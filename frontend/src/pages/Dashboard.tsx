@@ -468,33 +468,6 @@ export default function Dashboard() {
           )}
         </div>
       </div>
-
-      <div className="mt-6 bg-space-light p-6 rounded-lg border border-gray-700">
-        <h3 className="text-lg font-semibold text-white mb-4">Schnellzugriff</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Link
-            to="/galaxy"
-            className="p-4 bg-gray-700 hover:bg-gray-600 rounded-lg text-center text-white transition"
-          >
-            Galaxie erkunden
-          </Link>
-          <Link
-            to="/research"
-            className="p-4 bg-gray-700 hover:bg-gray-600 rounded-lg text-center text-white transition"
-          >
-            Forschung
-          </Link>
-          <Link
-            to="/fleet"
-            className="p-4 bg-gray-700 hover:bg-gray-600 rounded-lg text-center text-white transition"
-          >
-            Flotte verwalten
-          </Link>
-          <button className="p-4 bg-gray-700 hover:bg-gray-600 rounded-lg text-center text-white transition">
-            Handel
-          </button>
-        </div>
-      </div>
     </div>
   );
 }

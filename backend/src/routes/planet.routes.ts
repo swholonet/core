@@ -144,7 +144,23 @@ router.get('/:planetId', authMiddleware, async (req: AuthRequest, res: Response)
       }
     }
 
-    res.json({ ...planet, production });
+    // Get active research for this player
+    const activeResearch = await prisma.playerResearch.findMany({
+      where: {
+        playerId: planet.playerId || 0,
+        completedAt: null,
+      },
+      include: {
+        researchType: {
+          select: {
+            name: true,
+            category: true,
+          },
+        },
+      },
+    });
+
+    res.json({ ...planet, production, activeResearch });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
