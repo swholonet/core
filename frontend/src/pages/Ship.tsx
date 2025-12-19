@@ -69,6 +69,14 @@ export default function Ship() {
     try {
       const response = await api.get(`/ship/${id}`);
       setShipData(response.data);
+      
+      // Set initial view mode based on ship location
+      if (response.data.ship.currentSystemId) {
+        setViewMode('system');
+      } else {
+        setViewMode('galaxy');
+      }
+      
       setLoading(false);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Fehler beim Laden des Schiffs');
@@ -281,7 +289,7 @@ export default function Ship() {
           </div>
           
           <div className="overflow-auto">
-            <table className="border-collapse">
+            <table className="border-collapse mx-auto">
               <tbody>
                 {sensorGrid.map((row, y) => (
                   <tr key={y}>
@@ -296,25 +304,31 @@ export default function Ship() {
                         <td
                           key={x}
                           onClick={() => !isCenter && setDestination(cell.x, cell.y)}
-                          className={`w-10 h-10 border border-gray-700 cursor-pointer relative text-xs text-center ${
-                            isCenter ? 'bg-yellow-500 ring-2 ring-yellow-400' :
-                            hasSystem && viewMode === 'galaxy' ? 'bg-blue-700 hover:bg-blue-600' :
-                            'bg-gray-900 hover:bg-gray-800'
+                          className={`w-12 h-12 border-2 cursor-pointer relative text-center transition-all ${
+                            isCenter 
+                              ? 'bg-yellow-500 border-yellow-400 ring-2 ring-yellow-300' 
+                              : hasSystem && viewMode === 'galaxy' 
+                                ? 'bg-blue-800 border-blue-600 hover:bg-blue-700' 
+                                : 'bg-gray-900 border-gray-700 hover:bg-gray-800 hover:border-gray-600'
                           }`}
                           title={`${cell.x}|${cell.y}${hasSystem ? ` - ${cell.system.name}` : ''}`}
                         >
-                          {hasShips && !isCenter && (
-                            <span className="text-red-400 font-bold">{cell.ships.length}</span>
-                          )}
-                          {isCenter && (
-                            <span className="text-white font-bold text-lg">●</span>
-                          )}
-                          {hasSystem && viewMode === 'galaxy' && !isCenter && (
-                            <span className="text-blue-400">★</span>
-                          )}
+                          <div className="flex items-center justify-center h-full">
+                            {hasShips && !isCenter && (
+                              <span className="text-red-400 font-bold text-sm">{cell.ships.length}</span>
+                            )}
+                            {isCenter && (
+                              <span className="text-white font-bold text-2xl">●</span>
+                            )}
+                            {hasSystem && viewMode === 'galaxy' && !isCenter && (
+                              <span className="text-yellow-400 text-xl">★</span>
+                            )}
+                          </div>
                         </td>
                       );
                     })}
+                  </tr>
+                ))}
                   </tr>
                 ))}
               </tbody>
@@ -325,15 +339,16 @@ export default function Ship() {
             <p className="font-semibold text-white mb-1">{viewMode === 'galaxy' ? 'Hyperraum-Modus' : 'System-Modus'}</p>
             {viewMode === 'galaxy' ? (
               <>
-                <p>Position: {ship.position.galaxyX}|{ship.position.galaxyY}</p>
+                <p>Galaxy-Position: {ship.position.galaxyX || '?'}|{ship.position.galaxyY || '?'}</p>
                 {ship.destination.x && (
-                  <p>Ziel: {ship.destination.x}|{ship.destination.y}</p>
+                  <p className="text-blue-400">→ Ziel: {ship.destination.x}|{ship.destination.y}</p>
                 )}
+                <p className="text-gray-500 italic mt-2">Klicke auf ein Feld zum Hyperraum-Sprung</p>
               </>
             ) : (
               <>
-                <p>System-Position: {ship.position.systemX || 0}|{ship.position.systemY || 0}</p>
-                <p className="text-gray-500 italic">Klicke auf ein Feld um innerhalb des Systems zu fliegen</p>
+                <p>System-Position: {ship.position.systemX || '?'}|{ship.position.systemY || '?'}</p>
+                <p className="text-gray-500 italic mt-2">Klicke auf ein Feld um zu fliegen (1 Energie/Feld)</p>
               </>
             )}
             

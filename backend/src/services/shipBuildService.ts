@@ -38,6 +38,30 @@ class ShipBuildService {
         if (now >= startTime + buildTimeMs) {
           // Construction complete! Create the ships
           const ships = [];
+          
+          // Get planet with system info to set ship position
+          const planet = await prisma.planet.findUnique({
+            where: { id: queue.planetId },
+            include: {
+              system: {
+                include: {
+                  sector: true,
+                },
+              },
+            },
+          });
+
+          if (!planet) {
+            console.error(`Planet ${queue.planetId} not found for ship construction`);
+            continue;
+          }
+
+          // Calculate ship's initial position (at planet in system)
+          const systemCenterX = Math.floor(planet.system.gridSize / 2);
+          const systemCenterY = Math.floor(planet.system.gridSize / 2);
+          const galaxyX = (planet.system.sector.x - 1) * 20 + planet.system.fieldX;
+          const galaxyY = (planet.system.sector.y - 1) * 20 + planet.system.fieldY;
+
           for (let i = 0; i < queue.quantity; i++) {
             const ship = await prisma.ship.create({
               data: {
@@ -45,6 +69,13 @@ class ShipBuildService {
                 planetId: queue.planetId,
                 health: 100,
                 crew: 0,
+                // Set position at planet (in system)
+                currentSystemId: planet.systemId,
+                currentSystemX: systemCenterX,
+                currentSystemY: systemCenterY,
+                currentGalaxyX: galaxyX,
+                currentGalaxyY: galaxyY,
+                status: 'DOCKED',
               },
             });
             ships.push(ship);
