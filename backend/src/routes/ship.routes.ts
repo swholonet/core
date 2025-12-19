@@ -233,6 +233,151 @@ router.post('/:id/move-system', authMiddleware, async (req: any, res) => {
 });
 
 /**
+ * POST /api/ship/:id/enter-system
+ * Enter a system from hyperspace (galaxy map)
+ */
+router.post('/:id/enter-system', authMiddleware, async (req: any, res) => {
+  try {
+    const shipId = parseInt(req.params.id);
+    const playerId = req.user?.player?.id;
+
+    if (!playerId) {
+      return res.status(403).json({ error: 'Kein Spieler-Account gefunden' });
+    }
+
+    // Get ship
+    const ship = await prisma.ship.findFirst({
+      where: {
+        id: shipId,
+        planet: { playerId },
+      },
+      include: {
+        shipType: true,
+      },
+    });
+
+    if (!ship) {
+      return res.status(404).json({ error: 'Schiff nicht gefunden' });
+    }
+
+    if (ship.currentSystemId) {
+      return res.status(400).json({ error: 'Schiff ist bereits in einem System' });
+    }
+
+    if (!ship.currentGalaxyX || !ship.currentGalaxyY) {
+      return res.status(400).json({ error: 'Schiff hat keine Galaxy-Position' });
+    }
+
+    // Find system at current galaxy position
+    const system = await prisma.system.findFirst({
+      where: {
+        sector: {
+          x: Math.ceil(ship.currentGalaxyX / 20),
+          y: Math.ceil(ship.currentGalaxyY / 20),
+        },
+        fieldX: ((ship.currentGalaxyX - 1) % 20) + 1,
+        fieldY: ((ship.currentGalaxyY - 1) % 20) + 1,
+      },
+    });
+
+    if (!system) {
+      return res.status(400).json({ error: 'Kein System an dieser Position' });
+    }
+
+    // Enter system at center position
+    const centerX = Math.floor(system.gridSize / 2);
+    const centerY = Math.floor(system.gridSize / 2);
+
+    await prisma.ship.update({
+      where: { id: shipId },
+      data: {
+        currentSystemId: system.id,
+        currentSystemX: centerX,
+        currentSystemY: centerY,
+        status: 'DOCKED', // Stop hyperspace flight
+        destinationX: null,
+        destinationY: null,
+      },
+    });
+
+    res.json({ 
+      success: true, 
+      message: `System ${system.name} betreten`,
+      systemId: system.id,
+      systemName: system.name,
+    });
+  } catch (error) {
+    console.error('Error entering system:', error);
+    res.status(500).json({ error: 'Fehler beim System-Eintritt' });
+  }
+});
+
+/**
+ * POST /api/ship/:id/leave-system
+ * Leave current system and return to hyperspace
+ */
+router.post('/:id/leave-system', authMiddleware, async (req: any, res) => {
+  try {
+    const shipId = parseInt(req.params.id);
+    const playerId = req.user?.player?.id;
+
+    if (!playerId) {
+      return res.status(403).json({ error: 'Kein Spieler-Account gefunden' });
+    }
+
+    // Get ship with system
+    const ship = await prisma.ship.findFirst({
+      where: {
+        id: shipId,
+        planet: { playerId },
+      },
+      include: {
+        shipType: true,
+        system: {
+          include: {
+            sector: true,
+          },
+        },
+      },
+    });
+
+    if (!ship) {
+      return res.status(404).json({ error: 'Schiff nicht gefunden' });
+    }
+
+    if (!ship.currentSystemId || !ship.system) {
+      return res.status(400).json({ error: 'Schiff ist nicht in einem System' });
+    }
+
+    // Calculate galaxy coordinates from system position
+    const galaxyX = (ship.system.sector.x - 1) * 20 + ship.system.fieldX;
+    const galaxyY = (ship.system.sector.y - 1) * 20 + ship.system.fieldY;
+
+    await prisma.ship.update({
+      where: { id: shipId },
+      data: {
+        currentSystemId: null,
+        currentSystemX: null,
+        currentSystemY: null,
+        currentGalaxyX: galaxyX,
+        currentGalaxyY: galaxyY,
+        status: 'DOCKED', // In hyperspace but not moving
+      },
+    });
+
+    res.json({ 
+      success: true, 
+      message: 'System verlassen - im Hyperraum',
+      galaxyX,
+      galaxyY,
+    });
+  } catch (error) {
+    console.error('Error leaving system:', error);
+    res.status(500).json({ error: 'Fehler beim System-Verlassen' });
+  }
+});
+
+/**
  * POST /api/ship/:id/charge
  * Charge ship energy from planet
  */

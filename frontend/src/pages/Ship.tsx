@@ -145,6 +145,28 @@ export default function Ship() {
     }
   };
 
+  const enterSystem = async () => {
+    try {
+      const response = await api.post(`/ship/${id}/enter-system`);
+      alert(response.data.message);
+      await loadShipData();
+      setViewMode('system');
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Fehler beim System-Eintritt');
+    }
+  };
+
+  const leaveSystem = async () => {
+    try {
+      const response = await api.post(`/ship/${id}/leave-system`);
+      alert(response.data.message);
+      await loadShipData();
+      setViewMode('galaxy');
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Fehler beim System-Verlassen');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96">
@@ -314,6 +336,26 @@ export default function Ship() {
                 <p className="text-gray-500 italic">Klicke auf ein Feld um innerhalb des Systems zu fliegen</p>
               </>
             )}
+            
+            {/* System Enter/Leave Buttons */}
+            <div className="mt-3 pt-3 border-t border-gray-700">
+              {!isInSystem && ship.status === 'DOCKED' && (
+                <button
+                  onClick={enterSystem}
+                  className="w-full bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded text-sm font-semibold"
+                >
+                  System betreten
+                </button>
+              )}
+              {isInSystem && (
+                <button
+                  onClick={leaveSystem}
+                  className="w-full bg-orange-600 hover:bg-orange-500 text-white px-3 py-2 rounded text-sm font-semibold"
+                >
+                  System verlassen (Hyperraum)
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
