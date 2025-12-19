@@ -307,176 +307,177 @@ export default function Planet() {
             {/* Überschrift */}
             <h2 className="text-xl font-bold text-white mb-4">Planetenansicht</h2>
             
-            {/* Energy Display */}
-            <div className="mb-4" style={{ width: '480px' }}>
-              <div className="border-2 rounded-lg p-3 bg-yellow-900/20 border-yellow-700">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <Zap className="text-yellow-400" size={18} />
-                    <span className="text-base font-bold text-yellow-300">
-                      Energiespeicher
-                    </span>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-mono text-base font-bold text-yellow-400">
-                      {planet.energyStorage.toLocaleString()} / {planet.energyStorageCapacity.toLocaleString()}
-                    </p>
-                    {planet.production && (
-                      <span className={`text-xs ${
-                        (planet.production as any).energyProduction && (planet.production as any).energyConsumption
-                          ? ((planet.production as any).energyProduction - (planet.production as any).energyConsumption) >= 0 ? 'text-green-400' : 'text-red-400'
-                          : 'text-gray-400'
-                      }`}>
-                        {(planet.production as any).energyProduction && (planet.production as any).energyConsumption
-                          ? `${((planet.production as any).energyProduction - (planet.production as any).energyConsumption) >= 0 ? '+' : ''}${(planet.production as any).energyProduction - (planet.production as any).energyConsumption} / Tick`
-                          : 'Kein Kraftwerk'
-                        }
-                      </span>
-                    )}
+            <div className="flex items-start gap-6">
+              <div className="flex-1">
+                {/* Energy Display */}
+                <div className="mb-6 w-[480px]">
+                  <div className="border-2 rounded-lg p-3 bg-yellow-900/20 border-yellow-700">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Zap className="text-yellow-400" size={18} />
+                        <span className="text-base font-bold text-yellow-300">
+                          Energiespeicher
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-mono text-base font-bold text-yellow-400">
+                          {planet.energyStorage.toLocaleString()} / {planet.energyStorageCapacity.toLocaleString()}
+                        </p>
+                        {planet.production && (
+                          <span className={`text-xs ${
+                            (planet.production as any).energyProduction && (planet.production as any).energyConsumption
+                              ? ((planet.production as any).energyProduction - (planet.production as any).energyConsumption) >= 0 ? 'text-green-400' : 'text-red-400'
+                              : 'text-gray-400'
+                          }`}>
+                            {(planet.production as any).energyProduction && (planet.production as any).energyConsumption
+                              ? `${((planet.production as any).energyProduction - (planet.production as any).energyConsumption) >= 0 ? '+' : ''}${(planet.production as any).energyProduction - (planet.production as any).energyConsumption} / Tick`
+                              : 'Kein Kraftwerk'
+                            }
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="bg-gray-700 rounded-full h-2">
+                      <div 
+                        className="h-2 rounded-full transition-all bg-yellow-500"
+                        style={{ width: `${planet.energyStorageCapacity > 0 ? Math.max(0, Math.min((planet.energyStorage / planet.energyStorageCapacity) * 100, 100)) : 0}%` }}
+                      />
+                    </div>
                   </div>
                 </div>
-                <div className="bg-gray-700 rounded-full h-2">
-                  <div 
-                    className="h-2 rounded-full transition-all bg-yellow-500"
-                    style={{ width: `${planet.energyStorageCapacity > 0 ? Math.max(0, Math.min((planet.energyStorage / planet.energyStorageCapacity) * 100, 100)) : 0}%` }}
-                  />
+
+                {/* Grid */}
+                <div className="space-y-1">
+                  {/* ORBIT Layer (rows 0-1) */}
+                  <div className="inline-block border-2 border-blue-500/30 rounded bg-blue-900/10">
+                    <div className="text-xs text-blue-400 px-2 py-1 font-semibold">ORBIT</div>
+                    {grid.slice(0, 2).map((row, y) => (
+                      <div key={y} className="flex">
+                        {row.map((field, x) => (
+                          <button
+                            key={`${x}-${y}`}
+                            onClick={() => setSelectedField(field)}
+                            className={`
+                              w-12 h-12 border border-gray-700/50 relative
+                              transition-all duration-200
+                              ${selectedField?.id === field.id ? 'ring-2 ring-rebel' : ''}
+                              ${field.building 
+                                ? buildingColors[field.building.buildingType.name] || 'bg-gray-500'
+                                : fieldTypeColors[field.fieldType]
+                              }
+                            `}
+                            title={field.building 
+                              ? `${field.building.buildingType.name} (Lvl ${field.building.level})`
+                              : `${field.fieldType} (Orbit)`
+                            }
+                          >
+                            {field.building && (
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="text-white text-xs font-bold bg-black/50 rounded px-1">
+                                  {field.building.level}
+                                </div>
+                              </div>
+                            )}
+                            {!field.building?.isActive && field.building && (
+                              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
+                              </div>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* SURFACE Layer (rows 2-7) */}
+                  <div className="inline-block border-2 border-green-500/30 rounded bg-green-900/10">
+                    <div className="text-xs text-green-400 px-2 py-1 font-semibold">SURFACE</div>
+                    {grid.slice(2, 8).map((row, y) => (
+                      <div key={y + 2} className="flex">
+                        {row.map((field, x) => (
+                          <button
+                            key={`${x}-${y + 2}`}
+                            onClick={() => setSelectedField(field)}
+                            className={`
+                              w-12 h-12 border border-gray-700/50 relative
+                              transition-all duration-200
+                              ${selectedField?.id === field.id ? 'ring-2 ring-rebel' : ''}
+                              ${field.building 
+                                ? buildingColors[field.building.buildingType.name] || 'bg-gray-500'
+                                : fieldTypeColors[field.fieldType]
+                              }
+                            `}
+                            title={field.building 
+                              ? `${field.building.buildingType.name} (Lvl ${field.building.level})`
+                              : `${field.fieldType} (Surface)`
+                            }
+                          >
+                            {field.building && (
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="text-white text-xs font-bold bg-black/50 rounded px-1">
+                                  {field.building.level}
+                                </div>
+                              </div>
+                            )}
+                            {!field.building?.isActive && field.building && (
+                              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
+                              </div>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* UNDERGROUND Layer (rows 8-9) */}
+                  <div className="inline-block border-2 border-amber-500/30 rounded bg-amber-900/10">
+                    <div className="text-xs text-amber-400 px-2 py-1 font-semibold">UNDERGROUND</div>
+                    {grid.slice(8, 10).map((row, y) => (
+                      <div key={y + 8} className="flex">
+                        {row.map((field, x) => (
+                          <button
+                            key={`${x}-${y + 8}`}
+                            onClick={() => setSelectedField(field)}
+                            className={`
+                              w-12 h-12 border border-gray-700/50 relative
+                              transition-all duration-200
+                              ${selectedField?.id === field.id ? 'ring-2 ring-rebel' : ''}
+                              ${field.building 
+                                ? buildingColors[field.building.buildingType.name] || 'bg-gray-500'
+                                : fieldTypeColors[field.fieldType]
+                              }
+                            `}
+                            title={field.building 
+                              ? `${field.building.buildingType.name} (Lvl ${field.building.level})`
+                              : `${field.fieldType} (Underground)`
+                            }
+                          >
+                            {field.building && (
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="text-white text-xs font-bold bg-black/50 rounded px-1">
+                                  {field.building.level}
+                                </div>
+                              </div>
+                            )}
+                            {!field.building?.isActive && field.building && (
+                              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
+                              </div>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
-            
-            <div className="flex gap-6">
-              {/* Grid */}
-              <div className="space-y-1">
-                {/* ORBIT Layer (rows 0-1) */}
-                <div className="inline-block border-2 border-blue-500/30 rounded bg-blue-900/10">
-                <div className="text-xs text-blue-400 px-2 py-1 font-semibold">ORBIT</div>
-                {grid.slice(0, 2).map((row, y) => (
-                  <div key={y} className="flex">
-                    {row.map((field, x) => (
-                      <button
-                        key={`${x}-${y}`}
-                        onClick={() => setSelectedField(field)}
-                        className={`
-                          w-12 h-12 border border-gray-700/50 relative
-                          transition-all duration-200
-                          ${selectedField?.id === field.id ? 'ring-2 ring-rebel' : ''}
-                          ${field.building 
-                            ? buildingColors[field.building.buildingType.name] || 'bg-gray-500'
-                            : fieldTypeColors[field.fieldType]
-                          }
-                        `}
-                        title={field.building 
-                          ? `${field.building.buildingType.name} (Lvl ${field.building.level})`
-                          : `${field.fieldType} (Orbit)`
-                        }
-                      >
-                        {field.building && (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="text-white text-xs font-bold bg-black/50 rounded px-1">
-                              {field.building.level}
-                            </div>
-                          </div>
-                        )}
-                        {!field.building?.isActive && field.building && (
-                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                            <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
-                          </div>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                ))}
-              </div>
 
-              {/* SURFACE Layer (rows 2-7) */}
-              <div className="inline-block border-2 border-green-500/30 rounded bg-green-900/10">
-                <div className="text-xs text-green-400 px-2 py-1 font-semibold">SURFACE</div>
-                {grid.slice(2, 8).map((row, y) => (
-                  <div key={y + 2} className="flex">
-                    {row.map((field, x) => (
-                      <button
-                        key={`${x}-${y + 2}`}
-                        onClick={() => setSelectedField(field)}
-                        className={`
-                          w-12 h-12 border border-gray-700/50 relative
-                          transition-all duration-200
-                          ${selectedField?.id === field.id ? 'ring-2 ring-rebel' : ''}
-                          ${field.building 
-                            ? buildingColors[field.building.buildingType.name] || 'bg-gray-500'
-                            : fieldTypeColors[field.fieldType]
-                          }
-                        `}
-                        title={field.building 
-                          ? `${field.building.buildingType.name} (Lvl ${field.building.level})`
-                          : `${field.fieldType} (Surface)`
-                        }
-                      >
-                        {field.building && (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="text-white text-xs font-bold bg-black/50 rounded px-1">
-                              {field.building.level}
-                            </div>
-                          </div>
-                        )}
-                        {!field.building?.isActive && field.building && (
-                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                            <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
-                          </div>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                ))}
-              </div>
-
-              {/* UNDERGROUND Layer (rows 8-9) */}
-              <div className="inline-block border-2 border-amber-500/30 rounded bg-amber-900/10">
-                <div className="text-xs text-amber-400 px-2 py-1 font-semibold">UNDERGROUND</div>
-                {grid.slice(8, 10).map((row, y) => (
-                  <div key={y + 8} className="flex">
-                    {row.map((field, x) => (
-                      <button
-                        key={`${x}-${y + 8}`}
-                        onClick={() => setSelectedField(field)}
-                        className={`
-                          w-12 h-12 border border-gray-700/50 relative
-                          transition-all duration-200
-                          ${selectedField?.id === field.id ? 'ring-2 ring-rebel' : ''}
-                          ${field.building 
-                            ? buildingColors[field.building.buildingType.name] || 'bg-gray-500'
-                            : fieldTypeColors[field.fieldType]
-                          }
-                        `}
-                        title={field.building 
-                          ? `${field.building.buildingType.name} (Lvl ${field.building.level})`
-                          : `${field.fieldType} (Underground)`
-                        }
-                      >
-                        {field.building && (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="text-white text-xs font-bold bg-black/50 rounded px-1">
-                              {field.building.level}
-                            </div>
-                          </div>
-                        )}
-                        {!field.building?.isActive && field.building && (
-                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                            <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
-                          </div>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            {/* Selected Field Details - Right of Grid */}
-            <div className="ml-6 flex-shrink-0 w-64">
+              <div className="w-72 bg-gray-900/40 border border-gray-700 rounded-lg p-4 flex-shrink-0">
                 {selectedField ? (
                   <>
-                    <h3 className="text-white font-semibold mb-4">Ausgewähltes Feld</h3>
-                    
+                    <h3 className="text-white font-semibold mb-3 text-sm">Ausgewähltes Feld</h3>
+
                     <div className="space-y-3">
                       <div>
                         <p className="text-gray-400 text-xs">Geländetyp</p>
@@ -501,7 +502,7 @@ export default function Planet() {
                               {selectedField.building.level}
                             </span>
                           </div>
-                          
+
                           <div className="flex justify-between text-sm">
                             <span className="text-gray-400">Status</span>
                             <span className={`font-semibold ${
@@ -515,8 +516,7 @@ export default function Planet() {
                               }
                             </span>
                           </div>
-                          
-                          {/* Construction Progress */}
+
                           {!selectedField.building.isActive && !selectedField.building.completedAt && (
                             <div className="bg-yellow-900/20 border border-yellow-700 rounded p-2">
                               {(() => {
@@ -548,7 +548,7 @@ export default function Planet() {
                               })()}
                             </div>
                           )}
-                          
+
                           <div className="flex justify-between text-sm">
                             <span className="text-gray-400 flex items-center gap-1">
                               <Zap size={12} />
@@ -559,7 +559,6 @@ export default function Planet() {
                             </span>
                           </div>
 
-                          {/* Demolish/Cancel Button */}
                           <button
                             onClick={() => demolishBuilding(selectedField.building!.id)}
                             disabled={demolishing}
@@ -586,7 +585,7 @@ export default function Planet() {
                     </div>
                   </>
                 ) : (
-                  <div className="text-center text-gray-400 py-8">
+                  <div className="text-center text-gray-400 py-6">
                     <p className="text-sm">Wähle ein Feld aus</p>
                   </div>
                 )}

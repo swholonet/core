@@ -48,7 +48,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:-change-this-in-production}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost}
     ports:
-      - "127.0.0.1:3000:3000"  # Nur localhost, Nginx Reverse Proxy leitet weiter
+      - "127.0.0.1:3000:3000"  # Nur localhost, Caddy Reverse Proxy leitet weiter
     depends_on:
       postgres:
         condition: service_healthy
@@ -67,7 +67,7 @@ services:
     container_name: swu-frontend
     restart: unless-stopped
     ports:
-      - "127.0.0.1:8080:80"  # Nur localhost, Nginx Reverse Proxy lauscht auf 443
+      - "127.0.0.1:8080:80"  # Nur localhost, Caddy Reverse Proxy lauscht auf 443 (automatisches HTTPS)
     depends_on:
       - backend
 

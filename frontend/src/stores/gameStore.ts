@@ -178,8 +178,8 @@ export const useGameStore = create<GameState>((set, get) => ({
       console.log('🔌 Disconnected from game server');
     });
     
-    socket.on('tick:update', (data) => {
-      console.log('⏰ Tick update:', data);
+    socket.on('tick:update', () => {
+      // Silence tick payload logging to keep console lean
     });
     
     set({ socket });

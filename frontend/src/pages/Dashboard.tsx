@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useGameStore } from '../stores/gameStore';
 import { Link } from 'react-router-dom';
-import { Globe, Rocket, Wrench, TrendingUp, Zap, Box, Coins, Clock, Gem, Wind, Battery, Sparkles, Heart, Shield, FlaskConical, X } from 'lucide-react';
+import { Globe, Rocket, Wrench, Coins, Clock, Gem, Wind, Battery, Sparkles, Heart, Shield, FlaskConical, X } from 'lucide-react';
 import api from '../lib/api';
 
 interface DashboardData {
@@ -175,7 +175,6 @@ export default function Dashboard() {
 
         if (response.ok) {
           const data = await response.json();
-          console.log('Dashboard data:', data);
           setDashboardData(data);
         } else {
           console.error('Dashboard error:', response.status, await response.text());
@@ -219,6 +218,9 @@ export default function Dashboard() {
       </div>
     );
   }
+
+  const activeResearch = dashboardData?.activeResearch ?? [];
+  const hasActiveResearch = activeResearch.length > 0;
 
   const getRemainingTime = (completesAt: string) => {
     const now = new Date();
@@ -505,9 +507,9 @@ export default function Dashboard() {
           Laufende Forschungen
         </h3>
         <div className="space-y-2">
-          {dashboardData.activeResearch && dashboardData.activeResearch.length > 0 ? (
+          {hasActiveResearch ? (
             <div className="space-y-2">
-              {dashboardData.activeResearch.map((research) => (
+              {activeResearch.map((research) => (
                 <div key={research.id} className="bg-gray-700/50 p-4 rounded-lg">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2 flex-1">

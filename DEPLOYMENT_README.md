@@ -4,9 +4,9 @@ Für das Hosting auf deinem VPS wurden folgende Dateien erstellt:
 
 ### 📦 Docker Configuration
 - `Dockerfile.backend` - Backend Container
-- `Dockerfile.frontend` - Frontend Container mit Nginx
+- `Dockerfile.frontend` - Frontend Container mit Caddy
 - `docker-compose.prod.yml` - Production Setup
-- `nginx.conf` - Nginx Konfiguration
+- `Caddyfile` - Caddy Konfiguration (automatisches HTTPS)
 
 ### 🔧 Deployment
 - `deploy.sh` - Automatisches Deployment-Script
@@ -39,8 +39,8 @@ Das wars! Die App läuft dann auf:
 ### 📚 Vollständige Dokumentation
 Siehe `DEPLOYMENT.md` für:
 - Docker Installation
-- Nginx Reverse Proxy Setup
-- SSL/HTTPS mit Let's Encrypt
+- Caddy Reverse Proxy (automatisches HTTPS)
+- SSL/HTTPS automatisch via Let's Encrypt
 - Backups, Monitoring, Troubleshooting
 - Security Best Practices
 

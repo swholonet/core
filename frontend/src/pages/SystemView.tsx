@@ -135,12 +135,6 @@ export default function SystemView() {
       return { type: 'planet', data: planet };
     }
 
-    // Random asteroid fields for visual interest
-    const asteroidSeed = (x * 1000 + y) % 100;
-    if (asteroidSeed < 3 && Math.abs(x - center) > 3 && Math.abs(y - center) > 3) {
-      return { type: 'asteroid', data: null };
-    }
-
     return { type: 'empty', data: null };
   };
 
@@ -238,17 +232,18 @@ export default function SystemView() {
                         return (
                           <td
                             key={col}
-                            className="w-6 h-6 border border-gray-800 relative group cursor-pointer"
+                            className="border border-gray-800 relative group cursor-pointer"
+                            style={{ width: '24px', height: '24px', padding: 0 }}
                             onMouseEnter={() => setHoveredCell({ x: col, y: row })}
                             onMouseLeave={() => setHoveredCell(null)}
                             onClick={() => cell.type === 'planet' && navigate(`/planet/${cell.data.id}`)}
                           >
                             {/* Star */}
                             {cell.type === 'star' && (
-                              <div className="w-full h-full bg-yellow-400 shadow-lg shadow-yellow-400/50" />
+                              <div className="w-full h-full bg-yellow-400 rounded-full shadow-lg shadow-yellow-400/50" />
                             )}
                             {cell.type === 'star2' && (
-                              <div className="w-full h-full bg-orange-400 shadow-lg shadow-orange-400/50" />
+                              <div className="w-full h-full bg-orange-400 rounded-full shadow-lg shadow-orange-400/50" />
                             )}
 
                             {/* Planet */}

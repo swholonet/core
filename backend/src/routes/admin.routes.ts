@@ -2,7 +2,7 @@ import { Router, Response } from 'express';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { adminAuthMiddleware } from '../middleware/adminAuth';
 import prisma from '../lib/prisma';
-import { tickSystem } from '../index';
+import { tickSystem, getIo } from '../index';
 import { emitToPlayer } from '../socket';
 
 const router = Router();
@@ -57,20 +57,22 @@ router.post('/add-resources', async (req: AuthRequest, res: Response) => {
         credits: { increment: credits || 0 },
         durastahl: { increment: durastahl || 0 },
         kristallinesSilizium: { increment: kristall || 0 },
-        energy: { increment: energy || 0 },
+        energyStorage: { increment: energy || 0 },
       },
     });
 
     console.log(`🔧 Admin ${user.username} added resources to planet ${planetId}`);
 
     // Emit resource update
-    emitToPlayer(planet.playerId, 'resource:updated', {
-      planetId,
-      credits: updatedPlanet.credits,
-      durastahl: updatedPlanet.durastahl,
-      kristall: updatedPlanet.kristallinesSilizium,
-      energy: updatedPlanet.energy,
-    });
+    if (planet.playerId) {
+      emitToPlayer(getIo(), planet.playerId, 'resource:updated', {
+        planetId,
+        credits: updatedPlanet.credits,
+        durastahl: updatedPlanet.durastahl,
+        kristall: updatedPlanet.kristallinesSilizium,
+        energyStorage: updatedPlanet.energyStorage,
+      });
+    }
 
     res.json({ 
       success: true, 

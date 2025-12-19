@@ -115,6 +115,7 @@ router.get('/system/:systemId', authMiddleware, async (req: AuthRequest, res: Re
       systemType: system.systemType,
       fieldX: system.fieldX,
       fieldY: system.fieldY,
+      gridSize: system.gridSize,
       sector: {
         x: system.sector.x,
         y: system.sector.y,

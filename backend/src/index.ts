@@ -33,6 +33,10 @@ const io = new Server(httpServer, {
 
 const PORT = process.env.PORT || 3000;
 
+// Global io accessor
+let globalIo: Server;
+export const getIo = () => globalIo;
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -66,6 +70,9 @@ httpServer.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📡 Server accessible on all network interfaces (0.0.0.0:${PORT})`);
   console.log(`📡 WebSocket server ready`);
+  
+  // Set global io
+  globalIo = io;
   
   // Initialize and start tick system (for resources, energy)
   tickSystem.start();
