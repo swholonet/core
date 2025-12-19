@@ -11,7 +11,13 @@ const router = express.Router();
 router.get('/:planetId', authMiddleware, async (req: any, res) => {
   try {
     const { planetId } = req.params;
-    const playerId = req.player.id;
+    const playerId = req.user?.player?.id;
+
+    if (!playerId) {
+      return res.status(403).json({ error: 'Kein Spieler-Account gefunden' });
+    }
+
+    console.log(`Shipyard request for planet ${planetId} by player ${playerId}`);
 
     // Verify planet ownership
     const planet = await prisma.planet.findFirst({
@@ -58,11 +64,13 @@ router.get('/:planetId', authMiddleware, async (req: any, res) => {
 
     // Get all ship types that don't require research OR have required research completed
     const availableShips = await prisma.shipType.findMany({
-      where: {
+      where: completedResearchIds.length > 0 ? {
         OR: [
           { requiredResearch: null },
           { requiredResearch: { in: completedResearchIds } },
         ],
+      } : {
+        requiredResearch: null, // Only ships without research requirement if player has no research
       },
       orderBy: [
         { shipClass: 'asc' },
@@ -114,6 +122,7 @@ router.get('/:planetId', authMiddleware, async (req: any, res) => {
     });
   } catch (error) {
     console.error('Error fetching shipyard:', error);
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack');
     res.status(500).json({ error: 'Interner Serverfehler' });
   }
 });
@@ -126,7 +135,11 @@ router.post('/:planetId/build', authMiddleware, async (req: any, res) => {
   try {
     const { planetId } = req.params;
     const { shipTypeId, quantity = 1 } = req.body;
-    const playerId = req.player.id;
+    const playerId = req.user?.player?.id;
+
+    if (!playerId) {
+      return res.status(403).json({ error: 'Kein Spieler-Account gefunden' });
+    }
 
     if (!shipTypeId || quantity < 1) {
       return res.status(400).json({ error: 'Ungültige Eingabe' });

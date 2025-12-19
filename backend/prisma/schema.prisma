@@ -89,6 +89,7 @@ model System {
   
   sector      Sector   @relation(fields: [sectorId], references: [id])
   planets     Planet[]
+  ships       Ship[]   // Ships currently in this system
   
   @@unique([sectorId, fieldX, fieldY])
 }
@@ -256,6 +257,10 @@ model ShipType {
   attack                  Int
   defense                 Int
   requiredResearch        Int?
+  sensorRange             Int      @default(3)  // Sensor radius in fields
+  driveEfficiency         Int      @default(10) // Energy cost per field
+  maxEnergyWeapons        Int      @default(100) // Max weapon/shield energy
+  maxEnergyDrive          Int      @default(500) // Max hyperdrive energy
   
   ships                   Ship[]
   shipBuildQueue          ShipBuildQueue[]
@@ -265,14 +270,29 @@ model Ship {
   id              Int      @id @default(autoincrement())
   fleetId         Int?
   shipTypeId      Int
-  planetId        Int?     // Where it was built / is stationed
+  planetId        Int?     // Where it was built / is stationed (when DOCKED)
   name            String?
   health          Int      @default(100)
   crew            Int      @default(0)
   
+  // Position & Movement (STU-Style)
+  currentGalaxyX  Int?     // Position on 120x120 hyperspace map
+  currentGalaxyY  Int?
+  currentSystemX  Int?     // Position inside a system (if entered)
+  currentSystemY  Int?
+  currentSystemId Int?     // Which system the ship is in
+  status          String   @default("DOCKED") // DOCKED, IN_FLIGHT, STRANDED
+  destinationX    Int?     // Target coordinates for auto-flight
+  destinationY    Int?
+  
+  // Energy (STU-Style: separate for weapons and drive)
+  energyWeapons   Int      @default(0)   // Current energy for weapons/shields
+  energyDrive     Int      @default(0)   // Current energy for hyperdrive (determines range)
+  
   fleet           Fleet?   @relation(fields: [fleetId], references: [id])
   shipType        ShipType @relation(fields: [shipTypeId], references: [id])
   planet          Planet?  @relation(fields: [planetId], references: [id])
+  system          System?  @relation(fields: [currentSystemId], references: [id])
 }
 
 model ShipBuildQueue {

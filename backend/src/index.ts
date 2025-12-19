@@ -8,6 +8,7 @@ import { errorHandler } from './middleware/errorHandler';
 import { TickSystem } from './services/tickSystem';
 import { buildingCompletionService } from './services/buildingCompletionService';
 import { shipBuildService, setShipBuildIO } from './services/shipBuildService';
+import { shipMovementService } from './services/shipMovementService';
 
 // Routes
 import authRoutes from './routes/auth.routes';
@@ -19,6 +20,7 @@ import fleetRoutes from './routes/fleet.routes';
 import factionRoutes from './routes/faction.routes';
 import shipyardRoutes from './routes/shipyard.routes';
 import adminRoutes from './routes/admin.routes';
+import shipRoutes from './routes/ship.routes';
 
 dotenv.config();
 
@@ -56,6 +58,7 @@ app.use('/api/fleet', fleetRoutes);
 app.use('/api/factions', factionRoutes);
 app.use('/api/shipyard', shipyardRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/ship', shipRoutes);
 
 // Error handling
 app.use(errorHandler);
@@ -84,6 +87,9 @@ httpServer.listen(PORT, '0.0.0.0', () => {
   // Start ship build completion service
   setShipBuildIO(io);
   shipBuildService.startCompletionChecker();
+  
+  // Start ship movement service (real-time)
+  shipMovementService.start();
 });
 
 export { io, tickSystem };

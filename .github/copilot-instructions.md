@@ -8,6 +8,14 @@ Full-stack tick-based Star Wars strategy browser game with planet management, ga
 - **Frontend**: React 18 + TypeScript + Vite 6 + Tailwind CSS + Zustand + Socket.io Client
 - **Development**: devenv (Nix-based dev environment)
 
+## Development Environment
+**IMPORTANT**: This project uses `devenv up` to run all services (backend, frontend, database, Redis).
+- **DO NOT** manually start backend/frontend with npm/node commands
+- **DO NOT** attempt to kill or restart processes via terminal commands
+- `devenv up` handles all hot-reloading automatically via watch modes
+- Code changes in backend/frontend are picked up automatically
+- Only suggest `devenv up` restart if there are fundamental configuration changes
+
 ## Current Implementation Status
 
 ### ✅ Completed Features

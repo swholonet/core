@@ -195,7 +195,7 @@ export default function SystemView() {
                 {system.name}
               </h1>
               <p className="text-sm text-gray-400">
-                {getSystemTypeLabel(system.systemType)} • Koordinaten: {system.fieldX}|{system.fieldY}
+                {getSystemTypeLabel(system.systemType)} • Koordinaten: {system.sector.x * 20 + system.fieldX}|{system.sector.y * 20 + system.fieldY}
               </p>
             </div>
           </div>
@@ -283,7 +283,7 @@ export default function SystemView() {
             <h3 className="text-white font-semibold mb-2">{system.name}</h3>
             <div className="space-y-1 text-sm">
               <p className="text-gray-400">Typ: <span className="text-white">{getSystemTypeLabel(system.systemType)}</span></p>
-              <p className="text-gray-400">Koordinaten: <span className="text-white">{system.fieldX}|{system.fieldY}</span></p>
+              <p className="text-gray-400">Koordinaten: <span className="text-white">{system.sector.x * 20 + system.fieldX}|{system.sector.y * 20 + system.fieldY}</span></p>
             </div>
           </div>
 

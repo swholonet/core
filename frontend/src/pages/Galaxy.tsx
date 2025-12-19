@@ -266,124 +266,212 @@ export default function Galaxy() {
           <span className="text-gray-500 italic">Bewege die Maus über {viewMode === 'galaxy' ? 'einen Sektor' : 'ein Feld'} für Details</span>
         )}
       </div>
-      {/* Galaxy View - Sector Grid (6x6) */}
+      {/* Galaxy View - Sector Grid (6x6) - STU Style */}
       {viewMode === 'galaxy' && (
-        <div className="bg-gray-900 rounded-lg p-4 overflow-auto">
-          <div 
-            className="grid gap-1"
-            style={{
-              gridTemplateColumns: `repeat(${GALAXY_SIZE}, minmax(0, 1fr))`,
-              maxWidth: '800px',
-              margin: '0 auto'
-            }}
-          >
-            {Array.from({ length: GALAXY_SIZE * GALAXY_SIZE }, (_, index) => {
-              const sectorX = Math.floor(index / GALAXY_SIZE) + 1;
-              const sectorY = (index % GALAXY_SIZE) + 1;
-              const sector = sectors.get(`${sectorX},${sectorY}`);
-              const isHovered = hoveredSector?.x === sectorX && hoveredSector?.y === sectorY;
-              const hasOwnPlanets = sector?.systems.some(s => s.hasOwnPlanets) || false;
+        <div className="bg-space-light rounded-lg p-6 overflow-auto">
+          <table className="border-collapse mx-auto">
+            <thead>
+              <tr>
+                <th className="text-gray-400 text-sm p-2">x|y</th>
+                {Array.from({ length: GALAXY_SIZE }, (_, i) => (
+                  <th key={i} className="text-gray-400 text-sm p-2 w-32">
+                    {(i + 1) * FIELDS_PER_SECTOR}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from({ length: GALAXY_SIZE }, (_, y) => (
+                <tr key={y}>
+                  <td className="text-gray-400 text-sm p-2 text-right">
+                    {(y + 1) * FIELDS_PER_SECTOR}
+                  </td>
+                  {Array.from({ length: GALAXY_SIZE }, (_, x) => {
+                    const sectorY = y + 1;  // Y = row (vertical)
+                    const sectorX = x + 1;  // X = column (horizontal)
+                    const sectorNum = y * GALAXY_SIZE + x + 1;
+                    const sector = sectors.get(`${sectorX},${sectorY}`);
+                    const isHovered = hoveredSector?.x === sectorX && hoveredSector?.y === sectorY;
+                    const hasOwnPlanets = sector?.systems.some(s => s.hasOwnPlanets) || false;
 
-              return (
-                <div
-                  key={`${sectorX}-${sectorY}`}
-                  className={`aspect-square ${getSectorColor(sector)} hover:bg-opacity-80 border-2 cursor-pointer transition-all relative group ${
-                    hasOwnPlanets ? 'border-yellow-500' : 'border-gray-800'
-                  } ${
-                    isHovered ? 'ring-2 ring-blue-400 z-10' : ''
-                  }`}
-                  onClick={() => handleSectorClick(sectorX, sectorY)}
-                  onMouseEnter={() => setHoveredSector({ x: sectorX, y: sectorY })}
-                  onMouseLeave={() => setHoveredSector(null)}
-                >
-                  {sector && sector.systems.length > 0 && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-sm text-white font-bold">{sector.systems.length}</span>
-                      <ZoomIn className="text-white/50 group-hover:text-white/80 transition" size={16} />
-                    </div>
-                  )}
-                  <div className="absolute bottom-1 right-1 text-xs text-gray-500 font-mono">
-                    {sectorX},{sectorY}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                    return (
+                      <td
+                        key={x}
+                        className={`border-2 border-gray-700 cursor-pointer transition-all ${
+                          isHovered ? 'bg-blue-600 border-blue-400' : 'bg-space-dark hover:bg-gray-700'
+                        }`}
+                        onClick={() => handleSectorClick(sectorX, sectorY)}
+                        onMouseEnter={() => setHoveredSector({ x: sectorX, y: sectorY })}
+                        onMouseLeave={() => setHoveredSector(null)}
+                      >
+                        <div className="h-24 w-32 flex items-center justify-center relative">
+                          <div className="text-center">
+                            <div className="text-white font-semibold mb-1">Sektor {sectorNum}</div>
+                            {sector && sector.systems.length > 0 && (
+                              <div className="text-xs text-gray-400">
+                                {sector.systems.length} System{sector.systems.length !== 1 ? 'e' : ''}
+                              </div>
+                            )}
+                            {hasOwnPlanets && (
+                              <div className="absolute top-1 right-1">
+                                <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 
-      {/* Sector View - Field Grid (20x20) STU-Style - Memory Optimized */}
+      {/* Sector View - Field Grid (20x20) STU-Style Table */}
       {viewMode === 'sector' && selectedSector && (
-        <div className="bg-black rounded-lg p-2 overflow-auto">
-          <div 
-            className="grid"
-            style={{
-              gridTemplateColumns: `repeat(${FIELDS_PER_SECTOR}, minmax(0, 1fr))`,
-              gap: 0,
-              maxWidth: '1000px',
-              margin: '0 auto',
-              backgroundColor: '#000'
-            }}
-          >
-            {sectorFields.map((field) => {
-              const isHovered = hoveredField?.x === field.x && hoveredField?.y === field.y;
-              const galaxyX = (selectedSector.x - 1) * FIELDS_PER_SECTOR + field.x;
-              const galaxyY = (selectedSector.y - 1) * FIELDS_PER_SECTOR + field.y;
-              const hasSystem = !!field.system;
-              const planetCount = field.system?.planetCount || 0;
-              const hasOwnPlanets = field.system?.hasOwnPlanets || false;
+        <div className="flex gap-4">
+          <div className="bg-space-light rounded-lg p-4 overflow-auto flex-1">
+            <table className="border-collapse mx-auto">
+            <thead>
+              <tr>
+                <th className="text-gray-400 text-xs p-1">x|y</th>
+                {Array.from({ length: FIELDS_PER_SECTOR }, (_, i) => {
+                  const galaxyX = (selectedSector.x - 1) * FIELDS_PER_SECTOR + i + 1;
+                  return (
+                    <th key={i} className="text-gray-400 text-xs p-1 w-8">
+                      {galaxyX}
+                    </th>
+                  );
+                })}
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from({ length: FIELDS_PER_SECTOR }, (_, y) => {
+                const galaxyY = (selectedSector.y - 1) * FIELDS_PER_SECTOR + y + 1;
+                return (
+                  <tr key={y}>
+                    <td className="text-gray-400 text-xs p-1 text-right">
+                      {galaxyY}
+                    </td>
+                    {Array.from({ length: FIELDS_PER_SECTOR }, (_, x) => {
+                      const field = sectorFields.find(f => f.x === x + 1 && f.y === y + 1);
+                      const isHovered = hoveredField?.x === x + 1 && hoveredField?.y === y + 1;
+                      const hasSystem = !!field?.system;
+                      const planetCount = field?.system?.planetCount || 0;
+                      const hasOwnPlanets = field?.system?.hasOwnPlanets || false;
 
-              return (
-                <div
-                  key={`${field.x}-${field.y}`}
-                  className={`aspect-square cursor-pointer relative ${
-                    hasSystem ? 'bg-blue-900/20' : 'bg-gray-950'
-                  } ${
-                    hasOwnPlanets ? 'border-2 border-yellow-500' : 'border border-gray-800'
-                  } ${isHovered ? 'ring-1 ring-yellow-400' : ''}`}
-                  onClick={() => handleFieldClick(field)}
-                  onMouseEnter={() => handleMouseEnter(field.x, field.y)}
-                  onMouseLeave={handleMouseLeave}
-                  title={hasSystem ? `${field.system.name} (${galaxyX}|${galaxyY})` : undefined}
-                >
-                  {hasSystem && (
-                    <>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        {/* System type visualization */}
-                        {field.system.systemType === 'SINGLE_STAR' && (
-                          <div className="w-3 h-3 bg-yellow-400 rounded-full shadow-lg"></div>
-                        )}
-                        {field.system.systemType === 'BINARY_STAR' && (
-                          <div className="flex gap-1">
-                            <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                            <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+                      return (
+                        <td
+                          key={x}
+                          className={`border border-gray-700 cursor-pointer transition-all relative ${
+                            isHovered ? 'bg-blue-600' : 'bg-space-dark hover:bg-gray-700'
+                          }`}
+                          onClick={() => field && handleFieldClick(field)}
+                          onMouseEnter={() => handleMouseEnter(x + 1, y + 1)}
+                          onMouseLeave={handleMouseLeave}
+                        >
+                          <div className="h-8 w-8 flex items-center justify-center relative">
+                            {hasSystem && field?.system && (
+                              <>
+                                {/* System type visualization */}
+                                {field.system.systemType === 'SINGLE_STAR' && (
+                                  <div className="w-3 h-3 bg-yellow-400 rounded-full shadow-lg"></div>
+                                )}
+                                {field.system.systemType === 'BINARY_STAR' && (
+                                  <div className="flex gap-0.5">
+                                    <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                                    <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+                                  </div>
+                                )}
+                                {field.system.systemType === 'NEUTRON_STAR' && (
+                                  <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+                                )}
+                                {field.system.systemType === 'BLACK_HOLE' && (
+                                  <div className="w-3 h-3 bg-purple-900 rounded-full border border-purple-400"></div>
+                                )}
+                                {/* Own planets indicator */}
+                                {hasOwnPlanets && (
+                                  <div className="absolute top-0 right-0 w-1.5 h-1.5 bg-yellow-500 rounded-full"></div>
+                                )}
+                              </>
+                            )}
                           </div>
-                        )}
-                        {field.system.systemType === 'NEUTRON_STAR' && (
-                          <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
-                        )}
-                        {field.system.systemType === 'BLACK_HOLE' && (
-                          <div className="w-3 h-3 bg-purple-900 rounded-full border border-purple-400"></div>
-                        )}
-                      </div>
-                      {/* Planet count indicator */}
-                      {planetCount > 0 && (
-                        <div className="absolute top-0 right-0 text-xs text-yellow-400 bg-black/70 px-1 rounded">
-                          {planetCount}
-                        </div>
-                      )}
-                    </>
-                  )}
-                  {isHovered && (
-                    <div className="absolute bottom-0 left-0 text-xs text-yellow-400 bg-black px-1 font-mono z-10">
-                      {galaxyX}|{galaxyY}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
+
+        {/* STU-Style Navigation Panel - Right Side */}
+        <div className="bg-space-light rounded-lg p-4 w-24 flex flex-col items-center justify-start gap-2">
+          {/* Up Arrow */}
+          <button
+            onClick={() => selectedSector.y > 1 && handleSectorClick(selectedSector.x, selectedSector.y - 1)}
+            disabled={selectedSector.y <= 1}
+            className={`w-12 h-12 flex items-center justify-center text-2xl rounded transition ${
+              selectedSector.y > 1 
+                ? 'bg-gray-700 hover:bg-gray-600 text-white cursor-pointer' 
+                : 'bg-gray-800 text-gray-600 cursor-not-allowed'
+            }`}
+            title={selectedSector.y > 1 ? `Sektor ${selectedSector.x}|${selectedSector.y - 1}` : ''}
+          >
+            ∧
+          </button>
+
+          {/* Left Arrow */}
+          <button
+            onClick={() => selectedSector.x > 1 && handleSectorClick(selectedSector.x - 1, selectedSector.y)}
+            disabled={selectedSector.x <= 1}
+            className={`w-12 h-12 flex items-center justify-center text-2xl rounded transition ${
+              selectedSector.x > 1 
+                ? 'bg-gray-700 hover:bg-gray-600 text-white cursor-pointer' 
+                : 'bg-gray-800 text-gray-600 cursor-not-allowed'
+            }`}
+            title={selectedSector.x > 1 ? `Sektor ${selectedSector.x - 1}|${selectedSector.y}` : ''}
+          >
+            &lt;
+          </button>
+
+          {/* Current Sector Number */}
+          <div className="w-12 h-12 flex items-center justify-center bg-gray-800 text-white font-bold text-lg rounded">
+            {(selectedSector.y - 1) * GALAXY_SIZE + selectedSector.x}
+          </div>
+
+          {/* Right Arrow */}
+          <button
+            onClick={() => selectedSector.x < GALAXY_SIZE && handleSectorClick(selectedSector.x + 1, selectedSector.y)}
+            disabled={selectedSector.x >= GALAXY_SIZE}
+            className={`w-12 h-12 flex items-center justify-center text-2xl rounded transition ${
+              selectedSector.x < GALAXY_SIZE 
+                ? 'bg-gray-700 hover:bg-gray-600 text-white cursor-pointer' 
+                : 'bg-gray-800 text-gray-600 cursor-not-allowed'
+            }`}
+            title={selectedSector.x < GALAXY_SIZE ? `Sektor ${selectedSector.x + 1}|${selectedSector.y}` : ''}
+          >
+            &gt;
+          </button>
+
+          {/* Down Arrow */}
+          <button
+            onClick={() => selectedSector.y < GALAXY_SIZE && handleSectorClick(selectedSector.x, selectedSector.y + 1)}
+            disabled={selectedSector.y >= GALAXY_SIZE}
+            className={`w-12 h-12 flex items-center justify-center text-2xl rounded transition ${
+              selectedSector.y < GALAXY_SIZE 
+                ? 'bg-gray-700 hover:bg-gray-600 text-white cursor-pointer' 
+                : 'bg-gray-800 text-gray-600 cursor-not-allowed'
+            }`}
+            title={selectedSector.y < GALAXY_SIZE ? `Sektor ${selectedSector.x}|${selectedSector.y + 1}` : ''}
+          >
+            ∨
+          </button>
+        </div>
+      </div>
       )}
 
       {/* Planet List Modal - Shows when clicking on a sector in galaxy view */}

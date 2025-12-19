@@ -268,4 +268,49 @@ router.get('/invite-codes', authMiddleware, async (req: AuthRequest, res: Respon
   }
 });
 
+// Get player's ships
+router.get('/ships', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId },
+      include: { player: true },
+    });
+
+    if (!user?.player) {
+      return res.status(404).json({ error: 'Player not found' });
+    }
+
+    const ships = await prisma.ship.findMany({
+      where: {
+        planet: {
+          playerId: user.player.id,
+        },
+      },
+      include: {
+        shipType: {
+          select: {
+            name: true,
+            maxEnergyWeapons: true,
+            maxEnergyDrive: true,
+          },
+        },
+        planet: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: {
+        id: 'asc',
+      },
+    });
+
+    res.json({ ships });
+  } catch (error: any) {
+    console.error('Ships error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;

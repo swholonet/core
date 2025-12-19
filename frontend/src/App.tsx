@@ -15,6 +15,7 @@ import Settings from './pages/Settings';
 import InviteCodes from './pages/InviteCodes';
 import Admin from './pages/Admin';
 import Planets from './pages/Planets';
+import Ship from './pages/Ship';
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
         <Route path="/shipyard/:planetId" element={<Shipyard />} />
         <Route path="/galaxy" element={<Galaxy />} />
         <Route path="/system/:systemId" element={<SystemView />} />
+        <Route path="/ship/:id" element={<Ship />} />
         <Route path="/research" element={<Research />} />
         <Route path="/fleet" element={<Fleet />} />
         <Route path="/invite-codes" element={<InviteCodes />} />
