@@ -53,6 +53,34 @@ if [ -z "$POSTGRES_PASSWORD" ]; then
 fi
 echo ""
 
+# PostgreSQL Host
+read -p "PostgreSQL Host (Standard: postgres): " POSTGRES_HOST
+if [ -z "$POSTGRES_HOST" ]; then
+    POSTGRES_HOST="postgres"
+fi
+echo ""
+
+# PostgreSQL Port
+read -p "PostgreSQL Port (Standard: 5432): " POSTGRES_PORT
+if [ -z "$POSTGRES_PORT" ]; then
+    POSTGRES_PORT="5432"
+fi
+echo ""
+
+# Redis Host
+read -p "Redis Host (Standard: redis): " REDIS_HOST
+if [ -z "$REDIS_HOST" ]; then
+    REDIS_HOST="redis"
+fi
+echo ""
+
+# Redis Port
+read -p "Redis Port (Standard: 6379): " REDIS_PORT
+if [ -z "$REDIS_PORT" ]; then
+    REDIS_PORT="6379"
+fi
+echo ""
+
 # URL encode the password
 ENCODED_PASSWORD=$(urlencode "$POSTGRES_PASSWORD")
 
@@ -84,6 +112,8 @@ cat > .env.production << EOF
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
 POSTGRES_DB=swholo_game
+POSTGRES_HOST=${POSTGRES_HOST}
+POSTGRES_PORT=${POSTGRES_PORT}
 
 # ============================================
 # Backend Configuration
@@ -92,8 +122,8 @@ NODE_ENV=production
 PORT=3000
 
 # Database Connection String
-# Password is URL-encoded for special characters
-DATABASE_URL=postgresql://postgres:${ENCODED_PASSWORD}@postgres:5432/swholo_game?schema=public
+# Wird automatisch vom Backend konstruiert
+DATABASE_URL=postgresql://postgres:${ENCODED_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/swholo_game?schema=public
 
 # JWT Authentication
 JWT_SECRET=${JWT_SECRET}
@@ -101,6 +131,11 @@ JWT_EXPIRES_IN=7d
 
 # CORS Configuration
 CORS_ORIGIN=${CORS_ORIGIN}
+
+# Redis Connection
+REDIS_HOST=${REDIS_HOST}
+REDIS_PORT=${REDIS_PORT}
+REDIS_URL=redis://${REDIS_HOST}:${REDIS_PORT}
 
 # Asset Repository URL
 VITE_ASSET_BASE_URL=https://swholonet.github.io/assets
@@ -125,6 +160,10 @@ echo "  • Verwende beim nächsten Deploy: ./deploy-remote.sh"
 echo ""
 echo -e "${YELLOW}Deine Werte:${NC}"
 echo "  POSTGRES_PASSWORD: $POSTGRES_PASSWORD"
+echo "  POSTGRES_HOST: $POSTGRES_HOST"
+echo "  POSTGRES_PORT: $POSTGRES_PORT"
+echo "  REDIS_HOST: $REDIS_HOST"
+echo "  REDIS_PORT: $REDIS_PORT"
 echo "  JWT_SECRET: $JWT_SECRET"
 echo "  CORS_ORIGIN: $CORS_ORIGIN"
 echo ""
