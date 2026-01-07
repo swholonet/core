@@ -121,9 +121,7 @@ POSTGRES_PORT=${POSTGRES_PORT}
 NODE_ENV=production
 PORT=3000
 
-# Database Connection String
-# Wird automatisch vom Backend konstruiert
-DATABASE_URL=postgresql://postgres:${ENCODED_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/swholo_game?schema=public
+# Database Connection String wird automatisch vom entrypoint.sh aus POSTGRES_PASSWORD konstruiert!
 
 # JWT Authentication
 JWT_SECRET=${JWT_SECRET}
