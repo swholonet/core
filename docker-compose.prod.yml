@@ -3,9 +3,8 @@ services:
     image: postgres:15-alpine
     container_name: swholo-postgres
     restart: unless-stopped
+    env_file: .env.production
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: swholo_game
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -36,13 +35,11 @@ services:
     image: ghcr.io/swholonet/core/backend:latest
     container_name: swholo-backend
     restart: unless-stopped
+    env_file: .env.production
     environment:
       NODE_ENV: production
       PORT: 3000
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/swholo_game
       REDIS_URL: redis://redis:6379
-      JWT_SECRET: ${JWT_SECRET}
-      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost}
     ports:
       - "127.0.0.1:3000:3000"  # Nur localhost, Caddy Reverse Proxy leitet weiter
     depends_on:
