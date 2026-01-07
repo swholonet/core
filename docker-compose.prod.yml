@@ -40,6 +40,7 @@ services:
       NODE_ENV: production
       PORT: 3000
       REDIS_URL: redis://redis:6379
+      # DATABASE_URL will be auto-constructed from POSTGRES_PASSWORD by entrypoint script
     ports:
       - "127.0.0.1:3000:3000"  # Nur localhost, Caddy Reverse Proxy leitet weiter
     depends_on:
