@@ -41,8 +41,6 @@ services:
       PORT: 3000
       REDIS_URL: redis://redis:6379
       # DATABASE_URL will be auto-constructed from POSTGRES_PASSWORD by entrypoint script
-    ports:
-      - "127.0.0.1:3000:3000"  # Nur localhost, Caddy Reverse Proxy leitet weiter
     depends_on:
       postgres:
         condition: service_healthy
@@ -58,13 +56,31 @@ services:
     image: ghcr.io/swholonet/core/frontend:latest
     container_name: swholo-frontend
     restart: unless-stopped
-    ports:
-      - "127.0.0.1:8080:80"  # Nur localhost, Caddy Reverse Proxy lauscht auf 443 (automatisches HTTPS)
     depends_on:
       - backend
+
+  caddy:
+    image: caddy:latest
+    container_name: swholo-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - backend
+      - frontend
 
 volumes:
   postgres_data:
     driver: local
   redis_data:
+    driver: local
+  caddy_data:
+    driver: local
+  caddy_config:
     driver: local
