@@ -53,13 +53,22 @@ else
 fi
 echo ""
 
-echo -e "${BLUE}Schritt 4: Prisma Migrationen anwenden${NC}"
-docker compose -f docker-compose.prod.yml exec -T backend npx prisma migrate deploy
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}✅ Datenbank-Migrationen erfolgreich angewendet${NC}"
-else
-    echo -e "${YELLOW}⚠️  Migrationen übersprungen oder fehlgeschlagen${NC}"
-fi
+echo -e "${BLUE}Schritt 4: Backend-Container wird hochgefahren und Migrationen angewendet...${NC}"
+echo "⏳ Warten auf Database-Verbindung (max 60s)..."
+for i in {1..60}; do
+    if docker compose -f docker-compose.prod.yml exec -T backend node -e "require('http').get('http://localhost:3000/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))" 2>/dev/null; then
+        echo -e "${GREEN}✅ Backend ist bereit (${i}s)${NC}"
+        echo -e "${GREEN}✅ Datenbank-Migrationen wurden automatisch angewendet${NC}"
+        break
+    fi
+    if [ $i -eq 60 ]; then
+        echo -e "${YELLOW}⚠️  Backend-Health-Check Timeout, aber Container läuft weiter${NC}"
+        echo "    Logs prüfen mit: docker compose -f docker-compose.prod.yml logs -f backend"
+        break
+    fi
+    echo -n "."
+    sleep 1
+done
 echo ""
 
 echo -e "${BLUE}Schritt 5: Alte Images aufräumen${NC}"
