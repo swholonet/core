@@ -1,4 +1,5 @@
 import prisma from '../lib/prisma';
+import { PlanetType } from '@prisma/client';
 
 export class GalaxyService {
   // STU-Style Galaxy: 36 Sektoren (6x6), jeder Sektor hat 20x20 Felder
@@ -78,7 +79,13 @@ export class GalaxyService {
       'Felucia', 'Mygeeto', 'Saleucami', 'Cato Neimoidia', 'Polis Massa',
       'Kessel', 'Sullust', 'Nar Shaddaa', 'Bothawui', 'Fondor'
     ];
-    const planetTypes = ['TERRAN', 'DESERT', 'JUNGLE', 'ICE', 'VOLCANIC'];
+    const planetTypesEnum: PlanetType[] = [
+      PlanetType.TERRAN,
+      PlanetType.DESERT,
+      PlanetType.JUNGLE,
+      PlanetType.ICE,
+      PlanetType.VOLCANIC
+    ];
 
     let totalSystems = 0;
     let totalPlanets = 0;
@@ -142,7 +149,7 @@ export class GalaxyService {
         
         for (let p = 0; p < planetsInSystem; p++) {
           const planetName = `${systemName.replace('-System', '')} ${this.romanNumeral(p + 1)}`;
-          const planetType = planetTypes[Math.floor(Math.random() * planetTypes.length)];
+          const planetType = planetTypesEnum[Math.floor(Math.random() * planetTypesEnum.length)];
           const orbitRadius = p + 2; // Inner planets closer (2-6)
           const orbitAngle = Math.floor(Math.random() * 360); // Random starting position
 
@@ -192,6 +199,13 @@ export class GalaxyService {
     });
 
     const planetTypes = ['TERRAN', 'DESERT', 'JUNGLE', 'ICE', 'VOLCANIC'];
+    const planetTypesEnum: PlanetType[] = [
+      PlanetType.TERRAN,
+      PlanetType.DESERT,
+      PlanetType.JUNGLE,
+      PlanetType.ICE,
+      PlanetType.VOLCANIC
+    ];
     const planetNames = [
       'Tatooine', 'Hoth', 'Endor', 'Coruscant', 'Naboo',
       'Dantooine', 'Yavin', 'Bespin', 'Dagobah', 'Alderaan',
@@ -239,7 +253,7 @@ export class GalaxyService {
         if (nameAttempts >= 50) continue;
         usedNames.add(planetName);
 
-        const planetType = planetTypes[Math.floor(Math.random() * planetTypes.length)];
+        const planetType = planetTypesEnum[Math.floor(Math.random() * planetTypesEnum.length)];
 
         await prisma.planet.create({
           data: {

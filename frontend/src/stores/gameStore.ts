@@ -152,7 +152,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   
   // Socket Actions
   initSocket: () => {
-    const { socket: existingSocket, user } = get();
+    const { socket: existingSocket } = get();
     
     // Don't create duplicate connections
     if (existingSocket?.connected) {

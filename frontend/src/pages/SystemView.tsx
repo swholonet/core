@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MapPin, ArrowLeft, Users, Star } from 'lucide-react';
 import api from '../lib/api';
-import PlanetImage, { getPlanetTypeLabel, planetTypeColors } from '../components/PlanetImage';
+import PlanetImage, { getPlanetTypeLabel } from '../components/PlanetImage';
 
 interface Planet {
   id: string;
@@ -75,20 +75,6 @@ export default function SystemView() {
     }
   };
 
-  const getPlanetColorClass = (type: string): string => {
-    // Map planet type to Tailwind background color
-    const colors: Record<string, string> = {
-      DESERT: '#d4a574',
-      ICE: '#a3d4ff',
-      FOREST: '#4a9e4a',
-      CITY: '#888888',
-      VOLCANO: '#ff6b4a',
-      VOLCANIC: '#ff6b4a',
-      JUNGLE: '#4a9e4a',
-      TERRAN: '#6ba3ff',
-    };
-    return colors[type] || '#888888';
-  };
 
   const convertPlanetToGridPosition = (planet: Planet) => {
     if (!system) return { x: 0, y: 0 };

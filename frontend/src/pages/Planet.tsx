@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, MapPin, Users, Zap, Trash2, Rocket, X, Coins, Wrench, Gem, Factory, Clock, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Zap, Trash2, Rocket, Coins, Wrench, Gem, TrendingUp, Factory, Clock, X } from 'lucide-react';
 import api from '../lib/api';
 import BuildMenu from '../components/BuildMenu';
 import { useGameStore } from '../stores/gameStore';
