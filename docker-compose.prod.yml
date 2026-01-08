@@ -56,7 +56,6 @@ services:
     image: ghcr.io/swholonet/core/frontend:latest
     container_name: swholo-frontend
     restart: unless-stopped
-    env_file: .env.production
     depends_on:
       - backend
 
