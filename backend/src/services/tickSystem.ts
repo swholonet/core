@@ -65,22 +65,18 @@ export class TickSystem {
   private async processEnergyBalance() {
     console.log('Processing energy production and consumption per planet...');
     
-    // Get all colonized planets with their buildings
     const planets = await prisma.planet.findMany({
-      where: {
-        playerId: { not: null },
-      },
+      where: { playerId: { not: null } },
       include: {
         buildings: {
-          where: {
-            completedAt: { not: null },
-          },
-          include: {
-            buildingType: true,
-          },
+          where: { completedAt: { not: null } },
+          include: { buildingType: true },
         },
       },
     });
+
+    const planetUpdatePromises: any[] = [];
+    const buildingUpdatePromises: any[] = [];
 
     for (const planet of planets) {
       let energyProduction = 0;
@@ -88,16 +84,12 @@ export class TickSystem {
       let energyStorageCapacity = 1000; // Base capacity
       let resourceStorageCapacity = 500; // Base from Command Center
 
-      // Calculate energy production, consumption and storage capacities
       for (const building of planet.buildings) {
         energyProduction += building.buildingType.energyProduction * building.level;
-        // Energy storage grows with energy-producing buildings (simplified)
         if (building.buildingType.energyProduction > 0) {
           energyStorageCapacity += 100 * building.level;
         }
         resourceStorageCapacity += building.buildingType.storageBonus * building.level;
-        
-        // Only active buildings consume energy
         if (building.isActive) {
           energyConsumption += building.buildingType.energyCostPerTick * building.level;
         }
@@ -106,27 +98,26 @@ export class TickSystem {
       const energyBalance = energyProduction - energyConsumption;
       let newEnergyStorage = planet.energyStorage + energyBalance;
 
-      // Cap at storage capacity
       if (newEnergyStorage > energyStorageCapacity) {
         newEnergyStorage = energyStorageCapacity;
       }
 
-      // If energy would go negative, deactivate buildings
       if (newEnergyStorage < 0 && planet.playerId) {
         console.log(`  Planet ${planet.name}: Energy storage depleted! Deactivating buildings...`);
         
-        // Deactivate buildings starting with highest consumers (except power plants)
         const energyConsumers = planet.buildings
-          .filter((b: any) => b.isActive && b.buildingType.energyCostPerTick > 0 && b.buildingType.energyProduction === 0)
-          .sort((a: any, b: any) => b.buildingType.energyCostPerTick - a.buildingType.energyCostPerTick);
+          .filter((b) => b.isActive && b.buildingType.energyCostPerTick > 0 && b.buildingType.energyProduction === 0)
+          .sort((a, b) => b.buildingType.energyCostPerTick - a.buildingType.energyCostPerTick);
 
         let currentConsumption = energyConsumption;
         
         for (const building of energyConsumers) {
-          await prisma.building.update({
-            where: { id: building.id },
-            data: { isActive: false },
-          });
+          buildingUpdatePromises.push(
+            prisma.building.update({
+              where: { id: building.id },
+              data: { isActive: false },
+            })
+          );
 
           currentConsumption -= building.buildingType.energyCostPerTick * building.level;
           const newBalance = energyProduction - currentConsumption;
@@ -139,12 +130,10 @@ export class TickSystem {
           }
         }
 
-        // Ensure storage doesn't go negative
         if (newEnergyStorage < 0) {
           newEnergyStorage = 0;
         }
 
-        // Notify player
         emitToPlayer(io, planet.playerId, 'energy:deficit', {
           planetId: planet.id,
           planetName: planet.name,
@@ -153,17 +142,23 @@ export class TickSystem {
         });
       }
 
-      // Update planet energy storage and capacity
-      await prisma.planet.update({
-        where: { id: planet.id },
-        data: {
-          energyStorage: newEnergyStorage,
-          energyStorageCapacity: energyStorageCapacity,
-          storageCapacity: resourceStorageCapacity,
-        },
-      });
+      planetUpdatePromises.push(
+        prisma.planet.update({
+          where: { id: planet.id },
+          data: {
+            energyStorage: newEnergyStorage,
+            energyStorageCapacity: energyStorageCapacity,
+            storageCapacity: resourceStorageCapacity,
+          },
+        })
+      );
 
-      console.log(`  Planet ${planet.name}: Energie ${newEnergyStorage}/${energyStorageCapacity} (${energyBalance > 0 ? '+' : ''}${energyBalance}/Tick)`);
+      console.log(`  Planet ${planet.name}: Energie ${newEnergyStorage}/${energyStorageCapacity} (${energyBalance >= 0 ? '+' : ''}${energyBalance}/Tick)`);
+    }
+
+    if (planetUpdatePromises.length > 0 || buildingUpdatePromises.length > 0) {
+      await prisma.$transaction([...planetUpdatePromises, ...buildingUpdatePromises]);
+      console.log(`  -> Batched ${planetUpdatePromises.length} planet and ${buildingUpdatePromises.length} building updates.`);
     }
   }
 
@@ -179,7 +174,6 @@ export class TickSystem {
   private async processResources() {
     console.log('Processing resources per planet...');
     
-    // Get all colonized planets with their active buildings
     const planets = await prisma.planet.findMany({
       where: {
         playerId: { not: null },
@@ -197,6 +191,8 @@ export class TickSystem {
       },
     });
 
+    const planetUpdatePromises: any[] = [];
+
     for (const planet of planets) {
       let creditProduction = 0;
       let durastahlProduction = 0;
@@ -207,7 +203,6 @@ export class TickSystem {
       let bactaProduction = 0;
       let beskarProduction = 0;
 
-      // Calculate production from all active buildings on this planet
       for (const building of planet.buildings) {
         creditProduction += building.buildingType.creditProduction * building.level;
         durastahlProduction += building.buildingType.durastahlProduction * building.level;
@@ -219,13 +214,11 @@ export class TickSystem {
         beskarProduction += building.buildingType.beskarProduction * building.level;
       }
 
-      // Calculate current storage usage (all resources)
       const currentStorage = planet.credits + planet.durastahl + planet.kristallinesSilizium + 
                             planet.tibannaGas + planet.energiemodule + planet.kyberKristalle + 
                             planet.bacta + planet.beskar;
       const availableStorage = planet.storageCapacity - currentStorage;
 
-      // All resources: Cap at storage limit
       let creditGain = creditProduction;
       let durastahlGain = durastahlProduction;
       let kristallGain = kristallinesSiliziumProduction;
@@ -235,24 +228,24 @@ export class TickSystem {
       let bactaGain = bactaProduction;
       let beskarGain = beskarProduction;
 
-      // Distribute available storage proportionally if not enough space
       const totalProduction = creditGain + durastahlGain + kristallGain + tibannaGasGain + 
                               energiemoduleGain + kyberKristalleGain + bactaGain + beskarGain;
       
-      if (totalProduction > availableStorage) {
+      if (totalProduction > availableStorage && availableStorage > 0) {
         if (totalProduction > 0) {
-          creditGain = Math.floor((creditGain / totalProduction) * availableStorage);
-          durastahlGain = Math.floor((durastahlGain / totalProduction) * availableStorage);
-          kristallGain = Math.floor((kristallGain / totalProduction) * availableStorage);
-          tibannaGasGain = Math.floor((tibannaGasGain / totalProduction) * availableStorage);
-          energiemoduleGain = Math.floor((energiemoduleGain / totalProduction) * availableStorage);
-          kyberKristalleGain = Math.floor((kyberKristalleGain / totalProduction) * availableStorage);
-          bactaGain = Math.floor((bactaGain / totalProduction) * availableStorage);
-          beskarGain = Math.floor((beskarGain / totalProduction) * availableStorage);
-        } else {
-          creditGain = durastahlGain = kristallGain = tibannaGasGain = 
-          energiemoduleGain = kyberKristalleGain = bactaGain = beskarGain = 0;
+          const ratio = availableStorage / totalProduction;
+          creditGain = Math.floor(creditGain * ratio);
+          durastahlGain = Math.floor(durastahlGain * ratio);
+          kristallGain = Math.floor(kristallGain * ratio);
+          tibannaGasGain = Math.floor(tibannaGasGain * ratio);
+          energiemoduleGain = Math.floor(energiemoduleGain * ratio);
+          kyberKristalleGain = Math.floor(kyberKristalleGain * ratio);
+          bactaGain = Math.floor(bactaGain * ratio);
+          beskarGain = Math.floor(beskarGain * ratio);
         }
+      } else if (availableStorage <= 0) {
+        creditGain = durastahlGain = kristallGain = tibannaGasGain = 
+        energiemoduleGain = kyberKristalleGain = bactaGain = beskarGain = 0;
       }
 
       const newCredits = planet.credits + creditGain;
@@ -264,25 +257,25 @@ export class TickSystem {
       const newBacta = planet.bacta + bactaGain;
       const newBeskar = planet.beskar + beskarGain;
 
-      // Update planet resources
-      await prisma.planet.update({
-        where: { id: planet.id },
-        data: {
-          credits: newCredits,
-          durastahl: newDurastahl,
-          kristallinesSilizium: newKristallinesSilizium,
-          tibannaGas: newTibannaGas,
-          energiemodule: newEnergiemodule,
-          kyberKristalle: newKyberKristalle,
-          bacta: newBacta,
-          beskar: newBeskar,
-        },
-      });
+      planetUpdatePromises.push(
+        prisma.planet.update({
+          where: { id: planet.id },
+          data: {
+            credits: newCredits,
+            durastahl: newDurastahl,
+            kristallinesSilizium: newKristallinesSilizium,
+            tibannaGas: newTibannaGas,
+            energiemodule: newEnergiemodule,
+            kyberKristalle: newKyberKristalle,
+            bacta: newBacta,
+            beskar: newBeskar,
+          },
+        })
+      );
       
       const finalStorage = currentStorage + creditGain + durastahlGain + kristallGain + tibannaGasGain + energiemoduleGain + kyberKristalleGain + bactaGain + beskarGain;
       console.log(`  Planet ${planet.name}: +${creditGain}/${creditProduction} credits, +${durastahlGain}/${durastahlProduction} durastahl, +${kristallGain}/${kristallinesSiliziumProduction} kristall (${finalStorage}/${planet.storageCapacity} storage)`);
       
-      // Notify player of resource update for this planet
       if (planet.playerId) {
         emitToPlayer(io, planet.playerId, 'resources:updated', {
           planetId: planet.id,
@@ -317,6 +310,11 @@ export class TickSystem {
           },
         });
       }
+    }
+
+    if (planetUpdatePromises.length > 0) {
+      await prisma.$transaction(planetUpdatePromises);
+      console.log(`  -> Batched ${planetUpdatePromises.length} planet resource updates.`);
     }
   }
 
