@@ -162,6 +162,11 @@ JWT_EXPIRES_IN=7d
 # CORS Configuration
 CORS_ORIGIN=${CORS_ORIGIN}
 
+# ============================================
+# Frontend Configuration
+# ============================================
+VITE_API_URL=https://${DOMAIN_NAME}
+
 # Asset Repository URL
 VITE_ASSET_BASE_URL=https://swholonet.github.io/assets
 

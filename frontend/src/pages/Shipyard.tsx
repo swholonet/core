@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Rocket, Clock, AlertCircle, Coins, Wrench, Gem, X } from 'lucide-react';
 import { useGameStore } from '../stores/gameStore';
+import { API_BASE_URL } from '../lib/config';
 
 interface ShipType {
   id: number;
@@ -88,7 +89,7 @@ export default function Shipyard() {
   const loadShipyard = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3000/api/shipyard/${planetId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/shipyard/${planetId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -131,7 +132,7 @@ export default function Shipyard() {
     setBuilding(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3000/api/shipyard/${planetId}/build`, {
+      const response = await fetch(`${API_BASE_URL}/api/shipyard/${planetId}/build`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -162,7 +163,7 @@ export default function Shipyard() {
   const cancelBuild = async (queueId: number) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3000/api/shipyard/${planetId}/queue/${queueId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/shipyard/${planetId}/queue/${queueId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
