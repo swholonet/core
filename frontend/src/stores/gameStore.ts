@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { io, Socket } from 'socket.io-client';
 import logger from '../lib/logger';
+import { API_BASE_URL } from '../lib/config';
 
 interface Player {
   id: number;
@@ -166,7 +167,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       existingSocket.disconnect();
     }
     
-    const socket = io('http://localhost:3000', {
+    const socket = io(API_BASE_URL, {
       auth: {
         token: localStorage.getItem('token'),
       },

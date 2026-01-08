@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import api from '../lib/api';
 
 interface InviteCode {
   code: string;
@@ -25,14 +26,8 @@ export default function InviteCodes() {
 
   const fetchInviteCodes = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3000/api/player/invite-codes', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = await response.json();
-      setStats(data);
+      const response = await api.get('/player/invite-codes');
+      setStats(response.data);
     } catch (error) {
       console.error('Failed to fetch invite codes:', error);
     } finally {
