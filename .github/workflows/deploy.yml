@@ -26,8 +26,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: backend/package-lock.json
 
       - name: Install Backend Dependencies
         run: |
@@ -121,12 +119,11 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          envs: GHCR_TOKEN
           script: |
-            cd /root/swholonet/core
-            export GHCR_TOKEN="${{ secrets.GHCR_TOKEN }}"
-            git pull origin main
+            cd /root/swholonet/core || exit 1
+            git pull origin main || exit 1
             chmod +x deploy-remote.sh
+            export GHCR_TOKEN="${{ secrets.GHCR_TOKEN }}"
             ./deploy-remote.sh
 
       - name: Deployment Success Notification

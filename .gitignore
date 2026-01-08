@@ -11,3 +11,4 @@ NOTES.md
 .devenv/
 .direnv/
 devenv.local.nix
+.devenv-root

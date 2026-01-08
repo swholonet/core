@@ -56,6 +56,18 @@
         "type": "github"
       }
     },
+    "devenv-root": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-ghKkwXtqGJL0sauSyatsznlzKSw+o0pbbT8AjPZ85nE=",
+        "type": "file",
+        "url": "file:///dev/fd/11"
+      },
+      "original": {
+        "type": "file",
+        "url": "file:///dev/null"
+      }
+    },
     "flake-compat": {
       "flake": false,
       "locked": {
@@ -64,22 +76,6 @@
         "owner": "edolstra",
         "repo": "flake-compat",
         "rev": "f387cd2afec9419c8ee37694406ca490c3f34ee5",
-        "type": "github"
-      },
-      "original": {
-        "owner": "edolstra",
-        "repo": "flake-compat",
-        "type": "github"
-      }
-    },
-    "flake-compat_2": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1765121682,
-        "narHash": "sha256-4VBOP18BFeiPkyhy9o4ssBNQEvfvv1kXkasAYd0+rrA=",
-        "owner": "edolstra",
-        "repo": "flake-compat",
-        "rev": "65f23138d8d09a92e30f1e5c87611b23ef451bf3",
         "type": "github"
       },
       "original": {
@@ -232,7 +228,7 @@
     "root": {
       "inputs": {
         "devenv": "devenv",
-        "flake-compat": "flake-compat_2",
+        "devenv-root": "devenv-root",
         "nixpkgs": "nixpkgs_2"
       }
     }

@@ -53,10 +53,9 @@ else
 fi
 echo ""
 
-echo -e "${BLUE}Schritt 4: Backend-Container wird hochgefahren und Migrationen angewendet...${NC}"
-echo "⏳ Warten auf Database-Verbindung (max 60s)..."
+echo -e "${BLUE}Schritt 4: Warten auf Backend-Start (max 60s)${NC}"
 for i in {1..60}; do
-    if docker compose -f docker-compose.prod.yml exec -T backend node -e "require('http').get('http://localhost:3000/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))" 2>/dev/null; then
+    if docker compose -f docker-compose.prod.yml exec -T backend curl -f http://localhost:3000/health >/dev/null 2>&1; then
         echo -e "${GREEN}✅ Backend ist bereit (${i}s)${NC}"
         echo -e "${GREEN}✅ Datenbank-Migrationen wurden automatisch angewendet${NC}"
         break
@@ -78,6 +77,11 @@ if [ $? -eq 0 ]; then
 else
     echo -e "${YELLOW}⚠️  Cleanup übersprungen${NC}"
 fi
+echo ""
+
+echo -e "${BLUE}Schritt 6: Docker-Logout von GHCR${NC}"
+docker logout ghcr.io
+echo -e "${GREEN}✅ Logout erfolgreich${NC}"
 echo ""
 
 echo -e "${GREEN}✅ Deployment erfolgreich abgeschlossen!${NC}"
