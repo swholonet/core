@@ -68,7 +68,7 @@ class ShipBuildService {
                 playerId: planet.playerId!,
                 shipTypeId: queue.shipTypeId,
                 planetId: queue.planetId,
-                health: 100,
+                hullPoints: 100,
                 crew: 0,
                 // Set position at planet (in system)
                 currentSystemId: planet.systemId,

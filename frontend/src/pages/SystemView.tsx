@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { MapPin, ArrowLeft, Users, Star } from 'lucide-react';
 import api from '../lib/api';
 import PlanetImage, { getPlanetTypeLabel } from '../components/PlanetImage';
+import SunImage from '../components/SunImage';
 
 interface Planet {
   id: string;
@@ -201,10 +202,25 @@ export default function SystemView() {
                           >
                             {/* Star */}
                             {cell.type === 'star' && (
-                              <div className="w-full h-full bg-yellow-400 rounded-full shadow-lg shadow-yellow-400/50" />
+                              <div className="w-full h-full flex items-center justify-center">
+                                <SunImage
+                                  systemType={system.systemType}
+                                  size={24}
+                                  alt={system.name}
+                                  className="rounded-full shadow-lg shadow-yellow-400/50"
+                                />
+                              </div>
                             )}
                             {cell.type === 'star2' && (
-                              <div className="w-full h-full bg-orange-400 rounded-full shadow-lg shadow-orange-400/50" />
+                              <div className="w-full h-full flex items-center justify-center">
+                                <SunImage
+                                  systemType={system.systemType}
+                                  visualSeed={2}
+                                  size={20}
+                                  alt={`${system.name} (Begleitstern)`}
+                                  className="rounded-full shadow-lg shadow-orange-400/50"
+                                />
+                              </div>
                             )}
 
                             {/* Planet */}

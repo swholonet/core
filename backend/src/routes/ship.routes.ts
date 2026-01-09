@@ -39,6 +39,10 @@ router.get('/:id', authMiddleware, async (req: any, res) => {
       return res.status(404).json({ error: 'Schiff nicht gefunden oder keine Berechtigung' });
     }
 
+    if (!ship.shipType) {
+      return res.status(400).json({ error: 'Schiff hat keinen gültigen Schiffstyp' });
+    }
+
     // Calculate range
     const range = shipMovementService.calculateRange(ship);
 
@@ -67,7 +71,7 @@ router.get('/:id', authMiddleware, async (req: any, res) => {
           maxWeapons: ship.shipType.maxEnergyWeapons,
           maxDrive: ship.shipType.maxEnergyDrive,
         },
-        health: ship.health,
+        hullPoints: ship.hullPoints,
         crew: ship.crew,
         range,
       },
@@ -395,6 +399,10 @@ router.post('/:id/charge', authMiddleware, async (req: any, res) => {
 
     if (ship.status !== 'DOCKED' || !ship.planet) {
       return res.status(400).json({ error: 'Schiff muss angedockt sein' });
+    }
+
+    if (!ship.shipType) {
+      return res.status(400).json({ error: 'Schiff hat keinen gültigen Schiffstyp' });
     }
 
     // For now: charging is free (later: cost resources from planet)

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Globe, ArrowLeft } from 'lucide-react';
 import api from '../lib/api';
+import SunImage from '../components/SunImage';
 
 interface System {
   id: number;
@@ -360,20 +361,26 @@ export default function Galaxy() {
                             {hasSystem && field?.system && (
                               <>
                                 {/* System type visualization */}
-                                {field.system.systemType === 'SINGLE_STAR' && (
-                                  <div className="w-3 h-3 bg-yellow-400 rounded-full shadow-lg"></div>
-                                )}
-                                {field.system.systemType === 'BINARY_STAR' && (
+                                {field.system.systemType === 'BINARY_STAR' ? (
                                   <div className="flex gap-0.5">
-                                    <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                                    <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+                                    <SunImage
+                                      systemType={field.system.systemType as 'SINGLE_STAR' | 'BINARY_STAR' | 'NEUTRON_STAR' | 'BLACK_HOLE'}
+                                      size={10}
+                                      className="rounded-full"
+                                    />
+                                    <SunImage
+                                      systemType={field.system.systemType as 'SINGLE_STAR' | 'BINARY_STAR' | 'NEUTRON_STAR' | 'BLACK_HOLE'}
+                                      visualSeed={2}
+                                      size={10}
+                                      className="rounded-full"
+                                    />
                                   </div>
-                                )}
-                                {field.system.systemType === 'NEUTRON_STAR' && (
-                                  <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
-                                )}
-                                {field.system.systemType === 'BLACK_HOLE' && (
-                                  <div className="w-3 h-3 bg-purple-900 rounded-full border border-purple-400"></div>
+                                ) : (
+                                  <SunImage
+                                    systemType={field.system.systemType as 'SINGLE_STAR' | 'BINARY_STAR' | 'NEUTRON_STAR' | 'BLACK_HOLE'}
+                                    size={14}
+                                    className="rounded-full shadow-lg"
+                                  />
                                 )}
                                 {/* Own planets indicator */}
                                 {hasOwnPlanets && (
