@@ -18,6 +18,30 @@ enum PlanetType {
   TERRAN
 }
 
+// Blueprint System Enums
+enum ModuleCategory {
+  HYPERDRIVE       // Hyperantrieb, Reichweite
+  SUBLIGHT_ENGINE  // Sublicht-Antrieb, Geschwindigkeit
+  WEAPONS          // Turbolaser, Ionenkanonen, Protonenraketen
+  SHIELDS          // Deflektorschild-Generatoren
+  SENSORS          // Scanner, Zielerfassung
+  CARGO            // Frachtraum
+  LIFE_SUPPORT     // Lebenserhaltung, Crew-Kapazitaet
+  HULL             // Huellen-Panzerung
+  TRACTOR_BEAM     // Traktorstrahl
+  SPECIAL          // Spezialmodule (Tarnvorrichtung etc.)
+}
+
+enum ShipClass {
+  FIGHTER          // Jaeger (TIE, X-Wing)
+  BOMBER           // Bomber (Y-Wing, TIE-Bomber)
+  CORVETTE         // Korvette (CR90)
+  FRIGATE          // Fregatte (Nebulon-B)
+  CRUISER          // Kreuzer (Dreadnaught)
+  CAPITAL          // Grosskapitaeler (Sternzerstoerer)
+  TRANSPORT        // Transporter (GR-75)
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
@@ -39,7 +63,7 @@ model Player {
   allianceId    Int?
   isAdmin       Boolean  @default(false)
   createdAt     DateTime @default(now())
-  
+
   user          User       @relation(fields: [userId], references: [id])
   faction       Faction    @relation(fields: [factionId], references: [id])
   alliance      Alliance?  @relation(fields: [allianceId], references: [id])
@@ -48,6 +72,7 @@ model Player {
   research      PlayerResearch[]
   fleets        Fleet[]
   holonetMessages HoloNetMessage[]
+  blueprints    ShipBlueprint[]
 }
 
 model Faction {
@@ -136,6 +161,7 @@ model Planet {
   fields      PlanetField[]
   ships       Ship[]
   shipBuildQueue ShipBuildQueue[]
+  blueprintBuildQueue BlueprintBuildQueue[]
 }
 
 model PlanetField {
@@ -206,33 +232,34 @@ model ResearchType {
   researchLevel         Int      @default(0)  // 0, 1, 2, 3
   researchPointCost     Int      @default(0)  // FP cost (0 for Level 0)
   researchTime          Int      @default(0)  // Deprecated, using FP now
-  
+
   // Level 0 requirements (production-based)
   requiredCreditsPerTick  Int?
   requiredDurastahlPerTick Int?
   requiredKristallinesSiliziumPerTick Int?
   requiredEnergyPerTick   Int?
-  
+
   // Level 0 total accumulation requirements (for tick-based research)
   requiredCreditsTotal    Int?  // Total credits needed to complete
   requiredDurastahlTotal  Int?  // Total durastahl needed to complete
   requiredKristallinesSiliziumTotal Int?  // Total kristallines silizium needed to complete
   requiredEnergyTotal     Int?  // Total energy needed to complete
-  
+
   // Level 1+ requirements
   requiredLabCount      Int      @default(0)  // Minimum research labs needed
   prerequisiteId        Int?
-  
+
   // What it unlocks
   unlocksBuilding       String?  // BuildingType name
   unlocksBuildingId     Int?     // Direct reference
   unlocksShip           String?  // ShipType name
   bonusType             String?  // PRODUCTION_BONUS, COMBAT_BONUS, etc.
   bonusValue            Int      @default(0)
-  
+
   prerequisite          ResearchType?  @relation("ResearchPrerequisite", fields: [prerequisiteId], references: [id])
   dependents            ResearchType[] @relation("ResearchPrerequisite")
   playerResearch        PlayerResearch[]
+  unlockedModules       ModuleType[]   // Module die durch diese Forschung freigeschaltet werden
 }
 
 model PlayerResearch {
@@ -243,12 +270,121 @@ model PlayerResearch {
   maxProgress     Int      @default(0)  // Total required (FP or resources)
   startedAt       DateTime?
   completedAt     DateTime?
-  
+
   player          Player       @relation(fields: [playerId], references: [id])
   researchType    ResearchType @relation(fields: [researchTypeId], references: [id])
-  
+
   @@unique([playerId, researchTypeId])
 }
+
+// =====================================================
+// MODULARES SCHIFFSBAU-SYSTEM (Blueprint System)
+// =====================================================
+
+model ModuleType {
+  id                    Int            @id @default(autoincrement())
+  name                  String         @unique  // z.B. "Klasse-1 Hyperantrieb", "Turbolaser Mk.I"
+  description           String
+  category              ModuleCategory
+  maxLevel              Int            @default(10)
+
+  // Basis-Stats pro Level (werden mit Level multipliziert/skaliert)
+  baseHullPoints        Int            @default(0)   // Huellenpunkte
+  baseDamage            Int            @default(0)   // Schaden
+  baseShieldStrength    Int            @default(0)   // Deflektorschild-Staerke
+  baseSensorRange       Int            @default(0)   // Sensorreichweite
+  baseCargoCapacity     Int            @default(0)   // Frachtraum
+  baseCrewCapacity      Int            @default(0)   // Crew-Kapazitaet
+  baseSpeed             Int            @default(0)   // Sublicht-Geschwindigkeit
+
+  // Star Wars spezifische Stats
+  hyperdriveRating      Float?                       // 1.0 = Standard, 0.5 = schneller (kleiner = besser)
+  tibannaConsumption    Int            @default(0)   // Tibanna-Gas Verbrauch pro Schuss/Aktion
+
+  // Kosten-Basis (exponentiell skaliert mit Level)
+  baseCostCredits       Int            @default(0)
+  baseCostDurastahl     Int            @default(0)
+  baseCostKyberKristalle Int           @default(0)
+  baseCostTibannaGas    Int            @default(0)
+  baseCostBeskar        Int            @default(0)
+  baseCostKristallinesSilizium Int     @default(0)
+  baseCostEnergiemodule Int            @default(0)
+
+  // Bauzeit-Basis in Minuten (skaliert mit Level)
+  baseBuildTime         Int            @default(5)
+
+  // Freischaltung durch Forschung
+  requiredResearchId    Int?
+  requiredResearchLevel Int            @default(1)   // Mindest-Level der Forschung
+
+  requiredResearch      ResearchType?  @relation(fields: [requiredResearchId], references: [id])
+  blueprintModules      BlueprintModule[]
+}
+
+model ShipBlueprint {
+  id          Int        @id @default(autoincrement())
+  playerId    Int
+  name        String                               // z.B. "Mein Custom X-Wing"
+  shipClass   ShipClass                            // FIGHTER, CORVETTE, FRIGATE, etc.
+  description String?
+  isPublic    Boolean    @default(false)           // Kann von anderen kopiert werden
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  // Berechnete Gesamt-Stats (gecached fuer Performance)
+  totalHullPoints           Int     @default(0)
+  totalShieldStrength       Int     @default(0)   // deflectorShieldStrength
+  totalDamage               Int     @default(0)   // weaponDamage
+  totalSpeed                Int     @default(0)   // subLightSpeed
+  totalSensorRange          Int     @default(0)
+  totalCargoCapacity        Int     @default(0)
+  totalCrewRequired         Int     @default(0)
+  hyperdriveRating          Float   @default(1.0) // Effektives Hyperdrive-Rating
+
+  // Berechnete Kosten (gecached)
+  totalCostCredits          Int     @default(0)
+  totalCostDurastahl        Int     @default(0)
+  totalCostKyberKristalle   Int     @default(0)
+  totalCostTibannaGas       Int     @default(0)
+  totalCostBeskar           Int     @default(0)
+  totalCostKristallinesSilizium Int @default(0)
+  totalCostEnergiemodule    Int     @default(0)
+  totalBuildTime            Int     @default(0)   // Gesamte Bauzeit in Minuten
+
+  player      Player            @relation(fields: [playerId], references: [id])
+  modules     BlueprintModule[]
+  ships       Ship[]
+  buildQueue  BlueprintBuildQueue[]
+
+  @@unique([playerId, name])
+}
+
+model BlueprintModule {
+  id            Int      @id @default(autoincrement())
+  blueprintId   Int
+  moduleTypeId  Int
+  level         Int      @default(1)              // Level des Moduls (1-maxLevel)
+  slotPosition  Int                               // Position/Slot im Schiff (1-10)
+
+  blueprint     ShipBlueprint @relation(fields: [blueprintId], references: [id], onDelete: Cascade)
+  moduleType    ModuleType    @relation(fields: [moduleTypeId], references: [id])
+
+  @@unique([blueprintId, slotPosition])
+}
+
+model BlueprintBuildQueue {
+  id                     Int       @id @default(autoincrement())
+  planetId               Int
+  blueprintId            Int
+  quantity               Int       @default(1)
+  constructionStartedAt  DateTime  @default(now())
+  completedAt            DateTime?
+
+  planet                 Planet        @relation(fields: [planetId], references: [id])
+  blueprint              ShipBlueprint @relation(fields: [blueprintId], references: [id])
+}
+
+// =====================================================
 
 model ShipType {
   id                      Int      @id @default(autoincrement())
@@ -284,12 +420,12 @@ model Ship {
   id              Int      @id @default(autoincrement())
   playerId        Int      // Owner of the ship
   fleetId         Int?
-  shipTypeId      Int
+  shipTypeId      Int?     // Legacy: deprecated, use blueprintId instead
+  blueprintId     Int?     // NEU: Relation zum Blueprint
   planetId        Int?     // Where it was built / is stationed (when DOCKED)
   name            String?
-  health          Int      @default(100)
   crew            Int      @default(0)
-  
+
   // Position & Movement (STU-Style)
   currentGalaxyX  Int?     // Position on 120x120 hyperspace map
   currentGalaxyY  Int?
@@ -299,16 +435,27 @@ model Ship {
   status          String   @default("DOCKED") // DOCKED, IN_FLIGHT, STRANDED
   destinationX    Int?     // Target coordinates for auto-flight
   destinationY    Int?
-  
+
   // Energy (STU-Style: separate for weapons and drive)
   energyWeapons   Int      @default(0)   // Current energy for weapons/shields
   energyDrive     Int      @default(0)   // Current energy for hyperdrive (determines range)
-  
-  player          Player   @relation(fields: [playerId], references: [id])
-  fleet           Fleet?   @relation(fields: [fleetId], references: [id])
-  shipType        ShipType @relation(fields: [shipTypeId], references: [id])
-  planet          Planet?  @relation(fields: [planetId], references: [id])
-  system          System?  @relation(fields: [currentSystemId], references: [id])
+
+  // Finale Stats (vom Blueprint berechnet) - Star Wars thematisch
+  hullPoints              Int     @default(100)  // Huellenpunkte (ersetzt health)
+  deflectorShieldStrength Int     @default(0)    // Deflektorschild-Staerke
+  weaponDamage            Int     @default(10)   // Waffenschaden
+  subLightSpeed           Int     @default(5)    // Sublicht-Geschwindigkeit
+  hyperdriveRating        Float   @default(1.0)  // Hyperdrive-Klasse (kleiner = schneller)
+  sensorRange             Int     @default(3)    // Sensorreichweite
+  cargoCapacity           Int     @default(100)  // Frachtraum-Kapazitaet
+  crewCapacity            Int     @default(10)   // Crew-Kapazitaet
+
+  player          Player         @relation(fields: [playerId], references: [id])
+  fleet           Fleet?         @relation(fields: [fleetId], references: [id])
+  shipType        ShipType?      @relation(fields: [shipTypeId], references: [id])
+  blueprint       ShipBlueprint? @relation(fields: [blueprintId], references: [id])
+  planet          Planet?        @relation(fields: [planetId], references: [id])
+  system          System?        @relation(fields: [currentSystemId], references: [id])
 }
 
 model ShipBuildQueue {

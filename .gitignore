@@ -12,3 +12,4 @@ NOTES.md
 .direnv/
 devenv.local.nix
 .devenv-root
+.aider*

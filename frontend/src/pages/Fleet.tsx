@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Rocket, MapPin, Battery, Zap } from 'lucide-react';
+import { Rocket, MapPin, Battery, Zap, FileCode } from 'lucide-react';
 import api from '../lib/api';
 
 interface Ship {
@@ -52,7 +52,16 @@ export default function Fleet() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-white mb-6">Schiffe</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold text-white">Schiffe</h1>
+        <Link
+          to="/blueprints"
+          className="bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-all"
+        >
+          <FileCode size={18} />
+          Blueprints
+        </Link>
+      </div>
       
       {ships.length === 0 ? (
         <div className="bg-space-light p-6 rounded-lg border border-gray-700">

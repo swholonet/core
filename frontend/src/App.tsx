@@ -10,13 +10,13 @@ import Galaxy from './pages/Galaxy';
 import SystemView from './pages/SystemView';
 import Research from './pages/Research';
 import Fleet from './pages/Fleet';
-import Shipyard from './pages/Shipyard';
 import Settings from './pages/Settings';
 import InviteCodes from './pages/InviteCodes';
 import Admin from './pages/Admin';
 import Planets from './pages/Planets';
 import Ship from './pages/Ship';
 import HoloNet from './pages/HoloNet';
+import BlueprintEditorPage from './pages/BlueprintEditor';
 
 function App() {
   return (
@@ -36,7 +36,9 @@ function App() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/planets" element={<Planets />} />
         <Route path="/planet/:id" element={<Planet />} />
-        <Route path="/shipyard/:planetId" element={<Shipyard />} />
+        <Route path="/blueprints" element={<BlueprintEditorPage />} />
+        <Route path="/blueprints/:blueprintId" element={<BlueprintEditorPage />} />
+        <Route path="/planet/:planetId/blueprints" element={<BlueprintEditorPage />} />
         <Route path="/galaxy" element={<Galaxy />} />
         <Route path="/system/:systemId" element={<SystemView />} />
         <Route path="/ship/:id" element={<Ship />} />

@@ -3,8 +3,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { ArrowLeft, Zap, Trash2, Rocket, Coins, Wrench, Gem, TrendingUp, Factory, Clock, X } from 'lucide-react';
 import api from '../lib/api';
 import BuildMenu from '../components/BuildMenu';
+import OrbitalDockAction from '../components/OrbitalDockAction';
 import { useGameStore } from '../stores/gameStore';
 import logger from '../lib/logger';
+
+// Building names for shipyard functionality (supports both old and new names)
+const SHIPYARD_BUILDING_NAMES = ['Orbitales Raumdock', 'Raumschiffwerft', 'Shipyard'];
 
 interface Building {
   id: number;
@@ -98,6 +102,7 @@ const fieldTypeColors: Record<string, string> = {
 };
 
 const buildingColors: Record<string, string> = {
+  // English names
   'Command Center': 'bg-yellow-500',
   'Solar Plant': 'bg-orange-500',
   'Metal Mine': 'bg-gray-400',
@@ -109,6 +114,18 @@ const buildingColors: Record<string, string> = {
   'Defense Grid': 'bg-red-600',
   'Refinery': 'bg-amber-600',
   'Hangar': 'bg-slate-600',
+  // German names
+  'Kommandozentrale': 'bg-yellow-500',
+  'Solarkraftwerk': 'bg-orange-500',
+  'Durastahl-Mine': 'bg-gray-400',
+  'Kristallraffinerie': 'bg-purple-500',
+  'Lagerhaus': 'bg-blue-500',
+  'Handelszentrum': 'bg-green-500',
+  'Raumschiffwerft': 'bg-indigo-600',
+  'Orbitales Raumdock': 'bg-indigo-600',
+  'Forschungslabor': 'bg-cyan-500',
+  'Verteidigungsgitter': 'bg-red-600',
+  'Verarbeitungsanlage': 'bg-amber-600',
 };
 
 type LayerTab = 'orbit' | 'surface' | 'underground';
@@ -410,6 +427,21 @@ export default function Planet() {
             </div>
           </div>
         )}
+
+        {/* Orbital Dock Action */}
+        {SHIPYARD_BUILDING_NAMES.includes(building.buildingType.name) && (
+          <div className="border-t border-gray-700 pt-3 mt-3">
+            <OrbitalDockAction
+              planetId={planet!.id}
+              buildingName={building.buildingType.name}
+              isActive={building.isActive}
+              onClose={() => {
+                setSelectedField(null);
+                setShowBottomSheet(false);
+              }}
+            />
+          </div>
+        )}
       </div>
     );
   };
@@ -526,14 +558,14 @@ export default function Planet() {
             <span className="sm:hidden">Zurück</span>
           </Link>
           
-          {planet.buildings.some(b => b.buildingType.name === 'Raumschiffwerft' && b.isActive) && (
+          {planet.buildings.some(b => SHIPYARD_BUILDING_NAMES.includes(b.buildingType.name) && b.isActive) && (
             <Link
-              to={`/shipyard/${planet.id}`}
+              to={`/planet/${planet.id}/blueprints`}
               className="bg-cyan-600 hover:bg-cyan-500 text-white px-3 py-2 md:px-4 rounded flex items-center gap-2 transition text-sm"
             >
               <Rocket size={16} />
-              <span className="hidden sm:inline">Zur Raumschiffwerft</span>
-              <span className="sm:hidden">Werft</span>
+              <span className="hidden sm:inline">Orbitales Raumdock</span>
+              <span className="sm:hidden">Raumdock</span>
             </Link>
           )}
         </div>

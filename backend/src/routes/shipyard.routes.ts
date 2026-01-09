@@ -4,6 +4,9 @@ import prisma from '../lib/prisma';
 
 const router = express.Router();
 
+// Building names for shipyard functionality (supports both old and new names)
+const SHIPYARD_BUILDING_NAMES = ['Orbitales Raumdock', 'Raumschiffwerft', 'Shipyard'];
+
 /**
  * GET /api/shipyard/:planetId
  * Get available ship types and current build queue for a planet
@@ -29,7 +32,7 @@ router.get('/:planetId', authMiddleware, async (req: any, res) => {
         buildings: {
           where: {
             buildingType: {
-              name: 'Raumschiffwerft',
+              name: { in: SHIPYARD_BUILDING_NAMES },
             },
             isActive: true,
           },
@@ -46,7 +49,7 @@ router.get('/:planetId', authMiddleware, async (req: any, res) => {
 
     // Check if planet has an active shipyard
     if (planet.buildings.length === 0) {
-      return res.status(400).json({ error: 'Planet hat keine aktive Raumschiffwerft' });
+      return res.status(400).json({ error: 'Planet hat kein aktives Orbitales Raumdock' });
     }
 
     // Get player's completed research to determine available ships
@@ -155,7 +158,7 @@ router.post('/:planetId/build', authMiddleware, async (req: any, res) => {
         buildings: {
           where: {
             buildingType: {
-              name: 'Raumschiffwerft',
+              name: { in: SHIPYARD_BUILDING_NAMES },
             },
             isActive: true,
           },
@@ -168,7 +171,7 @@ router.post('/:planetId/build', authMiddleware, async (req: any, res) => {
     }
 
     if (planet.buildings.length === 0) {
-      return res.status(400).json({ error: 'Keine aktive Raumschiffwerft vorhanden' });
+      return res.status(400).json({ error: 'Kein aktives Orbitales Raumdock vorhanden' });
     }
 
     // Get ship type

@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Rocket, Clock, AlertCircle, Coins, Wrench, Gem, X } from 'lucide-react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { ArrowLeft, Rocket, Clock, AlertCircle, Coins, Wrench, Gem, X, FileCode } from 'lucide-react';
 import { useGameStore } from '../stores/gameStore';
 import { API_BASE_URL } from '../lib/config';
 
@@ -205,18 +205,27 @@ export default function Shipyard() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <button
-          onClick={() => navigate(`/planet/${planetId}`)}
-          className="text-gray-400 hover:text-white mb-4 inline-flex items-center gap-2"
+      <div className="flex items-start justify-between">
+        <div>
+          <button
+            onClick={() => navigate(`/planet/${planetId}`)}
+            className="text-gray-400 hover:text-white mb-4 inline-flex items-center gap-2"
+          >
+            <ArrowLeft size={20} />
+            Zurück zum Planeten
+          </button>
+          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+            <Rocket size={32} className="text-cyan-400" />
+            Raumschiffwerft - {data.planet.name}
+          </h1>
+        </div>
+        <Link
+          to={`/planet/${planetId}/blueprints`}
+          className="bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-white font-bold py-3 px-6 rounded-lg flex items-center gap-2 transition-all"
         >
-          <ArrowLeft size={20} />
-          Zurück zum Planeten
-        </button>
-        <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-          <Rocket size={32} className="text-cyan-400" />
-          Raumschiffwerft - {data.planet.name}
-        </h1>
+          <FileCode size={20} />
+          Blueprints
+        </Link>
       </div>
 
       {/* Build Queue */}
