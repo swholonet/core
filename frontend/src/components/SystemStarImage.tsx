@@ -8,7 +8,7 @@ interface SystemStarImageProps {
   size?: number;
 }
 
-const ASSET_BASE_URL = import.meta.env.VITE_ASSET_BASE_URL || 'https://swholonet.github.io/assets';
+const ASSET_BASE_URL = import.meta.env.VITE_ASSET_BASE_URL || 'https://swuniverse.github.io/assets/';
 
 /**
  * Generate fallback star image (colored circle SVG)

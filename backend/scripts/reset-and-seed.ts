@@ -30,7 +30,7 @@ if (!process.env.DATABASE_URL) {
     })
     .join('');
   
-  process.env.DATABASE_URL = `postgresql://postgres:${encodedPassword}@${postgresHost}:${postgresPort}/swholo_game?schema=public`;
+  process.env.DATABASE_URL = `postgresql://postgres:${encodedPassword}@${postgresHost}:${postgresPort}/swuniverse_game?schema=public`;
 }
 
 const prisma = new PrismaClient();

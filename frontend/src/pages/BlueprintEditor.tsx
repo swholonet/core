@@ -63,17 +63,21 @@ export default function BlueprintEditorPage() {
 
   if (showEditor) {
     return (
-      <div className="space-y-6">
-        <button
-          onClick={() => {
-            setShowEditor(false);
-            setEditingBlueprint(null);
-          }}
-          className="text-gray-400 hover:text-white inline-flex items-center gap-2"
-        >
-          <ArrowLeft size={20} />
-          Zurueck zur Uebersicht
-        </button>
+      <div className="space-y-8">
+        <div className="bg-gradient-to-r from-cyan-950/40 to-slate-900/60 border border-cyan-500/30 rounded-lg p-4 backdrop-blur-sm">
+          <button
+            onClick={() => {
+              setShowEditor(false);
+              setEditingBlueprint(null);
+            }}
+            className="flex items-center gap-3 text-cyan-400/70 hover:text-cyan-300 transition-all font-mono"
+          >
+            <div className="p-1 bg-cyan-900/40 border border-cyan-500/40 rounded">
+              <ArrowLeft size={16} />
+            </div>
+            <span className="tracking-wider">ZURÜCK ZUR ÜBERSICHT</span>
+          </button>
+        </div>
         <BlueprintEditor
           initialBlueprint={editingBlueprint}
           onSave={handleSave}
@@ -87,51 +91,58 @@ export default function BlueprintEditorPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <button
-            onClick={() => navigate(planetId ? `/planet/${planetId}` : '/')}
-            className="text-gray-400 hover:text-white mb-4 inline-flex items-center gap-2"
-          >
-            <ArrowLeft size={20} />
-            Zurueck
-          </button>
-          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-            <Rocket size={32} className="text-cyan-400" />
-            Schiffs-Blueprints
-          </h1>
-          <p className="text-gray-400 mt-1">
-            Erstelle und verwalte deine individuellen Schiffsentwuerfe
-          </p>
-        </div>
+    <div className="space-y-8">
+      {/* Imperial Command Blueprint Header */}
+      <div className="bg-gradient-to-r from-cyan-950/40 to-slate-900/60 border border-cyan-500/30 rounded-lg p-6 backdrop-blur-sm">
         <button
-          onClick={() => setShowEditor(true)}
-          className="bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-white font-bold py-3 px-6 rounded-lg flex items-center gap-2 transition-all"
+          onClick={() => navigate(planetId ? `/planet/${planetId}` : '/')}
+          className="flex items-center gap-3 text-cyan-400/70 hover:text-cyan-300 transition-all font-mono mb-4"
         >
-          <Plus size={20} />
-          Neuer Blueprint
+          <div className="p-1 bg-cyan-900/40 border border-cyan-500/40 rounded">
+            <ArrowLeft size={16} />
+          </div>
+          <span className="tracking-wider">ZURÜCK</span>
         </button>
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="p-2 bg-cyan-900/40 border border-cyan-500/40 rounded">
+              <Rocket className="text-cyan-300" size={24} />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-cyan-100 font-mono tracking-wider">SCHIFFS-BLUEPRINTS</h1>
+              <p className="text-cyan-400/70 font-mono text-sm">ERSTELLE UND VERWALTE DEINE INDIVIDUELLEN SCHIFFSENTWÜRFE</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowEditor(true)}
+            className="bg-gradient-to-r from-cyan-900/40 to-cyan-800/30 border border-cyan-500/30 text-cyan-100 px-6 py-3 rounded hover:from-cyan-800/50 hover:to-cyan-700/40 transition-all flex items-center gap-2 font-mono"
+          >
+            <Plus size={18} />
+            <span className="tracking-wider">NEUER BLUEPRINT</span>
+          </button>
+        </div>
       </div>
 
-      {/* Blueprint List */}
+      {/* Imperial Command Blueprint List */}
       {blueprints.length === 0 ? (
-        <div className="bg-gray-900/30 border border-dashed border-gray-700 rounded-xl p-12 text-center">
-          <Rocket className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-          <p className="text-gray-400 text-lg">Keine Blueprints vorhanden</p>
-          <p className="text-gray-600 text-sm mt-2">
-            Erstelle deinen ersten Schiffsentwurf
+        <div className="bg-gradient-to-r from-slate-950/40 to-cyan-950/20 border border-dashed border-cyan-500/30 rounded p-12 text-center backdrop-blur-sm">
+          <div className="p-4 bg-cyan-900/20 border border-cyan-500/30 rounded-full w-fit mx-auto mb-6">
+            <Rocket className="w-16 h-16 text-cyan-400/60" />
+          </div>
+          <p className="text-cyan-200 text-lg font-mono tracking-wider">KEINE BLUEPRINTS VORHANDEN</p>
+          <p className="text-cyan-400/60 text-sm font-mono mt-2">
+            ERSTELLE DEINEN ERSTEN SCHIFFSENTWURF
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {blueprints.map((bp) => (
             <div
               key={bp.id}
               className={`bg-gradient-to-br ${
                 SHIP_CLASS_COLORS[bp.shipClass]
-              } rounded-xl border p-5 transition-all hover:scale-[1.02]`}
+              } border border-cyan-500/30 rounded backdrop-blur-sm p-5 transition-all hover:border-cyan-400/50 hover:scale-[1.02]`}
             >
               {/* Header */}
               <div className="flex items-start justify-between mb-4">

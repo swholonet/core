@@ -7,6 +7,8 @@ import {
   SHIP_CLASS_COLORS,
 } from '../../types/blueprint';
 
+const ASSET_BASE_URL = import.meta.env.VITE_ASSET_BASE_URL || 'https://swuniverse.github.io/assets/';
+
 interface HullSelectorProps {
   shipClasses: ShipClassConfig[];
   selectedClass: ShipClass | null;
@@ -49,7 +51,7 @@ export default function HullSelector({
           >
             {selectedClass ? (
               <img
-                src={`/assets/ships/hulls/${selectedClass.toLowerCase()}.png`}
+                src={`${ASSET_BASE_URL}ships/hulls/${selectedClass.toLowerCase()}.png`}
                 alt={selectedClass}
                 className="w-10 h-10 object-contain"
                 onError={(e) => {
@@ -103,7 +105,7 @@ export default function HullSelector({
               >
                 <div className="w-10 h-10 rounded bg-gray-800 flex items-center justify-center">
                   <img
-                    src={`/assets/ships/hulls/${config.id.toLowerCase()}.png`}
+                    src={`${ASSET_BASE_URL}ships/hulls/${config.id.toLowerCase()}.png`}
                     alt={config.name}
                     className="w-8 h-8 object-contain"
                     onError={(e) => {

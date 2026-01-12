@@ -1,7 +1,7 @@
-# Star Wars - HoloNet - Caddy Reverse Proxy
+# Star Wars Universe - Caddy Reverse Proxy
 # Automatisches HTTPS mit Let's Encrypt
 
-swholo.net {
+swuniverse.net {
     # Automatisches HTTPS (Let's Encrypt)
     # Caddy macht das vollautomatisch, keine manuelle Konfiguration nötig!
 
@@ -30,12 +30,12 @@ swholo.net {
 
     # Health Check Endpoint
     handle /health {
-        reverse_proxy swholo-backend:3000
+        reverse_proxy swuniverse-backend:3000
     }
 
     # Socket.io WebSocket Support
     handle /socket.io/* {
-        reverse_proxy swholo-backend:3000 {
+        reverse_proxy swuniverse-backend:3000 {
             # WebSocket Headers
             header_up Upgrade {http.request.header.Upgrade}
             header_up Connection {http.request.header.Connection}
@@ -44,12 +44,12 @@ swholo.net {
 
     # Backend API
     handle /api/* {
-        reverse_proxy swholo-backend:3000
+        reverse_proxy swuniverse-backend:3000
     }
 
     # Frontend (React SPA)
     handle {
-        reverse_proxy swholo-frontend:3000
+        reverse_proxy swuniverse-frontend:3000
     }
 }
 

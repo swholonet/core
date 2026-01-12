@@ -12,7 +12,7 @@ Gehe zu: **https://github.com/swholonet/core/settings/secrets/actions**
 ```
 Name: SSH_HOST
 Secret: [Deine Hetzner-Server IP oder Domain]
-Beispiel: 116.203.xxx.xxx oder swholo.net
+Beispiel: 116.203.xxx.xxx oder swuniverse.net
 ```
 
 ### 2. SSH_USERNAME
@@ -130,7 +130,7 @@ nano .env.production
 ```env
 POSTGRES_PASSWORD=<sicheres-postgres-passwort>
 JWT_SECRET=<generierter-jwt-secret>
-CORS_ORIGIN=https://swholo.net
+CORS_ORIGIN=https://swuniverse.net
 ```
 
 Secrets generieren:
@@ -368,7 +368,7 @@ Nach erfolgreichem Setup:
 
 1. **Push auf main** triggert automatisches Deployment
 2. **Logs überwachen** in GitHub Actions
-3. **Testen** auf https://swholo.net
+3. **Testen** auf https://swuniverse.net
 4. **Monitoring** einrichten (optional)
 
 ---

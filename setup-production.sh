@@ -1,5 +1,5 @@
 #!/bin/bash
-# Complete deployment setup for Star Wars - HoloNet on production server
+# Complete deployment setup for Star Wars Universe on production server
 
 set -e
 
@@ -9,7 +9,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-echo -e "${BLUE}🚀 Star Wars - HoloNet - Production Deployment Setup${NC}"
+echo -e "${BLUE}🚀 Star Wars Universe - Production Deployment Setup${NC}"
 echo "======================================================"
 echo ""
 
@@ -118,9 +118,9 @@ if [ "$RECREATE" = "1" ] || [ ! -f .env.production ]; then
     echo ""
 
     # CORS Origin
-    read -p "CORS Origin (z.B. https://swholo.net): " CORS_ORIGIN
+    read -p "CORS Origin (z.B. https://swuniverse.net): " CORS_ORIGIN
     if [ -z "$CORS_ORIGIN" ]; then
-        CORS_ORIGIN="https://swholo.net"
+        CORS_ORIGIN="https://swuniverse.net"
     fi
     echo ""
 

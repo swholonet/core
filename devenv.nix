@@ -2,7 +2,7 @@
 
 {
   # https://devenv.sh/basics/
-  env.GREET = "Star Wars - HoloNet Dev Environment";
+  env.GREET = "Star Wars Universe Dev Environment";
 
   # https://devenv.sh/packages/
   packages = [ 

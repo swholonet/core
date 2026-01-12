@@ -1,8 +1,8 @@
-# Star Wars - HoloNet
+# Star Wars Universe
 
 Ein tick-basiertes Strategie-Browserspiel im Star Wars Universum.
 
-🌐 **Live:** https://swholo.net
+🌐 **Live:** https://swuniverse.net
 
 ## Überblick
 

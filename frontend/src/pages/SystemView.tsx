@@ -140,33 +140,37 @@ export default function SystemView() {
   }
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="bg-space-light rounded-lg p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate('/galaxy')}
-              className="p-2 hover:bg-gray-700 rounded transition"
-            >
-              <ArrowLeft className="text-gray-400" />
-            </button>
+    <div className="space-y-6">
+      {/* Imperial Command System Header */}
+      <div className="bg-gradient-to-r from-cyan-950/40 to-slate-900/60 border border-cyan-500/30 rounded-lg p-6 backdrop-blur-sm">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => navigate('/galaxy')}
+            className="flex items-center gap-2 text-cyan-400/70 hover:text-cyan-300 transition-all font-mono"
+          >
+            <div className="p-1 bg-cyan-900/40 border border-cyan-500/40 rounded">
+              <ArrowLeft size={16} />
+            </div>
+            <span className="tracking-wider">GALAXIE</span>
+          </button>
+          <div className="flex items-center gap-4 flex-1">
+            <div className="p-2 bg-yellow-900/40 border border-yellow-500/40 rounded">
+              <Star className="text-yellow-300" size={24} />
+            </div>
             <div>
-              <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-                <Star className="text-yellow-400" />
-                {system.name}
-              </h1>
-              <p className="text-sm text-gray-400">
-                {getSystemTypeLabel(system.systemType)} • Koordinaten: {system.sector.x * 20 + system.fieldX}|{system.sector.y * 20 + system.fieldY}
-              </p>
+              <h1 className="text-2xl font-bold text-cyan-100 font-mono tracking-wider">{system.name.toUpperCase()}</h1>
+              <div className="flex items-center gap-4 text-sm font-mono">
+                <span className="text-cyan-400/70">TYP: {getSystemTypeLabel(system.systemType).toUpperCase()}</span>
+                <span className="text-cyan-400/70">KOORDINATEN: {system.sector.x * 20 + system.fieldX}|{system.sector.y * 20 + system.fieldY}</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="flex gap-4">
-        {/* Grid View */}
-        <div className="flex-1 bg-space-light rounded-lg p-4">
+      <div className="flex gap-6">
+        {/* Imperial Command Grid View */}
+        <div className="flex-1 bg-gradient-to-br from-slate-950/40 to-cyan-950/20 border border-cyan-500/30 rounded p-6 backdrop-blur-sm">
           <div className="overflow-auto">
             <table className="border-collapse" style={{ minWidth: '800px' }}>
               {/* Column headers */}
@@ -258,14 +262,22 @@ export default function SystemView() {
           </div>
         </div>
 
-        {/* Info Panel */}
-        <div className="w-80 space-y-4">
+        {/* Imperial Command Info Panel */}
+        <div className="w-80 space-y-6">
           {/* System Info */}
-          <div className="bg-space-light rounded-lg p-4">
-            <h3 className="text-white font-semibold mb-2">{system.name}</h3>
-            <div className="space-y-1 text-sm">
-              <p className="text-gray-400">Typ: <span className="text-white">{getSystemTypeLabel(system.systemType)}</span></p>
-              <p className="text-gray-400">Koordinaten: <span className="text-white">{system.sector.x * 20 + system.fieldX}|{system.sector.y * 20 + system.fieldY}</span></p>
+          <div className="bg-gradient-to-br from-slate-950/40 to-cyan-950/20 border border-cyan-500/30 rounded p-4 backdrop-blur-sm">
+            <div className="mb-3 pb-2 border-b border-cyan-500/20">
+              <h3 className="text-cyan-100 font-semibold font-mono tracking-wider">{system.name.toUpperCase()}</h3>
+            </div>
+            <div className="space-y-2 text-sm font-mono">
+              <div className="flex justify-between">
+                <span className="text-cyan-400/70">TYP:</span>
+                <span className="text-cyan-100">{getSystemTypeLabel(system.systemType).toUpperCase()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-cyan-400/70">KOORDINATEN:</span>
+                <span className="text-cyan-100">{system.sector.x * 20 + system.fieldX}|{system.sector.y * 20 + system.fieldY}</span>
+              </div>
             </div>
           </div>
 
@@ -295,28 +307,30 @@ export default function SystemView() {
             return null;
           })()}
 
-          {/* Planet List */}
-          <div className="bg-space-light rounded-lg p-4">
-            <h2 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-              <MapPin className="text-blue-400" />
-              Planeten ({system.planets.length})
-            </h2>
+          {/* Imperial Command Planet List */}
+          <div className="bg-gradient-to-br from-slate-950/40 to-cyan-950/20 border border-cyan-500/30 rounded p-4 backdrop-blur-sm">
+            <div className="mb-4 pb-2 border-b border-cyan-500/20">
+              <h2 className="text-lg font-semibold text-cyan-100 flex items-center gap-2 font-mono tracking-wider">
+                <MapPin className="text-cyan-400" size={18} />
+                PLANETEN ({system.planets.length})
+              </h2>
+            </div>
             <div className="space-y-2 max-h-96 overflow-y-auto">
               {system.planets.map(planet => {
                 const pos = convertPlanetToGridPosition(planet);
                 return (
                   <div
                     key={planet.id}
-                    className="bg-gray-700 rounded p-2 hover:bg-gray-600 cursor-pointer transition text-sm"
+                    className="bg-slate-950/30 border border-slate-700/40 rounded p-3 hover:border-cyan-500/40 hover:bg-slate-950/40 cursor-pointer transition-all text-sm"
                     onClick={() => navigate(`/planet/${planet.id}`)}
                   >
-                    <div className="flex items-center justify-between mb-1">
-                      <h3 className="font-semibold text-white text-sm">{planet.name}</h3>
-                      <span className="text-xs text-gray-400">{pos.x}|{pos.y}</span>
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-semibold text-cyan-100 font-mono">{planet.name}</h3>
+                      <span className="text-xs text-cyan-400/60 font-mono">{pos.x}|{pos.y}</span>
                     </div>
-                    <p className="text-xs text-gray-400">{getPlanetTypeLabel(planet.planetType)}</p>
+                    <p className="text-xs text-cyan-400/70 font-mono">{getPlanetTypeLabel(planet.planetType).toUpperCase()}</p>
                     {planet.player && (
-                      <p className="text-xs text-blue-400 mt-1">{planet.player.username}</p>
+                      <p className="text-xs text-blue-400 mt-2 font-mono">{planet.player.username.toUpperCase()}</p>
                     )}
                   </div>
                 );

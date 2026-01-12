@@ -178,32 +178,36 @@ export default function HoloNet() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="bg-space-light rounded-lg border border-gray-700 shadow-xl mb-6">
-        {/* Header */}
-        <div className="border-b border-gray-700 p-4 md:p-6">
-          <div className="flex items-center gap-3">
-            <Radio size={24} className="text-cyan-400" />
+      <div className="bg-gradient-to-r from-cyan-950/40 to-slate-900/60 border border-cyan-500/30 rounded-lg backdrop-blur-sm mb-8">
+        {/* Imperial Command Header */}
+        <div className="border-b border-cyan-500/20 p-6">
+          <div className="flex items-center gap-4">
+            <div className="p-2 bg-cyan-900/40 border border-cyan-500/40 rounded">
+              <Radio size={24} className="text-cyan-300" />
+            </div>
             <div>
-              <h1 className="text-xl md:text-2xl font-bold text-white">HoloNet</h1>
-              <p className="text-sm text-gray-400">Galaktisches Kommunikationsnetzwerk - Rollenspiel & Story</p>
+              <h1 className="text-2xl font-bold text-cyan-100 font-mono tracking-wider">HOLONET</h1>
+              <p className="text-sm text-cyan-400/70 font-mono">GALAKTISCHES KOMMUNIKATIONSNETZWERK - ROLLENSPIEL & STORY</p>
             </div>
           </div>
         </div>
 
-        {/* New Post Form */}
-        <form onSubmit={sendMessage} className="p-4 md:p-6 border-b border-gray-700 bg-gray-800/30">
-          <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-            <FileText size={20} />
-            Neuer Beitrag
-          </h2>
-          <div className="space-y-3">
+        {/* Imperial Command New Post Form */}
+        <form onSubmit={sendMessage} className="p-6 border-b border-cyan-500/20 bg-slate-950/20">
+          <div className="mb-4 pb-3 border-b border-cyan-500/20">
+            <h2 className="text-lg font-semibold text-cyan-100 flex items-center gap-2 font-mono tracking-wider">
+              <FileText size={18} />
+              NEUER BEITRAG
+            </h2>
+          </div>
+          <div className="space-y-4">
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Titel (optional)"
               maxLength={100}
-              className="w-full bg-gray-800 text-white px-4 py-2 rounded border border-gray-600 focus:border-cyan-500 focus:outline-none"
+              className="w-full bg-slate-800/60 border border-cyan-500/30 rounded px-4 py-3 text-cyan-100 focus:outline-none focus:border-cyan-400 font-mono backdrop-blur-sm"
               disabled={sending}
             />
             <textarea
@@ -212,20 +216,20 @@ export default function HoloNet() {
               placeholder="Dein Rollenspiel-Text oder Story... (max 5000 Zeichen)"
               maxLength={5000}
               rows={6}
-              className="w-full bg-gray-800 text-white px-4 py-2 rounded border border-gray-600 focus:border-cyan-500 focus:outline-none resize-y"
+              className="w-full bg-slate-800/60 border border-cyan-500/30 rounded px-4 py-3 text-cyan-100 focus:outline-none focus:border-cyan-400 font-mono resize-y backdrop-blur-sm"
               disabled={sending}
             />
             <div className="flex items-center justify-between">
-              <p className="text-xs text-gray-500">
-                {newMessage.length}/5000 Zeichen
+              <p className="text-xs text-cyan-400/60 font-mono">
+                {newMessage.length}/5000 ZEICHEN
               </p>
               <button
                 type="submit"
                 disabled={!newMessage.trim() || sending}
-                className="px-6 py-2 bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded transition flex items-center gap-2"
+                className="px-6 py-3 bg-gradient-to-r from-cyan-900/40 to-cyan-800/30 border border-cyan-500/30 text-cyan-100 rounded hover:from-cyan-800/50 hover:to-cyan-700/40 transition-all disabled:from-slate-800/30 disabled:to-slate-700/20 disabled:border-slate-600/20 disabled:text-slate-400 disabled:cursor-not-allowed flex items-center gap-2 font-mono"
               >
-                <Send size={18} />
-                Veröffentlichen
+                <Send size={16} />
+                <span className="tracking-wider">VERÖFFENTLICHEN</span>
               </button>
             </div>
           </div>
@@ -239,37 +243,41 @@ export default function HoloNet() {
             <p className="text-gray-400">Lade HoloNet...</p>
           </div>
         ) : messages.length === 0 ? (
-          <div className="bg-space-light rounded-lg border border-gray-700 p-12 text-center text-gray-500">
-            <Radio size={48} className="mx-auto mb-4 opacity-20" />
-            <p>Noch keine Beiträge im HoloNet.</p>
-            <p className="text-sm mt-2">Sei der Erste, der eine Story veröffentlicht!</p>
+          <div className="bg-gradient-to-br from-slate-950/40 to-cyan-950/20 border border-dashed border-cyan-500/30 rounded p-12 text-center backdrop-blur-sm">
+            <div className="p-4 bg-cyan-900/20 border border-cyan-500/30 rounded-full w-fit mx-auto mb-6">
+              <Radio size={48} className="text-cyan-400/60" />
+            </div>
+            <p className="text-cyan-200 text-lg font-mono tracking-wider">KEINE ÜBERTRAGUNGEN EMPFANGEN</p>
+            <p className="text-cyan-400/60 text-sm font-mono mt-2">
+              SENDE DIE ERSTE NACHRICHT INS HOLONET
+            </p>
           </div>
         ) : (
           messages.map((msg) => (
             <div
               key={msg.id}
-              className="bg-space-light rounded-lg border border-gray-700 shadow-lg overflow-hidden"
+              className="bg-gradient-to-br from-slate-950/40 to-cyan-950/20 border border-cyan-500/30 rounded backdrop-blur-sm overflow-hidden"
             >
-              {/* Post Header */}
-              <div className="bg-gray-800/50 px-4 md:px-6 py-3 border-b border-gray-700">
+              {/* Imperial Command Post Header */}
+              <div className="bg-gradient-to-r from-slate-900/60 to-slate-800/40 border-b border-cyan-500/20 px-4 md:px-6 py-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                    <div className="w-10 h-10 bg-gradient-to-br from-cyan-500/80 to-blue-600/80 border border-cyan-400/40 rounded-full flex items-center justify-center text-white font-bold font-mono backdrop-blur-sm">
                       {msg.player.username.charAt(0).toUpperCase()}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-white font-semibold">
-                          {msg.player.username}
+                        <span className="text-cyan-100 font-semibold font-mono tracking-wider">
+                          {msg.player.username.toUpperCase()}
                         </span>
-                        <span className={`text-xs ${getFactionColor(msg.player.factionName)}`}>
-                          [{msg.player.factionName}]
+                        <span className={`text-xs font-mono tracking-wider ${getFactionColor(msg.player.factionName)}`}>
+                          [{msg.player.factionName.toUpperCase()}]
                         </span>
                       </div>
-                      <span className="text-xs text-gray-500">
-                        {formatTime(msg.createdAt)}
+                      <span className="text-xs text-cyan-400/60 font-mono tracking-wider">
+                        {formatTime(msg.createdAt).toUpperCase()}
                         {msg.updatedAt && msg.updatedAt !== msg.createdAt && (
-                          <span className="ml-2 text-gray-600">(bearbeitet)</span>
+                          <span className="ml-2 text-cyan-400/40">(BEARBEITET)</span>
                         )}
                       </span>
                     </div>
@@ -277,7 +285,7 @@ export default function HoloNet() {
                   {canEdit(msg) && editingId !== msg.id && (
                     <button
                       onClick={() => startEdit(msg)}
-                      className="text-gray-400 hover:text-cyan-400 transition"
+                      className="p-2 text-cyan-400/60 hover:text-cyan-300 hover:bg-cyan-900/20 border border-transparent hover:border-cyan-500/30 rounded transition-all"
                       title="Bearbeiten"
                     >
                       <Edit2 size={18} />
@@ -286,44 +294,44 @@ export default function HoloNet() {
                 </div>
               </div>
 
-              {/* Post Content */}
+              {/* Imperial Command Post Content */}
               <div className="p-4 md:p-6">
                 {editingId === msg.id ? (
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     <input
                       type="text"
                       value={editTitle}
                       onChange={(e) => setEditTitle(e.target.value)}
                       placeholder="Titel (optional)"
                       maxLength={100}
-                      className="w-full bg-gray-800 text-white px-4 py-2 rounded border border-gray-600 focus:border-cyan-500 focus:outline-none"
+                      className="w-full bg-slate-800/60 border border-cyan-500/30 rounded px-4 py-3 text-cyan-100 focus:outline-none focus:border-cyan-400 font-mono backdrop-blur-sm"
                     />
                     <textarea
                       value={editMessage}
                       onChange={(e) => setEditMessage(e.target.value)}
                       maxLength={5000}
                       rows={6}
-                      className="w-full bg-gray-800 text-white px-4 py-2 rounded border border-gray-600 focus:border-cyan-500 focus:outline-none resize-y"
+                      className="w-full bg-slate-800/60 border border-cyan-500/30 rounded px-4 py-3 text-cyan-100 focus:outline-none focus:border-cyan-400 font-mono resize-y backdrop-blur-sm"
                     />
                     <div className="flex items-center justify-between">
-                      <p className="text-xs text-gray-500">
-                        {editMessage.length}/5000 Zeichen
+                      <p className="text-xs text-cyan-400/60 font-mono tracking-wider">
+                        {editMessage.length}/5000 ZEICHEN
                       </p>
                       <div className="flex gap-2">
                         <button
                           onClick={cancelEdit}
-                          className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded transition flex items-center gap-2"
+                          className="px-4 py-2 bg-gradient-to-r from-slate-800/60 to-slate-700/40 border border-slate-500/30 text-slate-200 rounded hover:from-slate-700/70 hover:to-slate-600/50 transition-all flex items-center gap-2 font-mono tracking-wider"
                         >
                           <X size={16} />
-                          Abbrechen
+                          ABBRECHEN
                         </button>
                         <button
                           onClick={() => saveEdit(msg.id)}
                           disabled={!editMessage.trim() || sending}
-                          className="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded transition flex items-center gap-2"
+                          className="px-4 py-2 bg-gradient-to-r from-cyan-900/40 to-cyan-800/30 border border-cyan-500/30 text-cyan-100 rounded hover:from-cyan-800/50 hover:to-cyan-700/40 disabled:from-slate-800/30 disabled:to-slate-700/20 disabled:border-slate-600/20 disabled:text-slate-400 disabled:cursor-not-allowed transition-all flex items-center gap-2 font-mono tracking-wider"
                         >
                           <Send size={16} />
-                          Speichern
+                          SPEICHERN
                         </button>
                       </div>
                     </div>
@@ -331,11 +339,11 @@ export default function HoloNet() {
                 ) : (
                   <>
                     {msg.title && (
-                      <h3 className="text-xl font-bold text-white mb-3">
+                      <h3 className="text-xl font-bold text-cyan-100 mb-4 font-mono tracking-wider">
                         {msg.title}
                       </h3>
                     )}
-                    <div className="text-gray-300 whitespace-pre-wrap leading-relaxed">
+                    <div className="text-cyan-200/90 whitespace-pre-wrap leading-relaxed font-mono">
                       {msg.message}
                     </div>
                   </>

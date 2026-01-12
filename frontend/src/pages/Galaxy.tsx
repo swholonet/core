@@ -137,90 +137,102 @@ export default function Galaxy() {
 
   return (
     <div className="container mx-auto p-4">
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <Globe className="text-cyan-400" size={32} />
-          <h1 className="text-3xl font-bold text-cyan-300 font-mono tracking-wide">
+      {/* Imperial Command Header */}
+      <div className="bg-gradient-to-r from-cyan-950/40 to-slate-900/60 border border-cyan-500/30 rounded-lg p-6 mb-6 backdrop-blur-sm">
+        <div className="flex items-center gap-4 mb-4">
+          <div className="p-2 bg-cyan-900/40 border border-cyan-500/40 rounded">
+            <Globe className="text-cyan-300" size={24} />
+          </div>
+          <h1 className="text-2xl font-bold text-cyan-100 font-mono tracking-wider">
             {viewMode === 'galaxy' ? 'GALAXIEKARTE' : `SEKTOR ${selectedSector?.x}|${selectedSector?.y}`}
           </h1>
           {viewMode === 'sector' && (
             <button
               onClick={handleBackToGalaxy}
-              className="ml-auto flex items-center gap-2 bg-cyan-900/30 hover:bg-cyan-800/40 text-cyan-400 px-4 py-2 rounded border border-cyan-700/50 hover:border-cyan-500/70 transition font-mono text-sm"
+              className="ml-auto flex items-center gap-2 bg-gradient-to-r from-cyan-900/40 to-cyan-800/30 border border-cyan-500/30 text-cyan-100 px-4 py-2 rounded hover:from-cyan-800/50 hover:to-cyan-700/40 transition-all font-mono text-sm"
             >
-              <ArrowLeft size={18} />
-              Zurueck zur Galaxie
+              <ArrowLeft size={16} />
+              ZURÜCK ZUR GALAXIE
             </button>
           )}
         </div>
-        <p className="text-cyan-600/70 font-mono text-sm">
+        <div className="text-cyan-400/70 font-mono text-sm">
           {viewMode === 'galaxy'
-            ? `${GALAXY_SIZE}x${GALAXY_SIZE} Sektoren (${GALAXY_SIZE * GALAXY_SIZE} total), jeder Sektor hat ${FIELDS_PER_SECTOR}x${FIELDS_PER_SECTOR} Felder`
+            ? `${GALAXY_SIZE}x${GALAXY_SIZE} SEKTOREN (${GALAXY_SIZE * GALAXY_SIZE} TOTAL) • JEDER SEKTOR: ${FIELDS_PER_SECTOR}x${FIELDS_PER_SECTOR} FELDER`
             : (() => {
                 const startX = (selectedSector!.x - 1) * FIELDS_PER_SECTOR + 1;
                 const endX = selectedSector!.x * FIELDS_PER_SECTOR;
                 const startY = (selectedSector!.y - 1) * FIELDS_PER_SECTOR + 1;
                 const endY = selectedSector!.y * FIELDS_PER_SECTOR;
-                return `${FIELDS_PER_SECTOR}x${FIELDS_PER_SECTOR} Felder | Galaxie-Koordinaten: ${startX}-${endX} x ${startY}-${endY}`;
+                return `${FIELDS_PER_SECTOR}x${FIELDS_PER_SECTOR} FELDER • GALAXIE-KOORDINATEN: ${startX}-${endX} X ${startY}-${endY}`;
               })()
           }
-        </p>
-      </div>
-
-      {/* Breadcrumb */}
-      <div className="mb-4 flex items-center gap-2 text-sm text-cyan-700/70 font-mono">
-        <button
-          onClick={handleBackToGalaxy}
-          className={`hover:text-cyan-400 transition ${viewMode === 'galaxy' ? 'text-cyan-400' : ''}`}
-        >
-          [GALAXIE]
-        </button>
-        {viewMode === 'sector' && selectedSector && (
-          <>
-            <span className="text-cyan-800">&gt;</span>
-            <span className="text-cyan-400">[SEKTOR {selectedSector.x}|{selectedSector.y}]</span>
-          </>
-        )}
-      </div>
-
-      {/* Legend */}
-      <div className="mb-4 flex gap-6 flex-wrap font-mono text-xs">
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-black/50 border border-cyan-900/30 rounded-sm"></div>
-          <span className="text-cyan-700/70">Leer</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-cyan-900/30 border border-cyan-700/30 rounded-sm"></div>
-          <span className="text-cyan-700/70">Unbesiedelt</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-red-900/50 border border-red-700/50 rounded-sm"></div>
-          <span className="text-cyan-700/70">Imperium</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-orange-900/50 border border-orange-700/50 rounded-sm"></div>
-          <span className="text-cyan-700/70">Rebellen</span>
         </div>
       </div>
 
-      {/* Hover Info - Fixed Height */}
-      <div className="mb-4 rounded-lg p-3 border border-cyan-700/40 min-h-[60px] flex items-center font-mono" style={{ background: 'linear-gradient(90deg, rgba(0,30,50,0.6) 0%, rgba(0,20,40,0.4) 100%)' }}>
+      {/* Imperial Command Navigation Breadcrumb */}
+      <div className="mb-6 bg-gradient-to-r from-cyan-950/30 to-slate-900/40 border border-cyan-500/20 rounded p-3 backdrop-blur-sm">
+        <div className="flex items-center gap-2 text-sm font-mono">
+          <button
+            onClick={handleBackToGalaxy}
+            className={`px-2 py-1 rounded border transition-all ${
+              viewMode === 'galaxy'
+                ? 'text-cyan-300 border-cyan-500/40 bg-cyan-900/30'
+                : 'text-cyan-400/70 border-transparent hover:text-cyan-300 hover:border-cyan-500/30'
+            }`}
+          >
+            [GALAXIE]
+          </button>
+          {viewMode === 'sector' && selectedSector && (
+            <>
+              <span className="text-cyan-500/60">&gt;</span>
+              <span className="text-cyan-300 px-2 py-1 rounded border border-cyan-500/40 bg-cyan-900/20">
+                [SEKTOR {selectedSector.x}|{selectedSector.y}]
+              </span>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Imperial Command Legend */}
+      <div className="mb-6 bg-gradient-to-r from-slate-950/30 to-cyan-950/20 border border-cyan-500/20 rounded p-4 backdrop-blur-sm">
+        <div className="flex gap-6 flex-wrap font-mono text-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-3 h-3 bg-black/60 border border-slate-700/50 rounded"></div>
+            <span className="text-cyan-300/70">LEER</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="w-3 h-3 bg-cyan-900/40 border border-cyan-600/50 rounded"></div>
+            <span className="text-cyan-300/70">UNBESIEDELT</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="w-3 h-3 bg-red-900/60 border border-red-600/60 rounded"></div>
+            <span className="text-cyan-300/70">IMPERIUM</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="w-3 h-3 bg-orange-900/60 border border-orange-600/60 rounded"></div>
+            <span className="text-cyan-300/70">REBELLEN</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Imperial Command Hover Info Terminal */}
+      <div className="mb-6 bg-gradient-to-r from-cyan-950/30 to-slate-900/40 border border-cyan-500/30 rounded p-4 min-h-[72px] flex items-center font-mono backdrop-blur-sm">
         {viewMode === 'galaxy' && hoveredSector ? (
           <>
-            <span className="text-cyan-400 font-semibold">[SEKTOR {hoveredSector.x},{hoveredSector.y}]</span>
+            <span className="text-cyan-200 font-semibold tracking-wider">[SEKTOR {hoveredSector.x},{hoveredSector.y}]</span>
             {(() => {
               const sector = sectors.get(`${hoveredSector.x},${hoveredSector.y}`);
               if (!sector || sector.systems.length === 0) {
-                return <span className="text-cyan-700/50 ml-3">// Keine Systeme</span>;
+                return <span className="text-cyan-400/60 ml-4">// KEINE SYSTEME</span>;
               }
               const ownedSystems = sector.systems.filter(s => s.hasPlayerPlanets);
               if (ownedSystems.length === 0) {
-                return <span className="text-cyan-500/70 ml-3">// {sector.systems.length} unbesiedelte(s) System(e)</span>;
+                return <span className="text-cyan-300/70 ml-4">// {sector.systems.length} UNBESIEDELTE(S) SYSTEM(E)</span>;
               }
               return (
-                <span className="text-green-400/80 ml-3">
-                  // {sector.systems.length} System(e) - {ownedSystems[0].factionName}
+                <span className="text-green-400/90 ml-4">
+                  // {sector.systems.length} SYSTEM(E) - {ownedSystems[0].factionName?.toUpperCase()}
                 </span>
               );
             })()}
@@ -235,21 +247,21 @@ export default function Galaxy() {
 
               return (
                 <>
-                  <span className="text-cyan-400 font-semibold">[POS {galaxyX}|{galaxyY}]</span>
+                  <span className="text-cyan-200 font-semibold tracking-wider">[POS {galaxyX}|{galaxyY}]</span>
                   {field?.system ? (
-                    <span className="text-cyan-300/80 ml-3">
-                      // {field.system.name} ({field.system.systemType}) - {field.system.planetCount} Planet(en)
-                      {field.system.hasPlayerPlanets && <span className="text-green-400/80"> - {field.system.factionName}</span>}
+                    <span className="text-cyan-300/80 ml-4">
+                      // {field.system.name?.toUpperCase()} ({field.system.systemType}) - {field.system.planetCount} PLANET(EN)
+                      {field.system.hasPlayerPlanets && <span className="text-green-400/90"> - {field.system.factionName?.toUpperCase()}</span>}
                     </span>
                   ) : (
-                    <span className="text-cyan-700/50 ml-3">// Leerer Raum</span>
+                    <span className="text-cyan-400/60 ml-4">// LEERER RAUM</span>
                   )}
                 </>
               );
             })()}
           </>
         ) : (
-          <span className="text-cyan-700/40 italic text-sm">// Bewege die Maus ueber {viewMode === 'galaxy' ? 'einen Sektor' : 'ein Feld'} fuer Details</span>
+          <span className="text-cyan-400/60 text-sm">// BEWEGE DIE MAUS ÜBER {viewMode === 'galaxy' ? 'EINEN SEKTOR' : 'EIN FELD'} FÜR DETAILS</span>
         )}
       </div>
       {/* Galaxy View - Sector Grid (6x6) - STU Style */}

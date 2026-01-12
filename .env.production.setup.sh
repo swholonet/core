@@ -94,9 +94,9 @@ fi
 echo ""
 
 # CORS Origin
-read -p "CORS Origin (z.B. https://swholo.net): " CORS_ORIGIN
+read -p "CORS Origin (z.B. https://swuniverse.net): " CORS_ORIGIN
 if [ -z "$CORS_ORIGIN" ]; then
-    CORS_ORIGIN="https://swholo.net"
+    CORS_ORIGIN="https://swuniverse.net"
     echo "Standard: $CORS_ORIGIN"
 fi
 echo ""
@@ -136,7 +136,7 @@ REDIS_PORT=${REDIS_PORT}
 REDIS_URL=redis://${REDIS_HOST}:${REDIS_PORT}
 
 # Asset Repository URL
-VITE_ASSET_BASE_URL=https://swholonet.github.io/assets
+VITE_ASSET_BASE_URL=https://swuniverse.github.io/assets/
 
 # ============================================
 # Game Settings (Optional)

@@ -240,154 +240,188 @@ export default function Dashboard() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-white mb-2">
-          Willkommen zurück, Commander {user?.username}!
-        </h1>
-        <p className="text-gray-400">
-          {user?.player?.faction?.name} • {dashboardData?.planets.length || 0} Planet(en)
-        </p>
-      </div>
-
-      {/* Tick Timer */}
-      <div className="bg-gradient-to-r from-purple-900/20 to-blue-900/20 border border-purple-700 p-4 rounded-lg mb-6">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <Clock size={24} className="text-purple-400" />
-            <div>
-              <h3 className="text-white font-semibold">Nächster Tick</h3>
-              <p className="text-xs text-gray-400">Ticks: 00:00, 12:00, 15:00, 18:00, 21:00 Uhr</p>
+      {/* Imperial Command Header */}
+      <div className="bg-gradient-to-r from-cyan-950/40 to-slate-900/60 border border-cyan-500/30 rounded-lg p-6 mb-8 backdrop-blur-sm">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-cyan-100 font-mono tracking-wider mb-2">
+              WILLKOMMEN ZURÜCK, COMMANDER {user?.username?.toUpperCase()}
+            </h1>
+            <div className="flex items-center gap-4 text-sm">
+              <span className="text-cyan-400/70 font-mono">
+                FRAKTION: {user?.player?.faction?.name}
+              </span>
+              <span className="text-cyan-400/70 font-mono">
+                PLANETEN: {dashboardData?.planets.length || 0}
+              </span>
             </div>
           </div>
           <div className="text-right">
-            <div className="text-2xl font-bold text-purple-300">{timeUntilTick}</div>
+            <div className="text-xs text-cyan-400/60 font-mono">STATUS</div>
+            <div className="text-sm text-cyan-300 font-mono">AKTIV</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tick Timer - Imperial Command Terminal */}
+      <div className="bg-gradient-to-r from-cyan-950/30 to-slate-900/50 border border-cyan-500/30 rounded-lg p-6 mb-8 backdrop-blur-sm">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-4">
+            <div className="p-2 bg-cyan-900/40 border border-cyan-500/40 rounded">
+              <Clock size={20} className="text-cyan-300" />
+            </div>
+            <div>
+              <h3 className="text-cyan-100 font-mono font-semibold tracking-wider">NÄCHSTER TICK</h3>
+              <p className="text-xs text-cyan-400/60 font-mono">TICKS: 00:00, 12:00, 15:00, 18:00, 21:00 UHR</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-2xl font-bold text-cyan-200 font-mono">{timeUntilTick}</div>
             {nextTickTime && (
-              <div className="text-xs text-gray-400">
-                {nextTickTime.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr
+              <div className="text-xs text-cyan-400/60 font-mono">
+                {nextTickTime.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} UHR
               </div>
             )}
           </div>
         </div>
-        
+
         {/* Progress Bar */}
-        <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
+        <div className="w-full bg-slate-800/60 border border-slate-700/50 rounded-full h-2 overflow-hidden">
           <div
-            className="bg-gradient-to-r from-purple-500 to-blue-500 h-3 rounded-full transition-all duration-1000"
+            className="bg-gradient-to-r from-cyan-500 to-cyan-400 h-2 transition-all duration-1000"
             style={{ width: `${tickProgress}%` }}
           />
         </div>
-        <div className="flex justify-between text-xs text-gray-400 mt-1">
-          <span>Letzter Tick</span>
+        <div className="flex justify-between text-xs text-cyan-400/60 font-mono mt-2">
+          <span>LETZTER TICK</span>
           <span>{tickProgress.toFixed(1)}%</span>
-          <span>Nächster Tick</span>
+          <span>NÄCHSTER TICK</span>
         </div>
       </div>
 
-      {/* Total Resources Overview - 2x4 Grid für 8 Ressourcen */}
+      {/* Imperial Command Resource Overview */}
       {dashboardData && (
-        <div className="space-y-4 mb-6">
+        <div className="space-y-4 mb-8">
           {/* Erste Reihe: Credits, Durastahl, Kristallines Silizium, Tibanna-Gas */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-yellow-900/20 border border-yellow-700 p-4 rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-yellow-300 text-sm font-semibold">Credits Gesamt</span>
-                <Coins size={20} className="text-yellow-400" />
+            <div className="bg-gradient-to-br from-yellow-900/30 to-yellow-950/20 border border-yellow-500/30 p-4 rounded backdrop-blur-sm">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-yellow-200 text-sm font-mono tracking-wide">CREDITS</span>
+                <div className="p-1 bg-yellow-900/40 border border-yellow-500/40 rounded">
+                  <Coins size={16} className="text-yellow-300" />
+                </div>
               </div>
-              <p className="text-2xl font-bold text-white">{dashboardData.totals.credits.toLocaleString()}</p>
-              <p className="text-xs text-yellow-400 mt-1">+{dashboardData.production.credits}/Tick</p>
+              <p className="text-xl font-bold text-yellow-100 font-mono mb-1">{dashboardData.totals.credits.toLocaleString()}</p>
+              <p className="text-xs text-yellow-400/80 font-mono">+{dashboardData.production.credits}/TICK</p>
             </div>
 
-            <div className="bg-gray-900/20 border border-gray-700 p-4 rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-gray-300 text-sm font-semibold">Durastahl Gesamt</span>
-                <Wrench size={20} className="text-gray-400" />
+            <div className="bg-gradient-to-br from-slate-900/30 to-slate-950/20 border border-slate-500/30 p-4 rounded backdrop-blur-sm">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-slate-200 text-sm font-mono tracking-wide">DURASTAHL</span>
+                <div className="p-1 bg-slate-900/40 border border-slate-500/40 rounded">
+                  <Wrench size={16} className="text-slate-300" />
+                </div>
               </div>
-              <p className="text-2xl font-bold text-white">{dashboardData.totals.durastahl.toLocaleString()}</p>
-              <p className="text-xs text-gray-400 mt-1">+{dashboardData.production.durastahl}/Tick</p>
+              <p className="text-xl font-bold text-slate-100 font-mono mb-1">{dashboardData.totals.durastahl.toLocaleString()}</p>
+              <p className="text-xs text-slate-400/80 font-mono">+{dashboardData.production.durastahl}/TICK</p>
             </div>
 
-            <div className="bg-purple-900/20 border border-purple-700 p-4 rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-purple-300 text-sm font-semibold">Kristallines Silizium</span>
-                <Gem size={20} className="text-purple-400" />
+            <div className="bg-gradient-to-br from-purple-900/30 to-purple-950/20 border border-purple-500/30 p-4 rounded backdrop-blur-sm">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-purple-200 text-sm font-mono tracking-wide">K. SILIZIUM</span>
+                <div className="p-1 bg-purple-900/40 border border-purple-500/40 rounded">
+                  <Gem size={16} className="text-purple-300" />
+                </div>
               </div>
-              <p className="text-2xl font-bold text-white">{dashboardData.totals.kristallinesSilizium.toLocaleString()}</p>
-              <p className="text-xs text-purple-400 mt-1">+{dashboardData.production.kristallinesSilizium}/Tick</p>
+              <p className="text-xl font-bold text-purple-100 font-mono mb-1">{dashboardData.totals.kristallinesSilizium.toLocaleString()}</p>
+              <p className="text-xs text-purple-400/80 font-mono">+{dashboardData.production.kristallinesSilizium}/TICK</p>
             </div>
 
-            <div className="bg-cyan-900/20 border border-cyan-700 p-4 rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-cyan-300 text-sm font-semibold">Tibanna-Gas</span>
-                <Wind size={20} className="text-cyan-400" />
+            <div className="bg-gradient-to-br from-cyan-900/30 to-cyan-950/20 border border-cyan-500/30 p-4 rounded backdrop-blur-sm">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-cyan-200 text-sm font-mono tracking-wide">TIBANNA-GAS</span>
+                <div className="p-1 bg-cyan-900/40 border border-cyan-500/40 rounded">
+                  <Wind size={16} className="text-cyan-300" />
+                </div>
               </div>
-              <p className="text-2xl font-bold text-white">{dashboardData.totals.tibannaGas.toLocaleString()}</p>
-              <p className="text-xs text-cyan-400 mt-1">+{dashboardData.production.tibannaGas}/Tick</p>
+              <p className="text-xl font-bold text-cyan-100 font-mono mb-1">{dashboardData.totals.tibannaGas.toLocaleString()}</p>
+              <p className="text-xs text-cyan-400/80 font-mono">+{dashboardData.production.tibannaGas}/TICK</p>
             </div>
           </div>
 
           {/* Zweite Reihe: Energiemodule, Kyber-Kristalle, Bacta, Beskar */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-blue-900/20 border border-blue-700 p-4 rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-blue-300 text-sm font-semibold">Energiemodule</span>
-                <Battery size={20} className="text-blue-400" />
+            <div className="bg-gradient-to-br from-blue-900/30 to-blue-950/20 border border-blue-500/30 p-4 rounded backdrop-blur-sm">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-blue-200 text-sm font-mono tracking-wide">ENERGIE</span>
+                <div className="p-1 bg-blue-900/40 border border-blue-500/40 rounded">
+                  <Battery size={16} className="text-blue-300" />
+                </div>
               </div>
-              <p className="text-2xl font-bold text-white">{dashboardData.totals.energiemodule.toLocaleString()}</p>
-              <p className="text-xs text-blue-400 mt-1">+{dashboardData.production.energiemodule}/Tick</p>
+              <p className="text-xl font-bold text-blue-100 font-mono mb-1">{dashboardData.totals.energiemodule.toLocaleString()}</p>
+              <p className="text-xs text-blue-400/80 font-mono">+{dashboardData.production.energiemodule}/TICK</p>
             </div>
 
-            <div className="bg-green-900/20 border border-green-700 p-4 rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-green-300 text-sm font-semibold">Kyber-Kristalle</span>
-                <Sparkles size={20} className="text-green-400" />
+            <div className="bg-gradient-to-br from-green-900/30 to-green-950/20 border border-green-500/30 p-4 rounded backdrop-blur-sm">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-green-200 text-sm font-mono tracking-wide">KYBER</span>
+                <div className="p-1 bg-green-900/40 border border-green-500/40 rounded">
+                  <Sparkles size={16} className="text-green-300" />
+                </div>
               </div>
-              <p className="text-2xl font-bold text-white">{dashboardData.totals.kyberKristalle.toLocaleString()}</p>
-              <p className="text-xs text-green-400 mt-1">+{dashboardData.production.kyberKristalle}/Tick</p>
+              <p className="text-xl font-bold text-green-100 font-mono mb-1">{dashboardData.totals.kyberKristalle.toLocaleString()}</p>
+              <p className="text-xs text-green-400/80 font-mono">+{dashboardData.production.kyberKristalle}/TICK</p>
             </div>
 
-            <div className="bg-rose-900/20 border border-rose-700 p-4 rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-rose-300 text-sm font-semibold">Bacta</span>
-                <Heart size={20} className="text-rose-400" />
+            <div className="bg-gradient-to-br from-rose-900/30 to-rose-950/20 border border-rose-500/30 p-4 rounded backdrop-blur-sm">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-rose-200 text-sm font-mono tracking-wide">BACTA</span>
+                <div className="p-1 bg-rose-900/40 border border-rose-500/40 rounded">
+                  <Heart size={16} className="text-rose-300" />
+                </div>
               </div>
-              <p className="text-2xl font-bold text-white">{dashboardData.totals.bacta.toLocaleString()}</p>
-              <p className="text-xs text-rose-400 mt-1">+{dashboardData.production.bacta}/Tick</p>
+              <p className="text-xl font-bold text-rose-100 font-mono mb-1">{dashboardData.totals.bacta.toLocaleString()}</p>
+              <p className="text-xs text-rose-400/80 font-mono">+{dashboardData.production.bacta}/TICK</p>
             </div>
 
-            <div className="bg-slate-900/20 border border-slate-700 p-4 rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-slate-300 text-sm font-semibold">Beskar</span>
-                <Shield size={20} className="text-slate-400" />
+            <div className="bg-gradient-to-br from-amber-900/30 to-amber-950/20 border border-amber-500/30 p-4 rounded backdrop-blur-sm">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-amber-200 text-sm font-mono tracking-wide">BESKAR</span>
+                <div className="p-1 bg-amber-900/40 border border-amber-500/40 rounded">
+                  <Shield size={16} className="text-amber-300" />
+                </div>
               </div>
-              <p className="text-2xl font-bold text-white">{dashboardData.totals.beskar.toLocaleString()}</p>
-              <p className="text-xs text-slate-400 mt-1">+{dashboardData.production.beskar}/Tick</p>
+              <p className="text-xl font-bold text-amber-100 font-mono mb-1">{dashboardData.totals.beskar.toLocaleString()}</p>
+              <p className="text-xs text-amber-400/80 font-mono">+{dashboardData.production.beskar}/TICK</p>
             </div>
           </div>
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-4 md:gap-6">
-        {/* Active Constructions */}
-        <div className="bg-space-light p-6 rounded-lg border border-gray-700">
-          <div className="flex items-center gap-2 mb-4">
-            <Wrench size={20} className="text-orange-400" />
-            <h3 className="text-lg font-semibold text-white">Bauaufträge</h3>
+      <div className="grid grid-cols-1 gap-6">
+        {/* Imperial Command Construction Terminal */}
+        <div className="bg-gradient-to-r from-orange-950/30 to-red-950/20 border border-orange-500/30 p-6 rounded backdrop-blur-sm">
+          <div className="flex items-center gap-3 mb-6 pb-3 border-b border-orange-500/20">
+            <div className="p-2 bg-orange-900/40 border border-orange-500/40 rounded">
+              <Wrench size={18} className="text-orange-300" />
+            </div>
+            <h3 className="text-lg font-mono font-semibold text-orange-100 tracking-wider">BAUAUFTRÄGE</h3>
           </div>
-          
+
           {dashboardData && dashboardData.activeConstructions.length > 0 ? (
             <div className="space-y-3">
               {dashboardData.activeConstructions.map((construction) => (
                 <Link
                   key={construction.id}
                   to={`/planet/${construction.planetId}`}
-                  className="block p-3 bg-gray-700 hover:bg-gray-600 rounded transition"
+                  className="block p-4 bg-orange-950/20 border border-orange-500/20 rounded hover:border-orange-500/40 hover:bg-orange-950/30 transition-all"
                 >
                   <div className="text-sm">
-                    <p className="text-white font-semibold mb-1">{construction.buildingName}</p>
-                    <p className="text-gray-400 text-xs mb-2">{construction.planetName}</p>
+                    <p className="text-orange-100 font-mono font-semibold mb-2">{construction.buildingName}</p>
+                    <p className="text-orange-300/60 text-xs font-mono mb-3">PLANET: {construction.planetName}</p>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-orange-400">
-                        {getRemainingTime(construction.completesAt)}
+                      <span className="text-xs text-orange-300 font-mono">
+                        VERBLEIBEND: {getRemainingTime(construction.completesAt)}
                       </span>
                       <Rocket size={14} className="text-orange-400 animate-pulse" />
                     </div>
@@ -396,58 +430,61 @@ export default function Dashboard() {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-sm">Keine aktiven Bauaufträge</p>
+            <p className="text-orange-400/60 text-sm font-mono">KEINE AKTIVEN BAUAUFTRÄGE</p>
           )}
         </div>
-      </div>
 
-      {/* Active Research */}
-      <div className="bg-space-light p-6 rounded-lg border border-gray-700 mt-6">
-        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-          <FlaskConical className="text-cyan-400" size={20} />
-          Laufende Forschungen
-        </h3>
-        <div className="space-y-2">
-          {hasActiveResearch ? (
-            <div className="space-y-2">
-              {activeResearch.map((research) => (
-                <div key={research.id} className="bg-gray-700/50 p-4 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2 flex-1">
-                      <h4 className="text-white font-semibold text-sm">{research.researchTypeName}</h4>
-                      <span className="text-xs px-2 py-0.5 rounded bg-cyan-900/50 text-cyan-300">
-                        {research.category}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-cyan-400 text-xs font-mono">
-                        {research.progress} / {research.maxProgress} {research.resourceType}
-                      </span>
-                      <button
-                        onClick={cancelResearch}
-                        className="p-1 bg-red-600 hover:bg-red-700 rounded transition-colors"
-                        title="Forschung abbrechen"
-                      >
-                        <X size={14} className="text-white" />
-                      </button>
-                    </div>
-                  </div>
-                  <div className="bg-gray-900 rounded-full h-1.5 overflow-hidden">
-                    <div 
-                      className="h-1.5 bg-gradient-to-r from-cyan-600 to-cyan-400 transition-all duration-500"
-                      style={{ width: `${(research.progress / research.maxProgress) * 100}%` }}
-                    />
-                  </div>
-                  <div className="mt-1 text-xs text-gray-400 flex items-center justify-between">
-                    <span>{Math.round((research.progress / research.maxProgress) * 100)}% abgeschlossen</span>
-                    <FlaskConical size={12} className="text-cyan-400 animate-pulse" />
-                  </div>
-                </div>
-              ))}
+        {/* Imperial Command Research Terminal */}
+        <div className="bg-gradient-to-r from-cyan-950/30 to-blue-950/20 border border-cyan-500/30 p-6 rounded backdrop-blur-sm">
+          <div className="flex items-center gap-3 mb-6 pb-3 border-b border-cyan-500/20">
+            <div className="p-2 bg-cyan-900/40 border border-cyan-500/40 rounded">
+              <FlaskConical size={18} className="text-cyan-300" />
             </div>
-          ) : (
-            <p className="text-gray-500 text-sm">Keine aktiven Forschungen</p>
-          )}
+            <h3 className="text-lg font-mono font-semibold text-cyan-100 tracking-wider">LAUFENDE FORSCHUNGEN</h3>
+          </div>
+
+          <div className="space-y-4">
+            {hasActiveResearch ? (
+              <div className="space-y-4">
+                {activeResearch.map((research) => (
+                  <div key={research.id} className="bg-cyan-950/20 border border-cyan-500/20 p-4 rounded">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3 flex-1">
+                        <h4 className="text-cyan-100 font-mono font-semibold text-sm">{research.researchTypeName}</h4>
+                        <span className="text-xs px-2 py-1 rounded border border-cyan-500/40 bg-cyan-900/30 text-cyan-300 font-mono">
+                          {research.category}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-cyan-300 text-xs font-mono">
+                          {research.progress} / {research.maxProgress} {research.resourceType}
+                        </span>
+                        <button
+                          onClick={cancelResearch}
+                          className="p-1.5 bg-red-900/60 border border-red-500/40 hover:bg-red-900/80 hover:border-red-500/60 rounded transition-all"
+                          title="Forschung abbrechen"
+                        >
+                          <X size={12} className="text-red-300" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="bg-slate-800/60 border border-slate-700/50 rounded-full h-2 overflow-hidden">
+                      <div
+                        className="h-2 bg-gradient-to-r from-cyan-500 to-cyan-400 transition-all duration-500"
+                        style={{ width: `${(research.progress / research.maxProgress) * 100}%` }}
+                      />
+                    </div>
+                    <div className="mt-2 text-xs text-cyan-400/60 font-mono flex items-center justify-between">
+                      <span>{Math.round((research.progress / research.maxProgress) * 100)}% ABGESCHLOSSEN</span>
+                      <FlaskConical size={12} className="text-cyan-400 animate-pulse" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-cyan-400/60 text-sm font-mono">KEINE AKTIVEN FORSCHUNGEN</p>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -13,7 +13,7 @@ export const config = {
   ],
   
   // Asset URLs
-  ASSET_BASE_URL: 'https://swholonet.github.io/assets',
+  ASSET_BASE_URL: 'https://swuniverse.github.io/assets/',
   
   // Game Settings
   TICK_INTERVAL: parseInt(process.env.TICK_INTERVAL || '300000'), // 5 minutes default

@@ -49,9 +49,9 @@ jobs:
           cd frontend
           npm run build
         env:
-          VITE_API_URL: https://swholo.net
+          VITE_API_URL: https://swuniverse.net
           VITE_DEBUG_LOGGING: false
-          VITE_ASSET_BASE_URL: https://swholonet.github.io/assets
+          VITE_ASSET_BASE_URL: https://swuniverse.github.io/assets/
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -103,9 +103,9 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            VITE_API_URL=https://swholo.net
+            VITE_API_URL=https://swuniverse.net
             VITE_DEBUG_LOGGING=false
-            VITE_ASSET_BASE_URL=https://swholonet.github.io/assets
+            VITE_ASSET_BASE_URL=https://swuniverse.github.io/assets/
 
   deploy:
     needs: build-and-push

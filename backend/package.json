@@ -1,7 +1,7 @@
 {
-  "name": "swholo-backend",
+  "name": "swuniverse-backend",
   "version": "1.0.0",
-  "description": "Star Wars - HoloNet - Backend API",
+  "description": "Star Wars Universe - Backend API",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",

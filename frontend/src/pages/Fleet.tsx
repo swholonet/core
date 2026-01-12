@@ -52,98 +52,121 @@ export default function Fleet() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-white">Schiffe</h1>
-        <Link
-          to="/blueprints"
-          className="bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-all"
-        >
-          <FileCode size={18} />
-          Blueprints
-        </Link>
+      {/* Imperial Command Fleet Header */}
+      <div className="mb-8">
+        <div className="bg-gradient-to-r from-cyan-950/40 to-slate-900/60 border border-cyan-500/30 rounded-lg p-6 backdrop-blur-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-2 bg-cyan-900/40 border border-cyan-500/40 rounded">
+                <Rocket className="text-cyan-300" size={24} />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-cyan-100 font-mono tracking-wider">FLOTTE</h1>
+                <div className="flex items-center gap-4 text-sm font-mono">
+                  <span className="text-cyan-400/70">SCHIFFE: {ships.length}</span>
+                  <span className="text-cyan-400/70">STATUS: {ships.filter(s => s.status === 'DOCKED').length} ANGEDOCKT</span>
+                </div>
+              </div>
+            </div>
+            <Link
+              to="/blueprints"
+              className="bg-gradient-to-r from-cyan-900/40 to-cyan-800/30 border border-cyan-500/30 text-cyan-100 px-4 py-2 rounded hover:from-cyan-800/50 hover:to-cyan-700/40 transition-all flex items-center gap-2 font-mono text-sm"
+            >
+              <FileCode size={16} />
+              BLUEPRINTS
+            </Link>
+          </div>
+        </div>
       </div>
-      
+
       {ships.length === 0 ? (
-        <div className="bg-space-light p-6 rounded-lg border border-gray-700">
-          <p className="text-gray-400">Keine Schiffe vorhanden. Baue Schiffe in der Raumschiffwerft!</p>
+        <div className="bg-gradient-to-r from-slate-950/40 to-cyan-950/20 border border-cyan-500/30 p-6 rounded backdrop-blur-sm">
+          <p className="text-cyan-400/70 font-mono">KEINE SCHIFFE VORHANDEN. BAUE SCHIFFE IN DER RAUMSCHIFFWERFT!</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {ships.map((ship) => (
             <Link
               key={ship.id}
               to={`/ship/${ship.id}`}
-              className="bg-space-light p-4 rounded-lg border border-gray-700 hover:border-rebel transition"
+              className="bg-gradient-to-br from-slate-950/40 to-cyan-950/20 border border-cyan-500/30 p-5 rounded hover:border-cyan-400/50 hover:from-slate-950/50 hover:to-cyan-950/30 transition-all backdrop-blur-sm group"
             >
-              <div className="flex items-start justify-between mb-3">
+              {/* Ship Header */}
+              <div className="flex items-start justify-between mb-4 pb-3 border-b border-cyan-500/20">
                 <div>
-                  <h3 className="text-white font-semibold">
+                  <h3 className="text-cyan-100 font-mono font-semibold tracking-wide">
                     {ship.name || `${ship.shipType.name} ${ship.id}`}
                   </h3>
-                  <p className="text-gray-400 text-sm">{ship.shipType.name}</p>
+                  <p className="text-cyan-400/60 text-sm font-mono">{ship.shipType.name}</p>
                 </div>
-                <Rocket className={`${
-                  ship.status === 'DOCKED' ? 'text-green-400' :
-                  ship.status === 'IN_FLIGHT' ? 'text-blue-400' :
-                  'text-red-400'
-                }`} size={20} />
+                <div className={`p-2 rounded border ${
+                  ship.status === 'DOCKED'
+                    ? 'bg-green-900/40 border-green-500/40 text-green-400' :
+                  ship.status === 'IN_FLIGHT'
+                    ? 'bg-blue-900/40 border-blue-500/40 text-blue-400' :
+                    'bg-red-900/40 border-red-500/40 text-red-400'
+                }`}>
+                  <Rocket size={16} />
+                </div>
               </div>
 
-              <div className="space-y-2 text-sm">
+              {/* Ship Status Details */}
+              <div className="space-y-3 text-sm font-mono">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-400">Status</span>
-                  <span className="text-white">
-                    {ship.status === 'DOCKED' ? 'Angedockt' :
-                     ship.status === 'IN_FLIGHT' ? 'Im Flug' :
-                     'Gestrandet'}
+                  <span className="text-cyan-400/70">STATUS</span>
+                  <span className="text-cyan-100 tracking-wider">
+                    {ship.status === 'DOCKED' ? 'ANGEDOCKT' :
+                     ship.status === 'IN_FLIGHT' ? 'IM FLUG' :
+                     'GESTRANDET'}
                   </span>
                 </div>
 
                 {ship.planet && (
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-400 flex items-center gap-1">
+                    <span className="text-cyan-400/70 flex items-center gap-2">
                       <MapPin size={12} />
-                      Position
+                      POSITION
                     </span>
-                    <span className="text-white">{ship.planet.name}</span>
+                    <span className="text-cyan-100">{ship.planet.name}</span>
                   </div>
                 )}
 
                 {ship.currentGalaxyX && ship.currentGalaxyY && (
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-400">Koordinaten</span>
-                    <span className="text-white">{ship.currentGalaxyX}|{ship.currentGalaxyY}</span>
+                    <span className="text-cyan-400/70">KOORDINATEN</span>
+                    <span className="text-cyan-100">{ship.currentGalaxyX}|{ship.currentGalaxyY}</span>
                   </div>
                 )}
 
-                <div className="mt-3 space-y-1">
-                  <div>
-                    <div className="flex items-center justify-between text-xs mb-1">
-                      <span className="text-blue-300 flex items-center gap-1">
+                {/* Energy Systems */}
+                <div className="mt-4 space-y-3">
+                  <div className="p-3 bg-blue-950/20 border border-blue-500/20 rounded">
+                    <div className="flex items-center justify-between text-xs mb-2">
+                      <span className="text-blue-300 flex items-center gap-2 font-mono">
                         <Battery size={12} />
-                        Antrieb
+                        ANTRIEB
                       </span>
-                      <span className="text-white">{ship.energyDrive}/{ship.shipType.maxEnergyDrive}</span>
+                      <span className="text-blue-100 font-mono">{ship.energyDrive}/{ship.shipType.maxEnergyDrive}</span>
                     </div>
-                    <div className="bg-gray-700 rounded-full h-1">
+                    <div className="bg-slate-800/60 border border-slate-700/50 rounded-full h-1.5">
                       <div
-                        className="bg-blue-500 h-1 rounded-full"
+                        className="bg-blue-500 h-1.5 rounded-full transition-all duration-300"
                         style={{ width: `${(ship.energyDrive / ship.shipType.maxEnergyDrive) * 100}%` }}
                       />
                     </div>
                   </div>
 
-                  <div>
-                    <div className="flex items-center justify-between text-xs mb-1">
-                      <span className="text-yellow-300 flex items-center gap-1">
+                  <div className="p-3 bg-yellow-950/20 border border-yellow-500/20 rounded">
+                    <div className="flex items-center justify-between text-xs mb-2">
+                      <span className="text-yellow-300 flex items-center gap-2 font-mono">
                         <Zap size={12} />
-                        Waffen
+                        WAFFEN
                       </span>
-                      <span className="text-white">{ship.energyWeapons}/{ship.shipType.maxEnergyWeapons}</span>
+                      <span className="text-yellow-100 font-mono">{ship.energyWeapons}/{ship.shipType.maxEnergyWeapons}</span>
                     </div>
-                    <div className="bg-gray-700 rounded-full h-1">
+                    <div className="bg-slate-800/60 border border-slate-700/50 rounded-full h-1.5">
                       <div
-                        className="bg-yellow-500 h-1 rounded-full"
+                        className="bg-yellow-500 h-1.5 rounded-full transition-all duration-300"
                         style={{ width: `${(ship.energyWeapons / ship.shipType.maxEnergyWeapons) * 100}%` }}
                       />
                     </div>

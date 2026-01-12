@@ -10,37 +10,49 @@ import {
   Zap,
   Globe,
   ChevronDown,
+  Star,
+  Orbit,
+  Target,
+  Crown,
 } from 'lucide-react';
 
-// Feature data
+// Feature data with improved hierarchy and visual structure
 const features = [
   {
-    icon: Sword,
-    title: 'Strategie & Eroberung',
-    description:
-      'Plane deine Feldzuege, erobere Systeme und baue dein galaktisches Imperium auf. Jede Entscheidung zaehlt in einem Universum voller Moeglichkeiten und Gefahren.',
-    color: 'from-red-500 to-orange-500',
+    icon: Target,
+    title: 'Galaktische Strategie',
+    description: 'Erobere Sternensysteme und baue dein Imperium auf. Jede Entscheidung beeinflusst das Schicksal der Galaxis.',
+    highlight: 'Tick-basierte Schlachten',
+    stats: '50+ Sternensysteme',
+    color: 'from-cyan-400 to-cyan-600',
+    bgColor: 'from-cyan-950/30 to-cyan-900/20',
   },
   {
     icon: Rocket,
     title: 'Modularer Schiffsbau',
-    description:
-      'Entwirf deine eigenen Raumschiffe mit unserem modularen Blueprint-System. Von kleinen Jaegern bis zu massiven Sternenzerstoerern - du bestimmst das Design.',
-    color: 'from-cyan-500 to-blue-500',
+    description: 'Entwirf einzigartige Raumschiffe mit unserem Blueprint-System. Von Jaegern bis zu Sternenzerstoerern.',
+    highlight: 'Individuelle Designs',
+    stats: '100+ Module verfügbar',
+    color: 'from-blue-400 to-blue-600',
+    bgColor: 'from-blue-950/30 to-blue-900/20',
   },
   {
     icon: Coins,
-    title: 'Ressourcen & Wirtschaft',
-    description:
-      'Baue Minen, verwalte Handelsrouten und sichere dir wertvolle Ressourcen wie Durastahl, Tibanna-Gas und seltene Kyber-Kristalle.',
-    color: 'from-yellow-500 to-amber-500',
+    title: 'Ressourcenverwaltung',
+    description: 'Baue Minen, verwalte Handelsrouten und sichere wertvolle Materialien wie Kyber-Kristalle.',
+    highlight: 'Wirtschaftssystem',
+    stats: 'Credits • Metall • Kristalle',
+    color: 'from-amber-400 to-amber-600',
+    bgColor: 'from-amber-950/20 to-amber-900/10',
   },
   {
-    icon: Users,
-    title: 'Fraktionen & Loyalitaet',
-    description:
-      'Waehle deine Seite: Kaempfe fuer das Imperium, die Rebellion oder gruende deine eigene Fraktion. Allianzen und Verrat prraegen die Galaxis.',
-    color: 'from-purple-500 to-pink-500',
+    icon: Crown,
+    title: 'Fraktionskriege',
+    description: 'Kaempfe für Imperium oder Rebellion. Schmiede Allianzen oder fuehre Verrat aus.',
+    highlight: 'Persistente Welt',
+    stats: 'Imperium vs. Rebellion',
+    color: 'from-red-400 to-red-600',
+    bgColor: 'from-red-950/20 to-red-900/10',
   },
 ];
 
@@ -147,58 +159,63 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      {/* === HERO SECTION: HoloNet Terminal Login === */}
+      {/* === HERO SECTION: Imperial Command Terminal === */}
       <section className="relative min-h-screen flex flex-col items-center justify-center px-4 overflow-hidden">
-        {/* Animated Background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#000510] via-[#001020] to-[#000a15]" />
+        {/* Deep Space Background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#000408] via-[#000812] to-[#000204]" />
         <NebulaBackground />
         <StarField />
 
-        {/* Grid Overlay */}
+        {/* Subtle Grid Pattern */}
         <div
-          className="absolute inset-0 opacity-10"
+          className="absolute inset-0 opacity-5"
           style={{
-            backgroundImage: `linear-gradient(0deg, transparent 24%, rgba(0, 255, 255, 0.03) 25%, rgba(0, 255, 255, 0.03) 26%, transparent 27%, transparent 74%, rgba(0, 255, 255, 0.03) 75%, rgba(0, 255, 255, 0.03) 76%, transparent 77%, transparent),
-                             linear-gradient(90deg, transparent 24%, rgba(0, 255, 255, 0.03) 25%, rgba(0, 255, 255, 0.03) 26%, transparent 27%, transparent 74%, rgba(0, 255, 255, 0.03) 75%, rgba(0, 255, 255, 0.03) 76%, transparent 77%, transparent)`,
-            backgroundSize: '60px 60px',
+            backgroundImage: `linear-gradient(0deg, transparent 49%, rgba(0, 255, 255, 0.1) 50%, transparent 51%),
+                             linear-gradient(90deg, transparent 49%, rgba(0, 255, 255, 0.1) 50%, transparent 51%)`,
+            backgroundSize: '48px 48px',
           }}
         />
 
-        {/* Terminal Login Card */}
-        <div className="relative z-10 w-full max-w-lg">
+        {/* Command Terminal Interface */}
+        <div className="relative z-10 w-full max-w-md">
           {/* Terminal Header */}
-          <div className="bg-gradient-to-r from-cyan-900/50 via-cyan-800/50 to-cyan-900/50 border border-cyan-500/50 rounded-t-lg px-4 py-2 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-red-500 shadow-lg shadow-red-500/50" />
-              <div className="w-3 h-3 rounded-full bg-yellow-500 shadow-lg shadow-yellow-500/50" />
-              <div className="w-3 h-3 rounded-full bg-green-500 shadow-lg shadow-green-500/50" />
+          <div className="bg-gradient-to-r from-cyan-950/80 to-cyan-900/60 border border-cyan-500/30 rounded-t-lg px-4 py-3 flex items-center justify-between backdrop-blur-sm">
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full bg-red-400 shadow-sm shadow-red-400/50 animate-pulse" />
+              <div className="w-2 h-2 rounded-full bg-amber-400 shadow-sm shadow-amber-400/50" />
+              <div className="w-2 h-2 rounded-full bg-green-400 shadow-sm shadow-green-400/50" />
             </div>
-            <span className="font-mono text-xs text-cyan-400/70 tracking-wider">
-              SWHOLO.NET TERMINAL ACCESS - PORT 77
+            <span className="font-mono text-xs text-cyan-400/60 tracking-[0.2em] uppercase">
+              Imp-Net Terminal v2.7
             </span>
           </div>
 
           {/* Terminal Body */}
-          <div className="relative holo-terminal rounded-b-lg p-8 backdrop-blur-md">
+          <div className="relative bg-gradient-to-br from-cyan-950/40 via-slate-950/50 to-cyan-950/30 border border-cyan-500/20 rounded-b-lg p-8 backdrop-blur-sm">
             {/* Scan Line Effect */}
             <div className="holo-scan-line" />
 
-            {/* Logo */}
+            {/* Branding */}
             <div className="text-center mb-8">
-              <div className="relative inline-block">
-                <h1 className="text-5xl md:text-6xl font-bold font-mono tracking-wider animate-glow">
-                  <span className="text-cyan-400">SWHOLO</span>
-                  <span className="text-cyan-200">.NET</span>
+              <div className="relative inline-block mb-4">
+                <h1 className="text-4xl font-bold font-mono tracking-[0.1em] text-cyan-300 relative">
+                  STAR WARS
+                  <div className="text-lg text-cyan-500/80 font-normal tracking-[0.3em] mt-1">
+                    UNIVERSE
+                  </div>
                 </h1>
-                <div
-                  className="absolute -inset-4 bg-cyan-500/20 blur-xl rounded-full -z-10 animate-pulse"
-                  style={{ animationDuration: '3s' }}
-                />
+                {/* Subtle glow effect */}
+                <div className="absolute -inset-6 bg-cyan-400/10 blur-2xl rounded-full -z-10" />
               </div>
-              <p className="mt-3 text-cyan-500/70 font-mono text-sm tracking-[0.3em]">
-                GALAKTISCHES STRATEGIE-TERMINAL
-              </p>
-              <div className="holo-divider mt-4" />
+
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-cyan-950/50 border border-cyan-500/30 rounded-full mb-4">
+                <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
+                <span className="text-xs text-cyan-400/80 font-mono tracking-wider uppercase">
+                  Galaktisches Strategienetzwerk
+                </span>
+              </div>
+
+              <div className="h-px bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent mb-6" />
             </div>
 
             {/* Error Message */}
@@ -209,85 +226,93 @@ export default function LandingPage() {
               </div>
             )}
 
-            {/* Login Form */}
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
-                <label className="block text-cyan-500/80 font-mono text-sm mb-2 tracking-wider">
-                  ACCESS CODE
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full px-4 py-3 holo-input rounded-md font-mono"
-                  placeholder="commander@republic.holo"
-                  disabled={isLoading}
-                />
-              </div>
+            {/* Authentication Form */}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-cyan-400/90 font-mono text-sm mb-2 tracking-wider font-medium">
+                    BENUTZER-ID
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="w-full px-4 py-3 bg-slate-900/60 border border-cyan-500/30 text-cyan-200 placeholder-cyan-500/40 focus:outline-none focus:ring-1 focus:ring-cyan-400 focus:border-cyan-400 rounded-md font-mono text-sm backdrop-blur-sm transition-colors"
+                    placeholder="commander@imperium.net"
+                    disabled={isLoading}
+                  />
+                </div>
 
-              <div>
-                <label className="block text-cyan-500/80 font-mono text-sm mb-2 tracking-wider">
-                  SECURITY KEY
-                </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="w-full px-4 py-3 holo-input rounded-md font-mono"
-                  placeholder="************************"
-                  disabled={isLoading}
-                />
+                <div>
+                  <label className="block text-cyan-400/90 font-mono text-sm mb-2 tracking-wider font-medium">
+                    SICHERHEITSCODE
+                  </label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="w-full px-4 py-3 bg-slate-900/60 border border-cyan-500/30 text-cyan-200 placeholder-cyan-500/40 focus:outline-none focus:ring-1 focus:ring-cyan-400 focus:border-cyan-400 rounded-md font-mono text-sm backdrop-blur-sm transition-colors"
+                    placeholder="••••••••••••••••"
+                    disabled={isLoading}
+                  />
+                </div>
               </div>
 
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full holo-button rounded-md py-4 font-bold text-lg uppercase tracking-wider mt-6 group"
+                className="w-full relative px-6 py-4 bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-slate-900 font-mono font-bold text-sm tracking-wider uppercase rounded-md transition-all disabled:opacity-50 disabled:cursor-not-allowed group shadow-lg shadow-cyan-500/25 hover:shadow-cyan-400/40"
               >
-                <span className="relative z-10 flex items-center justify-center gap-2">
+                <span className="flex items-center justify-center gap-3">
                   {isLoading ? (
                     <>
-                      <Zap className="w-5 h-5 animate-spin" />
-                      AUTHENTIFIZIERUNG...
+                      <Zap className="w-4 h-4 animate-spin" />
+                      Authentifizierung läuft...
                     </>
                   ) : (
                     <>
-                      <Shield className="w-5 h-5 group-hover:animate-pulse" />
-                      LOG IN
+                      <Shield className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                      Terminal Zugang
                     </>
                   )}
                 </span>
               </button>
             </form>
 
-            <div className="holo-divider my-6" />
+            {/* Divider */}
+            <div className="h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent my-6" />
 
-            {/* Links */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm">
+            {/* Navigation Links */}
+            <div className="flex items-center justify-center gap-6 text-sm">
               <Link
                 to="/register"
-                className="holo-link uppercase tracking-wider flex items-center gap-1"
+                className="text-cyan-400 hover:text-cyan-300 font-mono tracking-wider flex items-center gap-2 transition-colors group"
               >
-                <Users className="w-4 h-4" />
-                Register New Identity
+                <Users className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                Neuen Account erstellen
               </Link>
-              <span className="hidden sm:block text-cyan-700">|</span>
-              <button className="holo-link uppercase tracking-wider flex items-center gap-1 opacity-50 cursor-not-allowed">
+              <div className="w-px h-4 bg-cyan-600/30" />
+              <button
+                disabled
+                className="text-cyan-600/40 font-mono tracking-wider flex items-center gap-2 cursor-not-allowed"
+              >
                 <Globe className="w-4 h-4" />
-                Forgot Credentials
+                Passwort vergessen
               </button>
             </div>
 
-            {/* Status Bar */}
-            <div className="holo-divider mt-6 mb-3" />
-            <div className="flex justify-between items-center text-xs font-mono text-cyan-600/50">
-              <span>STARDATE {new Date().toLocaleDateString('de-DE')}</span>
-              <span className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                SYS.STATUS: ONLINE
+            {/* Terminal Status */}
+            <div className="h-px bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent mt-6 mb-4" />
+            <div className="flex justify-between items-center text-xs font-mono">
+              <span className="text-cyan-500/60">
+                DATUM: {new Date().toLocaleDateString('de-DE')}
               </span>
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse shadow-sm shadow-green-400/50" />
+                <span className="text-cyan-500/60">VERBINDUNG: AKTIV</span>
+              </div>
             </div>
           </div>
         </div>
@@ -304,95 +329,133 @@ export default function LandingPage() {
       {/* === FEATURES SECTION === */}
       <section
         id="features"
-        className="relative py-20 px-4 bg-gradient-to-b from-[#000a15] via-[#001525] to-[#000a15]"
+        className="relative py-24 px-4 bg-gradient-to-b from-[#000204] via-[#000812] to-[#000408]"
       >
         {/* Section Header */}
-        <div className="max-w-6xl mx-auto text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold font-mono text-cyan-400 mb-4">
-            ENTDECKE DIE GALAXIS
+        <div className="max-w-6xl mx-auto text-center mb-20">
+          <h2 className="text-4xl md:text-5xl font-bold font-mono text-cyan-300 mb-6 tracking-tight">
+            EROBERE DIE GALAXIS
           </h2>
-          <p className="text-cyan-600/70 font-mono max-w-2xl mx-auto">
-            Tauche ein in ein lebendiges Star Wars Universum, in dem du dein
-            eigenes Schicksal formst.
+          <p className="text-cyan-500/70 font-mono max-w-3xl mx-auto text-lg leading-relaxed">
+            Tauche ein in ein lebendiges Star Wars Universum mit persistenter Welt,
+            strategischer Tiefe und endlosen Möglichkeiten.
           </p>
-          <div className="holo-divider max-w-md mx-auto mt-6" />
+          <div className="h-px bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent max-w-lg mx-auto mt-8" />
         </div>
 
-        {/* Feature Cards */}
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Feature Cards Grid */}
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
           {features.map((feature, index) => (
             <div
               key={index}
-              className="group relative bg-gradient-to-br from-cyan-950/50 to-blue-950/50 border border-cyan-800/30 rounded-xl p-6 hover:border-cyan-500/50 transition-all duration-300 overflow-hidden"
+              className="group relative bg-gradient-to-br from-slate-950/80 via-slate-900/60 to-slate-950/80 border border-cyan-500/20 rounded-2xl p-8 hover:border-cyan-400/40 transition-all duration-500 backdrop-blur-sm"
             >
-              {/* Glow Effect */}
-              <div
-                className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
-              />
+              {/* Accent Line */}
+              <div className={`absolute top-0 left-8 right-8 h-px bg-gradient-to-r ${feature.color}`} />
 
-              {/* Icon */}
-              <div
-                className={`inline-flex p-3 rounded-lg bg-gradient-to-br ${feature.color} mb-4`}
-              >
-                <feature.icon className="w-8 h-8 text-white" />
+              {/* Header */}
+              <div className="flex items-start justify-between mb-6">
+                <div className={`p-4 rounded-xl bg-gradient-to-br ${feature.bgColor} border border-current border-opacity-20`}>
+                  <feature.icon className={`w-8 h-8 bg-gradient-to-br ${feature.color} bg-clip-text text-transparent`} />
+                </div>
+                <div className="text-right">
+                  <div className="text-xs text-cyan-500/60 font-mono tracking-wider uppercase mb-1">
+                    {feature.highlight}
+                  </div>
+                  <div className="text-xs text-cyan-400/80 font-mono">
+                    {feature.stats}
+                  </div>
+                </div>
               </div>
 
               {/* Content */}
-              <h3 className="text-xl font-bold text-cyan-300 mb-3 font-mono">
+              <h3 className="text-2xl font-bold text-cyan-200 mb-4 font-mono tracking-wide">
                 {feature.title}
               </h3>
-              <p className="text-cyan-600/80 leading-relaxed">
+              <p className="text-cyan-300/70 leading-relaxed text-base mb-6">
                 {feature.description}
               </p>
 
-              {/* Placeholder for Hero Image */}
-              <div className="mt-6 h-40 bg-gradient-to-br from-cyan-900/30 to-blue-900/30 rounded-lg border border-cyan-800/20 flex items-center justify-center">
-                <span className="text-cyan-700/50 font-mono text-sm">
-                  [HERO IMAGE PLACEHOLDER]
-                </span>
+              {/* Visual Preview Placeholder */}
+              <div className="relative h-48 bg-gradient-to-br from-slate-900/50 to-slate-800/30 rounded-xl border border-cyan-600/20 overflow-hidden">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className={`text-center p-4 rounded-lg bg-gradient-to-br ${feature.bgColor}`}>
+                    <feature.icon className={`w-8 h-8 mx-auto mb-2 bg-gradient-to-br ${feature.color} bg-clip-text text-transparent`} />
+                    <div className="text-xs text-cyan-500/60 font-mono">
+                      Game Preview
+                    </div>
+                  </div>
+                </div>
+                {/* Subtle overlay grid */}
+                <div
+                  className="absolute inset-0 opacity-10"
+                  style={{
+                    backgroundImage: `linear-gradient(0deg, transparent 90%, rgba(0, 255, 255, 0.1) 100%),
+                                     linear-gradient(90deg, transparent 90%, rgba(0, 255, 255, 0.1) 100%)`,
+                    backgroundSize: '24px 24px',
+                  }}
+                />
               </div>
             </div>
           ))}
         </div>
 
-        {/* CTA Button */}
-        <div className="text-center mt-16">
+        {/* Call to Action */}
+        <div className="text-center mt-20">
+          <div className="max-w-md mx-auto mb-8">
+            <h3 className="text-2xl font-bold text-cyan-300 mb-4 font-mono">
+              BEREIT FÜR DIE GALAXIS?
+            </h3>
+            <p className="text-cyan-400/70 font-mono text-sm">
+              Schließe dich tausenden Spielern an und forme das Schicksal der Sterne.
+            </p>
+          </div>
+
           <Link
             to="/register"
-            className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-lg rounded-lg shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 transition-all uppercase tracking-wider"
+            className="inline-flex items-center gap-4 px-10 py-5 bg-gradient-to-r from-cyan-500 to-cyan-400 hover:from-cyan-400 hover:to-cyan-300 text-slate-900 font-mono font-bold text-lg rounded-xl shadow-xl shadow-cyan-500/30 hover:shadow-cyan-400/50 transition-all transform hover:scale-[1.02] hover:-translate-y-1"
           >
+            <Star className="w-6 h-6" />
+            <span className="tracking-wider">JETZT BEITRETEN</span>
             <Rocket className="w-6 h-6" />
-            Jetzt Spielen!
           </Link>
+
+          <div className="mt-6 text-xs text-cyan-500/50 font-mono">
+            Kostenlos • Sofort spielbar • Keine Downloads
+          </div>
         </div>
       </section>
 
       {/* === FOOTER === */}
-      <footer className="bg-[#000508] border-t border-cyan-900/30 py-12 px-4">
+      <footer className="relative bg-gradient-to-b from-[#000204] to-[#000102] border-t border-cyan-500/20 py-16 px-4">
         <div className="max-w-6xl mx-auto">
-          {/* Footer Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-            {/* Logo & Description */}
-            <div>
-              <h3 className="text-2xl font-bold font-mono text-cyan-400 mb-3">
-                SWHOLO.NET
+          {/* Footer Content */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+            {/* Brand */}
+            <div className="md:col-span-2">
+              <h3 className="text-2xl font-bold font-mono text-cyan-300 mb-4 tracking-wide">
+                STAR WARS UNIVERSE
               </h3>
-              <p className="text-cyan-700/70 text-sm">
-                Das ultimative Star Wars Browsergame. Baue dein Imperium,
-                erobere die Galaxis.
+              <p className="text-cyan-400/70 text-sm leading-relaxed max-w-md">
+                Das ultimative Star Wars Strategiespiel im Browser. Erobere die Galaxis,
+                baue dein Imperium und schreibe Geschichte in einer weit, weit entfernten Galaxis.
               </p>
+              <div className="flex items-center gap-2 mt-4 text-xs text-cyan-500/60 font-mono">
+                <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                <span>Live seit 2024 • Über 1.000 aktive Spieler</span>
+              </div>
             </div>
 
-            {/* Legal Links */}
+            {/* Legal */}
             <div>
-              <h4 className="text-cyan-500 font-mono font-bold mb-3 tracking-wider">
+              <h4 className="text-cyan-400 font-mono font-semibold mb-4 tracking-wider text-sm">
                 RECHTLICHES
               </h4>
-              <ul className="space-y-2">
+              <ul className="space-y-3">
                 <li>
                   <a
                     href="#"
-                    className="text-cyan-700/70 hover:text-cyan-400 text-sm transition-colors"
+                    className="text-cyan-500/70 hover:text-cyan-400 text-sm transition-colors font-mono"
                   >
                     Impressum
                   </a>
@@ -400,63 +463,60 @@ export default function LandingPage() {
                 <li>
                   <a
                     href="#"
-                    className="text-cyan-700/70 hover:text-cyan-400 text-sm transition-colors"
+                    className="text-cyan-500/70 hover:text-cyan-400 text-sm transition-colors font-mono"
                   >
-                    Datenschutzerklaerung
+                    Datenschutz
                   </a>
                 </li>
                 <li>
                   <a
                     href="#"
-                    className="text-cyan-700/70 hover:text-cyan-400 text-sm transition-colors"
+                    className="text-cyan-500/70 hover:text-cyan-400 text-sm transition-colors font-mono"
                   >
-                    AGB
+                    Nutzungsbedingungen
                   </a>
                 </li>
               </ul>
             </div>
 
-            {/* Social Media */}
+            {/* Community */}
             <div>
-              <h4 className="text-cyan-500 font-mono font-bold mb-3 tracking-wider">
-                FOLGE UNS
+              <h4 className="text-cyan-400 font-mono font-semibold mb-4 tracking-wider text-sm">
+                COMMUNITY
               </h4>
-              <div className="flex gap-4">
-                {/* Social Media Placeholders */}
+              <div className="space-y-3">
                 <a
                   href="#"
-                  className="w-10 h-10 rounded-lg bg-cyan-900/30 border border-cyan-800/30 flex items-center justify-center text-cyan-600 hover:text-cyan-400 hover:border-cyan-500/50 transition-all"
+                  className="flex items-center gap-3 text-cyan-500/70 hover:text-cyan-400 text-sm transition-colors group"
                 >
-                  <span className="text-xs">X</span>
+                  <div className="w-8 h-8 rounded-lg bg-slate-800/50 border border-cyan-600/20 flex items-center justify-center group-hover:border-cyan-500/40 transition-colors">
+                    <span className="text-xs font-mono">DC</span>
+                  </div>
+                  Discord Server
                 </a>
                 <a
                   href="#"
-                  className="w-10 h-10 rounded-lg bg-cyan-900/30 border border-cyan-800/30 flex items-center justify-center text-cyan-600 hover:text-cyan-400 hover:border-cyan-500/50 transition-all"
+                  className="flex items-center gap-3 text-cyan-500/70 hover:text-cyan-400 text-sm transition-colors group"
                 >
-                  <span className="text-xs">DC</span>
-                </a>
-                <a
-                  href="#"
-                  className="w-10 h-10 rounded-lg bg-cyan-900/30 border border-cyan-800/30 flex items-center justify-center text-cyan-600 hover:text-cyan-400 hover:border-cyan-500/50 transition-all"
-                >
-                  <span className="text-xs">YT</span>
+                  <div className="w-8 h-8 rounded-lg bg-slate-800/50 border border-cyan-600/20 flex items-center justify-center group-hover:border-cyan-500/40 transition-colors">
+                    <span className="text-xs font-mono">GH</span>
+                  </div>
+                  GitHub
                 </a>
               </div>
             </div>
           </div>
 
-          {/* Divider */}
-          <div className="holo-divider" />
+          {/* Bottom Bar */}
+          <div className="h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent mb-8" />
 
-          {/* Copyright */}
-          <div className="text-center text-cyan-800/60 text-xs font-mono mt-6">
-            <p>
-              &copy; 2024 swholo.net. Alle Rechte vorbehalten.
-            </p>
-            <p className="mt-1">
-              Star Wars&trade; ist ein eingetragenes Warenzeichen von Lucasfilm
-              Ltd.
-            </p>
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="text-xs text-cyan-500/50 font-mono">
+              &copy; 2024 Star Wars Universe. Alle Rechte vorbehalten.
+            </div>
+            <div className="text-xs text-cyan-600/40 font-mono">
+              Star Wars™ ist ein Warenzeichen von Lucasfilm Ltd.
+            </div>
           </div>
         </div>
       </footer>

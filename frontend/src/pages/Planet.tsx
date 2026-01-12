@@ -448,50 +448,52 @@ export default function Planet() {
 
   const renderPlanetDashboard = () => (
     <div className="space-y-4 transition-all duration-300">
-      <h3 className="text-white font-semibold text-lg flex items-center gap-2">
-        <TrendingUp size={20} />
-        Planeten-Dashboard
-      </h3>
-      
-      {/* Resource Production Overview */}
-      <div className="bg-gray-800/50 border border-gray-700 rounded p-3">
-        <h4 className="text-gray-300 font-semibold mb-2 text-sm">Produktion pro Runde</h4>
+      <div className="mb-4 pb-3 border-b border-cyan-500/20">
+        <h3 className="text-cyan-100 font-semibold font-mono tracking-wider flex items-center gap-2">
+          <TrendingUp size={20} />
+          PLANETEN-DASHBOARD
+        </h3>
+      </div>
+
+      {/* Imperial Command Resource Production Overview */}
+      <div className="bg-slate-950/20 border border-slate-700/30 rounded p-3">
+        <h4 className="text-cyan-300 font-semibold mb-3 text-sm font-mono tracking-wider">PRODUKTION PRO RUNDE</h4>
         <div className="space-y-2">
           {planet.production && planet.production.credits > 0 && (
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-300 flex items-center gap-2">
+              <span className="text-cyan-200 flex items-center gap-2 font-mono">
                 <Coins size={14} className="text-yellow-400" />
-                Credits
+                CREDITS
               </span>
-              <span className="text-green-400 font-mono">+{planet.production.credits}</span>
+              <span className="text-green-400 font-mono font-bold">+{planet.production.credits}</span>
             </div>
           )}
           {planet.production && planet.production.durastahl > 0 && (
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-300 flex items-center gap-2">
+              <span className="text-cyan-200 flex items-center gap-2 font-mono">
                 <Wrench size={14} className="text-gray-400" />
-                Durastahl
+                DURASTAHL
               </span>
-              <span className="text-green-400 font-mono">+{planet.production.durastahl}</span>
+              <span className="text-green-400 font-mono font-bold">+{planet.production.durastahl}</span>
             </div>
           )}
           {planet.production && planet.production.kristallinesSilizium > 0 && (
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-300 flex items-center gap-2">
+              <span className="text-cyan-200 flex items-center gap-2 font-mono">
                 <Gem size={14} className="text-purple-400" />
-                Kristallines Silizium
+                K. SILIZIUM
               </span>
-              <span className="text-green-400 font-mono">+{planet.production.kristallinesSilizium}</span>
+              <span className="text-green-400 font-mono font-bold">+{planet.production.kristallinesSilizium}</span>
             </div>
           )}
         </div>
       </div>
 
-      {/* Build Queue */}
-      <div className="bg-gray-800/50 border border-gray-700 rounded p-3">
-        <h4 className="text-gray-300 font-semibold mb-2 text-sm flex items-center gap-2">
+      {/* Imperial Command Build Queue */}
+      <div className="bg-slate-950/20 border border-slate-700/30 rounded p-3">
+        <h4 className="text-cyan-300 font-semibold mb-3 text-sm flex items-center gap-2 font-mono tracking-wider">
           <Clock size={14} />
-          Bau-Queue
+          BAU-QUEUE
         </h4>
         {planet.buildings.filter(b => !b.isActive).length > 0 ? (
           <div className="space-y-2">
@@ -506,13 +508,13 @@ export default function Planet() {
                 const remainingMinutes = Math.ceil(remaining / 60000);
 
                 return (
-                  <div key={building.id} className="bg-gray-900/50 border border-gray-600 rounded p-2">
+                  <div key={building.id} className="bg-slate-950/40 border border-slate-600/40 rounded p-2">
                     <div className="flex justify-between items-center mb-1">
-                      <span className="text-white text-sm font-medium">{building.buildingType.name}</span>
-                      <span className="text-yellow-400 text-xs">{remainingMinutes} Min</span>
+                      <span className="text-cyan-100 text-sm font-medium font-mono">{building.buildingType.name}</span>
+                      <span className="text-yellow-400 text-xs font-mono tracking-wider">{remainingMinutes} MIN</span>
                     </div>
-                    <div className="w-full bg-gray-700 rounded-full h-1.5">
-                      <div 
+                    <div className="w-full bg-slate-700/50 rounded-full h-1.5">
+                      <div
                         className="bg-yellow-500 h-1.5 rounded-full transition-all"
                         style={{ width: `${progress}%` }}
                       />
@@ -522,25 +524,25 @@ export default function Planet() {
               })}
           </div>
         ) : (
-          <p className="text-gray-400 text-sm">Keine Gebäude im Bau</p>
+          <p className="text-cyan-400/60 text-sm font-mono tracking-wider">KEINE GEBÄUDE IM BAU</p>
         )}
       </div>
 
-      {/* Building Statistics */}
-      <div className="bg-gray-800/50 border border-gray-700 rounded p-3">
-        <h4 className="text-gray-300 font-semibold mb-2 text-sm">Gebäude-Statistik</h4>
+      {/* Imperial Command Building Statistics */}
+      <div className="bg-slate-950/20 border border-slate-700/30 rounded p-3">
+        <h4 className="text-cyan-300 font-semibold mb-3 text-sm font-mono tracking-wider">GEBÄUDE-STATISTIK</h4>
         <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="bg-gray-700/50 p-2 rounded">
-            <p className="text-white font-bold text-lg">{planet.buildings.length}</p>
-            <p className="text-gray-400 text-xs">Gesamt</p>
+          <div className="bg-slate-950/40 border border-slate-600/30 p-2 rounded">
+            <p className="text-cyan-100 font-bold text-lg font-mono">{planet.buildings.length}</p>
+            <p className="text-cyan-400/70 text-xs font-mono tracking-wider">GESAMT</p>
           </div>
-          <div className="bg-gray-700/50 p-2 rounded">
-            <p className="text-green-400 font-bold text-lg">{planet.buildings.filter(b => b.isActive).length}</p>
-            <p className="text-gray-400 text-xs">Aktiv</p>
+          <div className="bg-green-950/20 border border-green-500/30 p-2 rounded">
+            <p className="text-green-400 font-bold text-lg font-mono">{planet.buildings.filter(b => b.isActive).length}</p>
+            <p className="text-green-400/70 text-xs font-mono tracking-wider">AKTIV</p>
           </div>
-          <div className="bg-gray-700/50 p-2 rounded">
-            <p className="text-yellow-400 font-bold text-lg">{planet.buildings.filter(b => !b.isActive).length}</p>
-            <p className="text-gray-400 text-xs">Im Bau</p>
+          <div className="bg-yellow-950/20 border border-yellow-500/30 p-2 rounded">
+            <p className="text-yellow-400 font-bold text-lg font-mono">{planet.buildings.filter(b => !b.isActive).length}</p>
+            <p className="text-yellow-400/70 text-xs font-mono tracking-wider">IM BAU</p>
           </div>
         </div>
       </div>
@@ -549,65 +551,76 @@ export default function Planet() {
 
   return (
     <div className="pb-20 md:pb-0">
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex justify-between items-center mb-4">
-          <Link to="/" className="text-gray-400 hover:text-white inline-flex items-center gap-2 text-sm md:text-base">
-            <ArrowLeft size={20} />
-            <span className="hidden sm:inline">Zurück zum Dashboard</span>
-            <span className="sm:hidden">Zurück</span>
-          </Link>
-          
-          {planet.buildings.some(b => SHIPYARD_BUILDING_NAMES.includes(b.buildingType.name) && b.isActive) && (
-            <Link
-              to={`/planet/${planet.id}/blueprints`}
-              className="bg-cyan-600 hover:bg-cyan-500 text-white px-3 py-2 md:px-4 rounded flex items-center gap-2 transition text-sm"
-            >
-              <Rocket size={16} />
-              <span className="hidden sm:inline">Orbitales Raumdock</span>
-              <span className="sm:hidden">Raumdock</span>
+      {/* Imperial Command Planet Header */}
+      <div className="mb-8">
+        <div className="bg-gradient-to-r from-cyan-950/40 to-slate-900/60 border border-cyan-500/30 rounded-lg p-6 backdrop-blur-sm">
+          <div className="flex justify-between items-center mb-4">
+            <Link to="/" className="flex items-center gap-3 text-cyan-400/70 hover:text-cyan-300 transition-all font-mono">
+              <div className="p-1 bg-cyan-900/40 border border-cyan-500/40 rounded">
+                <ArrowLeft size={16} />
+              </div>
+              <span className="hidden sm:inline tracking-wider">ZURÜCK ZUM DASHBOARD</span>
+              <span className="sm:hidden tracking-wider">ZURÜCK</span>
             </Link>
-          )}
-        </div>
-        
-        {/* Planet Name */}
-        <div className="mt-4">
-          {editingName ? (
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={newPlanetName}
-                onChange={(e) => setNewPlanetName(e.target.value)}
-                onBlur={renamePlanet}
-                onKeyDown={(e) => e.key === 'Enter' && renamePlanet()}
-                className="bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white text-xl md:text-2xl font-bold focus:outline-none focus:border-rebel"
-                autoFocus
-              />
-            </div>
-          ) : (
-            <h1 
-              className="text-2xl md:text-3xl font-bold text-white mb-2 cursor-pointer hover:text-rebel transition"
-              onClick={() => {
-                setNewPlanetName(planet.name);
-                setEditingName(true);
-              }}
-              title="Klicken zum Umbenennen"
-            >
-              {planet.name}
-            </h1>
-          )}
+
+            {planet.buildings.some(b => SHIPYARD_BUILDING_NAMES.includes(b.buildingType.name) && b.isActive) && (
+              <Link
+                to={`/planet/${planet.id}/blueprints`}
+                className="bg-gradient-to-r from-cyan-900/40 to-cyan-800/30 border border-cyan-500/30 text-cyan-100 px-4 py-2 rounded hover:from-cyan-800/50 hover:to-cyan-700/40 transition-all flex items-center gap-2 font-mono text-sm"
+              >
+                <Rocket size={16} />
+                <span className="hidden sm:inline tracking-wider">ORBITALES RAUMDOCK</span>
+                <span className="sm:hidden tracking-wider">RAUMDOCK</span>
+              </Link>
+            )}
+          </div>
+
+          {/* Planet Name - Imperial Command Style */}
+          <div className="mt-4">
+            {editingName ? (
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={newPlanetName}
+                  onChange={(e) => setNewPlanetName(e.target.value)}
+                  onBlur={renamePlanet}
+                  onKeyDown={(e) => e.key === 'Enter' && renamePlanet()}
+                  className="bg-slate-800/60 border border-cyan-500/30 rounded px-4 py-3 text-cyan-100 text-xl md:text-2xl font-bold font-mono tracking-wider focus:outline-none focus:border-cyan-400 backdrop-blur-sm"
+                  autoFocus
+                />
+              </div>
+            ) : (
+              <div className="flex items-center gap-4">
+                <h1
+                  className="text-xl md:text-2xl font-bold text-cyan-100 font-mono tracking-wider cursor-pointer hover:text-cyan-200 transition"
+                  onClick={() => {
+                    setNewPlanetName(planet.name);
+                    setEditingName(true);
+                  }}
+                  title="KLICKEN ZUM UMBENENNEN"
+                >
+                  {planet.name?.toUpperCase()}
+                </h1>
+                <div className="flex items-center gap-4 text-sm font-mono">
+                  <span className="text-cyan-400/70">TYP: {planet.planetType}</span>
+                  <span className="text-cyan-400/70">SYSTEM: {planet.system.name}</span>
+                  <span className="text-cyan-400/70">KOORDINATEN: {planet.system.sector.x}|{planet.system.sector.y}</span>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Desktop: Storage Bar */}
-      <div className="hidden md:block mb-4 bg-space-light border border-gray-700 rounded p-3">
-        <div className="flex items-center justify-between">
-          <div className="text-white text-sm">
-            Lager: <span className="font-mono font-bold">{(planet.credits + planet.durastahl + planet.kristallinesSilizium + planet.tibannaGas + planet.energiemodule + planet.kyberKristalle + planet.bacta + planet.beskar).toLocaleString()}/{planet.storageCapacity.toLocaleString()}</span>
+      {/* Imperial Command Storage Terminal */}
+      <div className="hidden md:block mb-6 bg-gradient-to-r from-slate-950/30 to-cyan-950/20 border border-cyan-500/20 rounded p-4 backdrop-blur-sm">
+        <div className="flex items-center justify-between mb-3">
+          <div className="text-cyan-100 font-mono text-sm tracking-wider">
+            LAGER: <span className="font-bold">{(planet.credits + planet.durastahl + planet.kristallinesSilizium + planet.tibannaGas + planet.energiemodule + planet.kyberKristalle + planet.bacta + planet.beskar).toLocaleString()}/{planet.storageCapacity.toLocaleString()}</span>
           </div>
-          <div className={`text-sm font-bold ${
+          <div className={`text-sm font-bold font-mono ${
             ((planet.credits + planet.durastahl + planet.kristallinesSilizium + planet.tibannaGas + planet.energiemodule + planet.kyberKristalle + planet.bacta + planet.beskar) / planet.storageCapacity) < 0.9
-              ? 'text-green-400' 
+              ? 'text-green-400'
               : ((planet.credits + planet.durastahl + planet.kristallinesSilizium + planet.tibannaGas + planet.energiemodule + planet.kyberKristalle + planet.bacta + planet.beskar) / planet.storageCapacity) < 1
               ? 'text-yellow-400'
               : 'text-red-400'
@@ -615,11 +628,11 @@ export default function Planet() {
             {Math.round(((planet.credits + planet.durastahl + planet.kristallinesSilizium + planet.tibannaGas + planet.energiemodule + planet.kyberKristalle + planet.bacta + planet.beskar) / planet.storageCapacity) * 100)}%
           </div>
         </div>
-        <div className="bg-gray-900 rounded-full h-2 mt-2">
-          <div 
+        <div className="bg-slate-800/60 border border-slate-700/50 rounded-full h-2">
+          <div
             className={`h-2 rounded-full transition-all duration-500 ${
               ((planet.credits + planet.durastahl + planet.kristallinesSilizium + planet.tibannaGas + planet.energiemodule + planet.kyberKristalle + planet.bacta + planet.beskar) / planet.storageCapacity) < 0.9
-                ? 'bg-green-500' 
+                ? 'bg-green-500'
                 : ((planet.credits + planet.durastahl + planet.kristallinesSilizium + planet.tibannaGas + planet.energiemodule + planet.kyberKristalle + planet.bacta + planet.beskar) / planet.storageCapacity) < 1
                 ? 'bg-yellow-500'
                 : 'bg-red-500'
@@ -629,21 +642,21 @@ export default function Planet() {
         </div>
       </div>
 
-      {/* Desktop: Energy Bar */}
-      <div className="hidden md:block mb-4 bg-space-light border border-gray-700 rounded p-3">
-        <div className="flex items-center justify-between">
-          <div className="text-white text-sm">
-            Energie: <span className="font-mono font-bold">{planet.energyStorage}/{planet.energyStorageCapacity}</span>
+      {/* Imperial Command Energy Terminal */}
+      <div className="hidden md:block mb-6 bg-gradient-to-r from-blue-950/30 to-cyan-950/20 border border-cyan-500/20 rounded p-4 backdrop-blur-sm">
+        <div className="flex items-center justify-between mb-3">
+          <div className="text-cyan-100 font-mono text-sm tracking-wider">
+            ENERGIE: <span className="font-bold">{planet.energyStorage}/{planet.energyStorageCapacity}</span>
             {planet.production && (planet.production as any).energyProduction && (planet.production as any).energyConsumption && (
-              <span className="text-gray-400 ml-2">
-                ({((planet.production as any).energyProduction - (planet.production as any).energyConsumption) >= 0 ? '+' : ''}{(planet.production as any).energyProduction - (planet.production as any).energyConsumption}/Runde)
+              <span className="text-cyan-400/60 ml-3">
+                ({((planet.production as any).energyProduction - (planet.production as any).energyConsumption) >= 0 ? '+' : ''}{(planet.production as any).energyProduction - (planet.production as any).energyConsumption}/RUNDE)
               </span>
             )}
           </div>
-          <div className={`text-sm font-bold ${
+          <div className={`text-sm font-bold font-mono ${
             (planet.production as any).energyProduction && (planet.production as any).energyConsumption
               ? ((planet.production as any).energyProduction - (planet.production as any).energyConsumption) >= 0 ? 'text-green-400' : 'text-red-400'
-              : 'text-gray-400'
+              : 'text-cyan-400/60'
           }`}>
             {(planet.production as any).energyProduction && (planet.production as any).energyConsumption
               ? `${((planet.production as any).energyProduction - (planet.production as any).energyConsumption) >= 0 ? '+' : ''}${(planet.production as any).energyProduction - (planet.production as any).energyConsumption}`
@@ -651,19 +664,22 @@ export default function Planet() {
             }
           </div>
         </div>
-        <div className="bg-gray-900 rounded-full h-2 mt-2">
-          <div 
-            className="h-2 rounded-full bg-yellow-500 transition-all duration-500"
+        <div className="bg-slate-800/60 border border-slate-700/50 rounded-full h-2">
+          <div
+            className="h-2 rounded-full bg-blue-500 transition-all duration-500"
             style={{ width: `${planet.energyStorageCapacity > 0 ? Math.max(0, Math.min((planet.energyStorage / planet.energyStorageCapacity) * 100, 100)) : 0}%` }}
           />
         </div>
       </div>
 
       {/* Desktop Layout */}
-      <div className="hidden md:grid md:grid-cols-12 gap-4">
-        {/* Left: Grid */}
+      <div className="hidden md:grid md:grid-cols-12 gap-6">
+        {/* Left: Imperial Command Planet Grid */}
         <div className="col-span-8">
-          <div className="bg-space-light p-6 rounded-lg border border-gray-700">
+          <div className="bg-gradient-to-br from-slate-950/40 to-cyan-950/20 border border-cyan-500/30 p-6 rounded backdrop-blur-sm">
+            <div className="mb-4 pb-3 border-b border-cyan-500/20">
+              <h3 className="text-cyan-100 font-mono font-semibold tracking-wider">PLANET GRID</h3>
+            </div>
             {/* Centered Grid with fixed aspect ratio */}
             <div className="flex justify-center">
               <div className="space-y-1">
@@ -674,45 +690,47 @@ export default function Planet() {
             </div>
           </div>
 
-          {/* Desktop Resources Display */}
-          <div className="mt-4 bg-space-light p-4 rounded-lg border border-gray-700">
-            <h3 className="text-white font-semibold mb-3">Ressourcen</h3>
+          {/* Imperial Command Resources Terminal */}
+          <div className="mt-6 bg-gradient-to-br from-slate-950/40 to-cyan-950/20 border border-cyan-500/30 p-4 rounded backdrop-blur-sm">
+            <div className="mb-4 pb-3 border-b border-cyan-500/20">
+              <h3 className="text-cyan-100 font-mono font-semibold tracking-wider">RESSOURCEN</h3>
+            </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="flex items-center justify-between">
-                <span className="text-gray-300 flex items-center gap-2">
-                  <Coins size={18} className="text-yellow-400" />
-                  Credits
+              <div className="flex items-center justify-between p-3 bg-yellow-950/20 border border-yellow-500/20 rounded">
+                <span className="text-yellow-200 flex items-center gap-2 font-mono text-sm">
+                  <Coins size={16} className="text-yellow-400" />
+                  CREDITS
                 </span>
                 <div className="flex items-center gap-2">
-                  <span className="text-white font-mono">{planet.credits.toLocaleString()}</span>
+                  <span className="text-yellow-100 font-mono font-bold">{planet.credits.toLocaleString()}</span>
                   {planet.production && planet.production.credits > 0 && (
-                    <span className="text-green-400 text-sm">+{planet.production.credits}</span>
+                    <span className="text-green-400 text-xs font-mono">+{planet.production.credits}</span>
                   )}
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
-                <span className="text-gray-300 flex items-center gap-2">
-                  <Wrench size={18} className="text-gray-400" />
-                  Durastahl
+              <div className="flex items-center justify-between p-3 bg-slate-950/20 border border-slate-500/20 rounded">
+                <span className="text-slate-200 flex items-center gap-2 font-mono text-sm">
+                  <Wrench size={16} className="text-slate-400" />
+                  DURASTAHL
                 </span>
                 <div className="flex items-center gap-2">
-                  <span className="text-white font-mono">{planet.durastahl.toLocaleString()}</span>
+                  <span className="text-slate-100 font-mono font-bold">{planet.durastahl.toLocaleString()}</span>
                   {planet.production && planet.production.durastahl > 0 && (
-                    <span className="text-green-400 text-sm">+{planet.production.durastahl}</span>
+                    <span className="text-green-400 text-xs font-mono">+{planet.production.durastahl}</span>
                   )}
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
-                <span className="text-gray-300 flex items-center gap-2">
-                  <Gem size={18} className="text-purple-400" />
-                  Kristallines Silizium
+              <div className="flex items-center justify-between p-3 bg-purple-950/20 border border-purple-500/20 rounded">
+                <span className="text-purple-200 flex items-center gap-2 font-mono text-sm">
+                  <Gem size={16} className="text-purple-400" />
+                  K. SILIZIUM
                 </span>
                 <div className="flex items-center gap-2">
-                  <span className="text-white font-mono">{planet.kristallinesSilizium.toLocaleString()}</span>
+                  <span className="text-purple-100 font-mono font-bold">{planet.kristallinesSilizium.toLocaleString()}</span>
                   {planet.production && planet.production.kristallinesSilizium > 0 && (
-                    <span className="text-green-400 text-sm">+{planet.production.kristallinesSilizium}</span>
+                    <span className="text-green-400 text-xs font-mono">+{planet.production.kristallinesSilizium}</span>
                   )}
                 </div>
               </div>
@@ -733,9 +751,9 @@ export default function Planet() {
           </div>
         </div>
 
-        {/* Right: Dashboard or Building Details */}
+        {/* Imperial Command Dashboard Panel */}
         <div className="col-span-4">
-          <div className="bg-space-light p-4 rounded-lg border border-gray-700 sticky top-4">
+          <div className="bg-gradient-to-br from-slate-950/40 to-cyan-950/20 border border-cyan-500/30 rounded p-4 backdrop-blur-sm sticky top-4">
             <div className="transition-all duration-300 ease-in-out">
               {selectedField ? renderBuildingDetails() : renderPlanetDashboard()}
             </div>
@@ -743,46 +761,46 @@ export default function Planet() {
         </div>
       </div>
 
-      {/* Mobile Layout */}
+      {/* Imperial Command Mobile Layout */}
       <div className="md:hidden">
-        {/* Tab Navigation */}
-        <div className="bg-space-light border border-gray-700 rounded-t-lg overflow-hidden">
-          <div className="flex border-b border-gray-700">
+        {/* Imperial Command Mobile Tab Navigation */}
+        <div className="bg-gradient-to-br from-slate-950/40 to-cyan-950/20 border border-cyan-500/30 rounded-t backdrop-blur-sm overflow-hidden">
+          <div className="flex border-b border-cyan-500/20">
             <button
               onClick={() => setActiveTab('orbit')}
-              className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-                activeTab === 'orbit' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-800 text-gray-400 hover:text-white'
+              className={`flex-1 px-4 py-3 text-sm font-medium font-mono tracking-wider transition-colors ${
+                activeTab === 'orbit'
+                  ? 'bg-gradient-to-r from-blue-900/60 to-blue-800/40 border-b-2 border-blue-400 text-blue-100'
+                  : 'bg-slate-950/20 text-cyan-400/70 hover:text-cyan-200 hover:bg-slate-900/30'
               }`}
             >
-              Orbit
+              ORBIT
             </button>
             <button
               onClick={() => setActiveTab('surface')}
-              className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-                activeTab === 'surface' 
-                  ? 'bg-green-600 text-white' 
-                  : 'bg-gray-800 text-gray-400 hover:text-white'
+              className={`flex-1 px-4 py-3 text-sm font-medium font-mono tracking-wider transition-colors ${
+                activeTab === 'surface'
+                  ? 'bg-gradient-to-r from-green-900/60 to-green-800/40 border-b-2 border-green-400 text-green-100'
+                  : 'bg-slate-950/20 text-cyan-400/70 hover:text-cyan-200 hover:bg-slate-900/30'
               }`}
             >
-              Oberfläche
+              OBERFLÄCHE
             </button>
             <button
               onClick={() => setActiveTab('underground')}
-              className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
-                activeTab === 'underground' 
-                  ? 'bg-purple-600 text-white' 
-                  : 'bg-gray-800 text-gray-400 hover:text-white'
+              className={`flex-1 px-4 py-3 text-sm font-medium font-mono tracking-wider transition-colors ${
+                activeTab === 'underground'
+                  ? 'bg-gradient-to-r from-purple-900/60 to-purple-800/40 border-b-2 border-purple-400 text-purple-100'
+                  : 'bg-slate-950/20 text-cyan-400/70 hover:text-cyan-200 hover:bg-slate-900/30'
               }`}
             >
-              Untergrund
+              UNTERGRUND
             </button>
           </div>
         </div>
 
-        {/* Grid Display (based on active tab) */}
-        <div className="bg-space-light p-4 rounded-b-lg border-x border-b border-gray-700">
+        {/* Imperial Command Mobile Grid Display */}
+        <div className="bg-gradient-to-br from-slate-950/40 to-cyan-950/20 border border-cyan-500/30 border-t-0 p-4 rounded-b backdrop-blur-sm">
           <div className="flex justify-center overflow-x-auto">
             {activeTab === 'orbit' && renderGrid(orbitFields, 'ORBIT', '#3b82f6')}
             {activeTab === 'surface' && renderGrid(surfaceFields, 'OBERFLÄCHE', '#10b981')}
@@ -790,15 +808,15 @@ export default function Planet() {
           </div>
         </div>
 
-        {/* Mobile: Storage Bar */}
-        <div className="mt-4 bg-space-light border border-gray-700 rounded p-3">
+        {/* Imperial Command Mobile Storage Terminal */}
+        <div className="mt-4 bg-gradient-to-r from-slate-950/30 to-cyan-950/20 border border-cyan-500/20 rounded p-3 backdrop-blur-sm">
           <div className="flex items-center justify-between">
-            <div className="text-white text-sm">
-              Lager: <span className="font-mono font-bold">{(planet.credits + planet.durastahl + planet.kristallinesSilizium + planet.tibannaGas + planet.energiemodule + planet.kyberKristalle + planet.bacta + planet.beskar).toLocaleString()}/{planet.storageCapacity.toLocaleString()}</span>
+            <div className="text-cyan-100 text-sm font-mono tracking-wider">
+              LAGER: <span className="font-bold">{(planet.credits + planet.durastahl + planet.kristallinesSilizium + planet.tibannaGas + planet.energiemodule + planet.kyberKristalle + planet.bacta + planet.beskar).toLocaleString()}/{planet.storageCapacity.toLocaleString()}</span>
             </div>
-            <div className={`text-sm font-bold ${
+            <div className={`text-sm font-bold font-mono ${
               ((planet.credits + planet.durastahl + planet.kristallinesSilizium + planet.tibannaGas + planet.energiemodule + planet.kyberKristalle + planet.bacta + planet.beskar) / planet.storageCapacity) < 0.9
-                ? 'text-green-400' 
+                ? 'text-green-400'
                 : ((planet.credits + planet.durastahl + planet.kristallinesSilizium + planet.tibannaGas + planet.energiemodule + planet.kyberKristalle + planet.bacta + planet.beskar) / planet.storageCapacity) < 1
                 ? 'text-yellow-400'
                 : 'text-red-400'
@@ -806,11 +824,11 @@ export default function Planet() {
               {Math.round(((planet.credits + planet.durastahl + planet.kristallinesSilizium + planet.tibannaGas + planet.energiemodule + planet.kyberKristalle + planet.bacta + planet.beskar) / planet.storageCapacity) * 100)}%
             </div>
           </div>
-          <div className="bg-gray-900 rounded-full h-2 mt-2">
-            <div 
+          <div className="bg-slate-800/60 border border-slate-700/50 rounded-full h-2 mt-2">
+            <div
               className={`h-2 rounded-full transition-all duration-500 ${
                 ((planet.credits + planet.durastahl + planet.kristallinesSilizium + planet.tibannaGas + planet.energiemodule + planet.kyberKristalle + planet.bacta + planet.beskar) / planet.storageCapacity) < 0.9
-                  ? 'bg-green-500' 
+                  ? 'bg-green-500'
                   : ((planet.credits + planet.durastahl + planet.kristallinesSilizium + planet.tibannaGas + planet.energiemodule + planet.kyberKristalle + planet.bacta + planet.beskar) / planet.storageCapacity) < 1
                   ? 'bg-yellow-500'
                   : 'bg-red-500'
@@ -820,85 +838,85 @@ export default function Planet() {
           </div>
         </div>
 
-        {/* Resource Cards */}
+        {/* Imperial Command Mobile Resource Cards */}
         <div className="mt-4 grid grid-cols-2 gap-3">
-          <div className="bg-space-light border border-gray-700 rounded-lg p-3">
-            <div className="flex items-center gap-2 mb-1">
+          <div className="bg-gradient-to-br from-yellow-950/20 to-slate-950/40 border border-yellow-500/20 rounded p-3 backdrop-blur-sm">
+            <div className="flex items-center gap-2 mb-2">
               <Coins size={18} className="text-yellow-400" />
-              <span className="text-gray-400 text-xs font-medium">Credits</span>
+              <span className="text-yellow-200 text-xs font-medium font-mono tracking-wider">CREDITS</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-white font-mono font-bold text-lg">{planet.credits.toLocaleString()}</span>
+              <span className="text-yellow-100 font-mono font-bold text-lg">{planet.credits.toLocaleString()}</span>
               {planet.production && planet.production.credits > 0 && (
-                <span className="text-green-400 text-xs font-semibold">+{planet.production.credits}</span>
+                <span className="text-green-400 text-xs font-semibold font-mono">+{planet.production.credits}</span>
               )}
             </div>
           </div>
 
-          <div className="bg-space-light border border-gray-700 rounded-lg p-3">
-            <div className="flex items-center gap-2 mb-1">
-              <Wrench size={18} className="text-gray-400" />
-              <span className="text-gray-400 text-xs font-medium">Durastahl</span>
+          <div className="bg-gradient-to-br from-slate-950/20 to-slate-900/40 border border-slate-500/20 rounded p-3 backdrop-blur-sm">
+            <div className="flex items-center gap-2 mb-2">
+              <Wrench size={18} className="text-slate-400" />
+              <span className="text-slate-200 text-xs font-medium font-mono tracking-wider">DURASTAHL</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-white font-mono font-bold text-lg">{planet.durastahl.toLocaleString()}</span>
+              <span className="text-slate-100 font-mono font-bold text-lg">{planet.durastahl.toLocaleString()}</span>
               {planet.production && planet.production.durastahl > 0 && (
-                <span className="text-green-400 text-xs font-semibold">+{planet.production.durastahl}</span>
+                <span className="text-green-400 text-xs font-semibold font-mono">+{planet.production.durastahl}</span>
               )}
             </div>
           </div>
 
-          <div className="bg-space-light border border-gray-700 rounded-lg p-3">
-            <div className="flex items-center gap-2 mb-1">
+          <div className="bg-gradient-to-br from-purple-950/20 to-slate-950/40 border border-purple-500/20 rounded p-3 backdrop-blur-sm">
+            <div className="flex items-center gap-2 mb-2">
               <Gem size={18} className="text-purple-400" />
-              <span className="text-gray-400 text-xs font-medium">Kristall</span>
+              <span className="text-purple-200 text-xs font-medium font-mono tracking-wider">KRISTALL</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-white font-mono font-bold text-lg">{planet.kristallinesSilizium.toLocaleString()}</span>
+              <span className="text-purple-100 font-mono font-bold text-lg">{planet.kristallinesSilizium.toLocaleString()}</span>
               {planet.production && planet.production.kristallinesSilizium > 0 && (
-                <span className="text-green-400 text-xs font-semibold">+{planet.production.kristallinesSilizium}</span>
+                <span className="text-green-400 text-xs font-semibold font-mono">+{planet.production.kristallinesSilizium}</span>
               )}
             </div>
           </div>
 
-          <div className="bg-space-light border border-gray-700 rounded-lg p-3">
-            <div className="flex items-center gap-2 mb-1">
-              <Zap size={18} className="text-yellow-500" />
-              <span className="text-gray-400 text-xs font-medium">Energie</span>
+          <div className="bg-gradient-to-br from-blue-950/20 to-slate-950/40 border border-blue-500/20 rounded p-3 backdrop-blur-sm">
+            <div className="flex items-center gap-2 mb-2">
+              <Zap size={18} className="text-blue-400" />
+              <span className="text-blue-200 text-xs font-medium font-mono tracking-wider">ENERGIE</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-white font-mono font-bold text-lg">{planet.energyStorage}/{planet.energyStorageCapacity}</span>
+              <span className="text-blue-100 font-mono font-bold text-lg">{planet.energyStorage}/{planet.energyStorageCapacity}</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Mobile Bottom Sheet */}
+      {/* Imperial Command Mobile Bottom Sheet */}
       {showBottomSheet && (
         <div className="md:hidden fixed inset-0 z-50 flex items-end" onClick={closeBottomSheet}>
           {/* Backdrop */}
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-          
-          {/* Sheet */}
-          <div 
-            className="relative w-full bg-space-dark rounded-t-2xl border-t-2 border-gray-600 shadow-2xl transform transition-transform duration-300 ease-out animate-slide-up"
+
+          {/* Imperial Command Sheet */}
+          <div
+            className="relative w-full bg-gradient-to-br from-slate-950/95 to-cyan-950/80 border-t border-cyan-500/30 rounded-t-2xl shadow-2xl transform transition-transform duration-300 ease-out animate-slide-up backdrop-blur-sm"
             onClick={(e) => e.stopPropagation()}
             style={{ maxHeight: '80vh' }}
           >
             {/* Handle */}
             <div className="flex justify-center pt-2 pb-3">
-              <div className="w-12 h-1.5 bg-gray-600 rounded-full" />
+              <div className="w-12 h-1.5 bg-cyan-500/40 rounded-full" />
             </div>
 
             {/* Content */}
             <div className="px-4 pb-6 overflow-y-auto" style={{ maxHeight: 'calc(80vh - 40px)' }}>
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-white font-semibold text-lg">
-                  {selectedField?.building ? 'Gebäude-Details' : 'Feld-Details'}
+              <div className="flex justify-between items-center mb-4 pb-3 border-b border-cyan-500/20">
+                <h3 className="text-cyan-100 font-semibold text-lg font-mono tracking-wider">
+                  {selectedField?.building ? 'GEBÄUDE-DETAILS' : 'FELD-DETAILS'}
                 </h3>
                 <button
                   onClick={closeBottomSheet}
-                  className="text-gray-400 hover:text-white p-2 rounded-full hover:bg-gray-700 transition"
+                  className="text-cyan-400/70 hover:text-cyan-200 hover:bg-cyan-900/20 p-2 rounded border border-transparent hover:border-cyan-500/30 transition-all"
                 >
                   <X size={20} />
                 </button>

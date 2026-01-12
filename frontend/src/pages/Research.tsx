@@ -107,10 +107,10 @@ export default function Research() {
 
   const getLevelBadge = (level: number) => {
     const badges = [
-      { bg: 'bg-gray-700', text: 'text-gray-300', label: 'Stufe 0 - Basis' },
-      { bg: 'bg-blue-700', text: 'text-blue-300', label: 'Stufe 1 - Fortgeschritten' },
-      { bg: 'bg-purple-700', text: 'text-purple-300', label: 'Stufe 2 - Elite' },
-      { bg: 'bg-yellow-700', text: 'text-yellow-300', label: 'Stufe 3 - Legendär' }
+      { bg: 'bg-gradient-to-r from-slate-900/60 to-slate-800/40', border: 'border-slate-500/40', text: 'text-slate-200', label: 'STUFE 0 - BASIS' },
+      { bg: 'bg-gradient-to-r from-blue-900/60 to-blue-800/40', border: 'border-blue-500/40', text: 'text-blue-200', label: 'STUFE 1 - FORTGESCHRITTEN' },
+      { bg: 'bg-gradient-to-r from-purple-900/60 to-purple-800/40', border: 'border-purple-500/40', text: 'text-purple-200', label: 'STUFE 2 - ELITE' },
+      { bg: 'bg-gradient-to-r from-yellow-900/60 to-yellow-800/40', border: 'border-yellow-500/40', text: 'text-yellow-200', label: 'STUFE 3 - LEGENDÄR' }
     ];
     return badges[level] || badges[0];
   };
@@ -145,52 +145,66 @@ export default function Research() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-white mb-2">Forschungsbaum</h1>
-        <p className="text-gray-400">Erforsche neue Technologien um dein Imperium zu stärken</p>
+      {/* Imperial Command Research Header */}
+      <div className="mb-8">
+        <div className="bg-gradient-to-r from-cyan-950/40 to-slate-900/60 border border-cyan-500/30 rounded-lg p-6 backdrop-blur-sm">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="p-2 bg-cyan-900/40 border border-cyan-500/40 rounded">
+              <FlaskConical className="text-cyan-300" size={24} />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-cyan-100 font-mono tracking-wider">FORSCHUNGSBAUM</h1>
+              <p className="text-cyan-400/70 font-mono text-sm">ERFORSCHE NEUE TECHNOLOGIEN UM DEIN IMPERIUM ZU STÄRKEN</p>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Player Stats */}
+      {/* Imperial Command Research Capacity */}
       {playerStats && (
-        <div className="mb-6 bg-gray-800 border border-gray-700 rounded-lg p-4">
-          <h2 className="font-bold text-white mb-3">Deine Forschungskapazität</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4">
-            <div>
-              <div className="text-gray-400 text-sm">Forschungslabore</div>
-              <div className="text-white font-bold">{playerStats.labCount}</div>
+        <div className="mb-8 bg-gradient-to-r from-slate-950/40 to-cyan-950/20 border border-cyan-500/30 rounded p-6 backdrop-blur-sm">
+          <div className="mb-4 pb-3 border-b border-cyan-500/20">
+            <h2 className="font-bold text-cyan-100 font-mono tracking-wider">FORSCHUNGSKAPAZITÄT</h2>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="p-3 bg-slate-950/20 border border-slate-700/30 rounded">
+              <div className="text-cyan-400/70 text-sm font-mono tracking-wide">LABORE</div>
+              <div className="text-cyan-100 font-bold font-mono text-lg">{playerStats.labCount}</div>
             </div>
-            <div>
-              <div className="text-gray-400 text-sm">Credits/Tick</div>
-              <div className="text-yellow-400 font-bold">{playerStats.production.credits}</div>
+            <div className="p-3 bg-yellow-950/20 border border-yellow-500/20 rounded">
+              <div className="text-yellow-400/70 text-sm font-mono tracking-wide">CREDITS/TICK</div>
+              <div className="text-yellow-200 font-bold font-mono text-lg">{playerStats.production.credits}</div>
             </div>
-            <div>
-              <div className="text-gray-400 text-sm">Durastahl/Tick</div>
-              <div className="text-gray-300 font-bold">{playerStats.production.durastahl}</div>
+            <div className="p-3 bg-slate-950/20 border border-slate-500/20 rounded">
+              <div className="text-slate-400/70 text-sm font-mono tracking-wide">DURASTAHL/TICK</div>
+              <div className="text-slate-200 font-bold font-mono text-lg">{playerStats.production.durastahl}</div>
             </div>
-            <div>
-              <div className="text-gray-400 text-sm">Kristall/Tick</div>
-              <div className="text-blue-400 font-bold">{playerStats.production.kristallinesSilizium}</div>
+            <div className="p-3 bg-purple-950/20 border border-purple-500/20 rounded">
+              <div className="text-purple-400/70 text-sm font-mono tracking-wide">KRISTALL/TICK</div>
+              <div className="text-purple-200 font-bold font-mono text-lg">{playerStats.production.kristallinesSilizium}</div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Category Tabs */}
-      <div className="mb-6 flex gap-2 overflow-x-auto pb-2">
-        {categories.map(cat => (
-          <button
-            key={cat.value}
-            onClick={() => setActiveCategory(cat.value)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${
-              activeCategory === cat.value
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
-            }`}
-          >
-            {cat.icon}
-            <span>{cat.label}</span>
-          </button>
-        ))}
+      {/* Imperial Command Category Tabs */}
+      <div className="mb-8 bg-gradient-to-r from-slate-950/30 to-cyan-950/20 border border-cyan-500/20 rounded p-4 backdrop-blur-sm">
+        <div className="flex gap-2 overflow-x-auto pb-2">
+          {categories.map(cat => (
+            <button
+              key={cat.value}
+              onClick={() => setActiveCategory(cat.value)}
+              className={`flex items-center gap-2 px-4 py-3 rounded border font-mono whitespace-nowrap transition-all ${
+                activeCategory === cat.value
+                  ? 'bg-cyan-950/40 border-cyan-500/40 text-cyan-100'
+                  : 'bg-slate-950/20 border-slate-700/30 text-cyan-400/70 hover:border-cyan-500/30 hover:text-cyan-200'
+              }`}
+            >
+              {cat.icon}
+              <span className="tracking-wider">{cat.label.toUpperCase()}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Research by Level */}
@@ -201,24 +215,24 @@ export default function Research() {
           const levelBadge = getLevelBadge(level);
           return (
             <div key={level} className="mb-8">
-              <div className={`${levelBadge.bg} ${levelBadge.text} px-4 py-2 rounded-lg mb-4 inline-block font-bold`}>
+              <div className={`${levelBadge.bg} ${levelBadge.text} border ${levelBadge.border} px-6 py-3 rounded mb-6 inline-block font-bold font-mono tracking-wider backdrop-blur-sm`}>
                 {levelBadge.label}
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {groupedByLevel[level].map(research => {
                   const prerequisiteName = getPrerequisiteName(research.prerequisiteId);
-                  
+
                   return (
                     <div
                       key={research.id}
-                      className={`border rounded-lg p-4 ${
+                      className={`border rounded backdrop-blur-sm p-5 ${
                         research.status === 'completed'
-                          ? 'bg-green-900/20 border-green-700'
+                          ? 'bg-gradient-to-br from-green-950/40 to-green-900/20 border-green-500/40'
                           : research.status === 'in_progress'
-                          ? 'bg-blue-900/20 border-blue-700'
+                          ? 'bg-gradient-to-br from-blue-950/40 to-blue-900/20 border-blue-500/40'
                           : research.status === 'available'
-                          ? 'bg-gray-800 border-gray-700'
-                          : 'bg-gray-900 border-gray-800 opacity-60'
+                          ? 'bg-gradient-to-br from-slate-950/40 to-cyan-950/20 border-cyan-500/30'
+                          : 'bg-gradient-to-br from-slate-950/20 to-slate-900/10 border-slate-700/20 opacity-60'
                       }`}
                     >
                       {/* Header */}
