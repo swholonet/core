@@ -250,20 +250,36 @@ router.post('/:planetId/build', authMiddleware, async (req: AuthRequest, res: Re
     }
 
     if (field.buildingId) {
-      return res.status(400).json({ error: 'Feld hat bereits ein Gebäude' });
+      return res.status(400).json({ error: 'Feld hat bereits ein Gebaeude' });
     }
 
-    if (field.fieldType !== 'LAND') {
-      return res.status(400).json({ error: 'Kann nur auf LAND-Feldern gebaut werden' });
-    }
-
-    // Get building type
+    // Get building type first to check terrain restrictions
     const buildingType = await prisma.buildingType.findUnique({
       where: { id: buildingTypeId },
     });
 
     if (!buildingType) {
-      return res.status(400).json({ error: 'Ungültiger Gebäudetyp' });
+      return res.status(400).json({ error: 'Ungueltiger Gebaeudetyp' });
+    }
+
+    // Check if building can be placed on this field type
+    const allowedFieldTypes = buildingType.allowedFieldTypes.split(',');
+    if (!allowedFieldTypes.includes(field.fieldType)) {
+      // Create helpful error message with allowed terrain types
+      const fieldTypeNames: Record<string, string> = {
+        'LAND': 'Land',
+        'WATER': 'Wasser',
+        'MOUNTAIN': 'Gebirge',
+        'SPACE': 'Orbit',
+        'ROCK': 'Fels (Untergrund)',
+        'CRYSTAL': 'Kristall (Untergrund)',
+        'METAL': 'Metall (Untergrund)',
+      };
+      const currentFieldName = fieldTypeNames[field.fieldType] || field.fieldType;
+      const allowedNames = allowedFieldTypes.map(t => fieldTypeNames[t] || t).join(', ');
+      return res.status(400).json({
+        error: `${buildingType.name} kann nicht auf ${currentFieldName} gebaut werden. Erlaubte Felder: ${allowedNames}`
+      });
     }
 
     // Check if Kommandozentrale already exists on this planet (can only have 1)

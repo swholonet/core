@@ -41,6 +41,10 @@ services:
       PORT: 3000
       REDIS_URL: redis://redis:6379
       # DATABASE_URL will be auto-constructed from POSTGRES_PASSWORD by entrypoint script
+      # === SEEDING ===
+      # Set RUN_SEEDS=true to run seed scripts on startup (use only once after major updates!)
+      # Uncomment the line below when you need to reseed after schema changes:
+      # RUN_SEEDS: "true"
     depends_on:
       postgres:
         condition: service_healthy

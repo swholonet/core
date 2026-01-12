@@ -44,6 +44,9 @@ COPY --from=builder /app/scripts ./scripts
 COPY backend/src ./src
 COPY backend/docker-entrypoint.sh /app/
 
+# Install tsx globally for running seed scripts (optional seeding with RUN_SEEDS=true)
+RUN npm install -g tsx
+
 RUN chmod +x /app/docker-entrypoint.sh
 
 # Expose port

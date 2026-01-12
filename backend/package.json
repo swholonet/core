@@ -12,7 +12,10 @@
     "prisma:studio": "prisma studio",
     "db:reset": "tsx scripts/reset-and-seed.ts",
     "seed:buildings": "tsx scripts/seed-building-types.ts",
-    "seed:modules": "tsx prisma/seed-modules.ts"
+    "seed:modules": "tsx prisma/seed-modules.ts",
+    "seed:research": "tsx scripts/seed-research-types.ts",
+    "seed:factions": "tsx scripts/seed-factions.ts",
+    "seed:all": "npm run seed:factions && npm run seed:buildings && npm run seed:research && npm run seed:modules"
   },
   "keywords": [
     "game",

@@ -49,11 +49,55 @@ echo "================================"
 echo "Applying Migrations"
 echo "================================"
 
-# Run migrations and start the app
+# Run migrations
 if npx prisma migrate deploy; then
     echo "✅ Migrations applied successfully"
 else
     echo "⚠️  Migrations failed or already applied"
+fi
+
+# Check if seeding is requested (set RUN_SEEDS=true in environment)
+if [ "$RUN_SEEDS" = "true" ]; then
+    echo ""
+    echo "================================"
+    echo "Running Seed Scripts"
+    echo "================================"
+
+    # Priority seeds - these run first in order (factions must exist before other seeds)
+    PRIORITY_SEEDS="scripts/seed-factions.ts"
+
+    for seed in $PRIORITY_SEEDS; do
+        if [ -f "$seed" ]; then
+            echo "🌱 Running priority seed: $seed"
+            npx tsx "$seed" || echo "⚠️  $seed failed"
+        fi
+    done
+
+    # Auto-discover and run all other seed-*.ts files in scripts/
+    echo ""
+    echo "Discovering seed scripts in scripts/..."
+    for seed in scripts/seed-*.ts; do
+        # Skip if no matches (glob returns literal pattern)
+        [ -f "$seed" ] || continue
+        # Skip priority seeds (already run)
+        case "$PRIORITY_SEEDS" in
+            *"$seed"*) continue ;;
+        esac
+        echo "🌱 Running: $seed"
+        npx tsx "$seed" || echo "⚠️  $seed failed"
+    done
+
+    # Auto-discover and run all seed-*.ts files in prisma/
+    echo ""
+    echo "Discovering seed scripts in prisma/..."
+    for seed in prisma/seed-*.ts; do
+        [ -f "$seed" ] || continue
+        echo "🌱 Running: $seed"
+        npx tsx "$seed" || echo "⚠️  $seed failed"
+    done
+
+    echo ""
+    echo "✅ Seeding complete"
 fi
 
 echo ""

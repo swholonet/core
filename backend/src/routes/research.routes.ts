@@ -4,13 +4,22 @@ import prisma from '../lib/prisma';
 
 const router = Router();
 
-// Get all research types with player's progress
+// Get all research types with player's progress (filtered by faction)
 router.get('/available', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
     const { user } = req as any;
 
-    // Get all research types
+    // Get player's faction
+    const playerFactionId = user.player?.factionId;
+
+    // Get research types available for this faction (universal + faction-specific)
     const allResearch = await prisma.researchType.findMany({
+      where: {
+        OR: [
+          { factionId: null }, // Universal research (available to all)
+          { factionId: playerFactionId }, // Faction-specific research
+        ],
+      },
       orderBy: [
         { researchLevel: 'asc' },
         { researchPointCost: 'asc' },
@@ -215,6 +224,12 @@ router.post('/start', authMiddleware, async (req: AuthRequest, res: Response) =>
 
     if (!researchType) {
       return res.status(404).json({ error: 'Research type not found' });
+    }
+
+    // Check if research is available for player's faction
+    const playerFactionId = user.player?.factionId;
+    if (researchType.factionId !== null && researchType.factionId !== playerFactionId) {
+      return res.status(403).json({ error: 'Diese Forschung ist fuer deine Fraktion nicht verfuegbar' });
     }
 
     // Check if already completed or in progress

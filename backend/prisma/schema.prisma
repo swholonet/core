@@ -79,9 +79,10 @@ model Faction {
   id          Int      @id @default(autoincrement())
   name        String   @unique
   description String
-  
+
   players     Player[]
   startPlanets StartPlanet[]
+  researchTypes ResearchType[]  // Faction-specific research
 }
 
 model Alliance {
@@ -183,7 +184,14 @@ model BuildingType {
   id                Int      @id @default(autoincrement())
   name              String   @unique
   description       String
-  category          String   // RESOURCE, PRODUCTION, DEFENSE, RESEARCH, STORAGE
+  category          String   // RESOURCE, PRODUCTION, DEFENSE, RESEARCH, STORAGE, ORBITAL
+
+  // Terrain restrictions - comma-separated list of allowed field types
+  // SURFACE: LAND, WATER, MOUNTAIN
+  // ORBIT: SPACE
+  // UNDERGROUND: ROCK, CRYSTAL, METAL
+  allowedFieldTypes String   @default("LAND")  // Default: can only build on LAND
+
   buildCostCredits  Int
   buildCostDurastahl Int     @default(0)
   buildCostKristallinesSilizium Int @default(0)
@@ -206,7 +214,7 @@ model BuildingType {
   creditProduction  Int      @default(0)
   storageBonus      Int      @default(0)
   requiredResearch  Int?
-  
+
   buildings         Building[]
 }
 
@@ -233,6 +241,9 @@ model ResearchType {
   researchPointCost     Int      @default(0)  // FP cost (0 for Level 0)
   researchTime          Int      @default(0)  // Deprecated, using FP now
 
+  // Faction restriction (null = universal, available to all factions)
+  factionId             Int?     // 1 = Imperial, 2 = Rebel, null = universal
+
   // Level 0 requirements (production-based)
   requiredCreditsPerTick  Int?
   requiredDurastahlPerTick Int?
@@ -256,6 +267,7 @@ model ResearchType {
   bonusType             String?  // PRODUCTION_BONUS, COMBAT_BONUS, etc.
   bonusValue            Int      @default(0)
 
+  faction               Faction? @relation(fields: [factionId], references: [id])
   prerequisite          ResearchType?  @relation("ResearchPrerequisite", fields: [prerequisiteId], references: [id])
   dependents            ResearchType[] @relation("ResearchPrerequisite")
   playerResearch        PlayerResearch[]
