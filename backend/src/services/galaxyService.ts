@@ -9,7 +9,7 @@ export class GalaxyService {
   private readonly FIELDS_PER_SECTOR = 20;
 
   // Initialize galaxy with sectors (STU-style: 36 sectors in 6x6 grid)
-  async initializeGalaxy(name: string = 'Star Wars - HoloNet') {
+  async initializeGalaxy(name: string = 'Star Wars Universe') {
     // Check if galaxy already exists
     const existingGalaxy = await prisma.galaxy.findFirst();
     if (existingGalaxy) {

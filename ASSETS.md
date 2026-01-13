@@ -2,7 +2,7 @@
 
 ## Übersicht
 
-Das Star Wars - HoloNet Projekt verwendet ein externes Asset-Repository für Planeten-Bilder und andere grafische Ressourcen.
+Das Star Wars Universe Projekt verwendet ein externes Asset-Repository für Planeten-Bilder und andere grafische Ressourcen.
 
 ## Asset Repository
 

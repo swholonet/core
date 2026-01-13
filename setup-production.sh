@@ -135,7 +135,7 @@ if [ "$RECREATE" = "1" ] || [ ! -f .env.production ]; then
 
     # Generate .env.production
     cat > .env.production << EOF
-# Star Wars - HoloNet - Production Environment Variables
+# Star Wars Universe - Production Environment Variables
 # Generated at: $(date)
 # DO NOT COMMIT THIS FILE TO GIT!
 

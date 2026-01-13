@@ -46,7 +46,7 @@
 
   # https://devenv.sh/scripts/
   scripts.setup.exec = ''
-    echo "Setting up Star Wars - HoloNet development environment..."
+    echo "Setting up Star Wars Universe development environment..."
     cd backend
     cp .env.example .env 2>/dev/null || true
     npm install

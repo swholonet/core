@@ -9,7 +9,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-echo -e "${BLUE}🔧 Star Wars - HoloNet - Environment Setup${NC}"
+echo -e "${BLUE}🔧 Star Wars Universe - Environment Setup${NC}"
 echo "=========================================="
 echo ""
 
@@ -103,7 +103,7 @@ echo ""
 
 # Generate .env.production
 cat > .env.production << EOF
-# Star Wars - HoloNet - Production Environment Variables
+# Star Wars Universe - Production Environment Variables
 # Generated at: $(date)
 
 # ============================================
@@ -111,7 +111,7 @@ cat > .env.production << EOF
 # ============================================
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-POSTGRES_DB=swholo_game
+POSTGRES_DB=swuniverse_game
 POSTGRES_HOST=${POSTGRES_HOST}
 POSTGRES_PORT=${POSTGRES_PORT}
 

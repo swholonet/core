@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "🚀 Star Wars - HoloNet - Build Script"
+echo "🚀 Star Wars Universe - Build Script"
 echo "===================================="
 echo ""
 

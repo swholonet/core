@@ -1,5 +1,5 @@
 /**
- * Global configuration for the Star Wars - HoloNet backend
+ * Global configuration for the Star Wars Universe backend
  */
 
 export const config = {

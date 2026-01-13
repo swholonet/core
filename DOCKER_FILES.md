@@ -53,7 +53,7 @@ docker build -f Dockerfile.frontend -t swholo-frontend:latest .
 
 **Erwartete Ausgabe:**
 ```
-🚀 Star Wars - HoloNet - Build Script
+🚀 Star Wars Universe - Build Script
 ✅ Backend erfolgreich gebaut
 ✅ Frontend erfolgreich gebaut
 ✅ Alle Images erfolgreich gebaut!
@@ -67,8 +67,8 @@ docker build -f Dockerfile.frontend -t swholo-frontend:latest .
 **Services:**
 - `postgres` - PostgreSQL 15 mit Health Checks
 - `redis` - Redis 7 mit Persistence
-- `backend` - Star Wars - HoloNet Backend API + Socket.io
-- `frontend` - Star Wars - HoloNet React Frontend
+- `backend` - Star Wars Universe Backend API + Socket.io
+- `frontend` - Star Wars Universe React Frontend
 
 **Container Ports:**
 - PostgreSQL: `5432:5432`

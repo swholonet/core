@@ -1,6 +1,6 @@
-# Star Wars - HoloNet - Docker Deployment Guide
+# Star Wars Universe - Docker Deployment Guide
 
-Vollständige Anleitung für das Deployment der Star Wars - HoloNet Applikation via Docker auf einem VPS oder Server.
+Vollständige Anleitung für das Deployment der Star Wars Universe Applikation via Docker auf einem VPS oder Server.
 
 ## 📋 Voraussetzungen
 
@@ -100,7 +100,7 @@ Das Script führt aus:
 
 **Erwartete Ausgabe:**
 ```
-🚀 Star Wars - HoloNet - Build Script
+🚀 Star Wars Universe - Build Script
 ====================================
 
 Schritt 1: Backend Docker Image bauen
