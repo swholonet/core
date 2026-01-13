@@ -167,7 +167,7 @@ export default function Dashboard() {
     const fetchDashboard = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:3000/api/player/dashboard', {
+        const response = await fetch('/api/player/dashboard', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -200,7 +200,7 @@ export default function Dashboard() {
       await api.post('/research/cancel');
       // Reload dashboard after cancel
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3000/api/player/dashboard', {
+      const response = await fetch('/api/player/dashboard', {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.ok) {

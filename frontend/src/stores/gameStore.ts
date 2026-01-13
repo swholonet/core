@@ -167,7 +167,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       existingSocket.disconnect();
     }
     
-    const socket = io(API_BASE_URL, {
+    const socket = io(API_BASE_URL || window.location.origin, {
       auth: {
         token: localStorage.getItem('token'),
       },
