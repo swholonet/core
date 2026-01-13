@@ -167,7 +167,12 @@ export const useGameStore = create<GameState>((set, get) => ({
       existingSocket.disconnect();
     }
     
-    const socket = io(API_BASE_URL || window.location.origin, {
+    // Clean the API_BASE_URL and provide proper fallback
+    // Handles case where Vite serializes empty env vars as '""' literal string
+    const cleanApiUrl = API_BASE_URL?.replace(/^["']|["']$/g, '') || '';
+    const socketUrl = cleanApiUrl || window.location.origin;
+
+    const socket = io(socketUrl, {
       auth: {
         token: localStorage.getItem('token'),
       },
