@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Globe, Zap, Box, Coins, Gem, Wind, Battery, Sparkles, Heart, Shield, Wrench } from 'lucide-react';
+import { Globe, Zap, Box, Coins, Gem, Wrench } from 'lucide-react';
 import api from '../lib/api';
 import PlanetImage, { getPlanetTypeLabel } from '../components/PlanetImage';
 

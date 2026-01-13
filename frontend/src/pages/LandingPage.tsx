@@ -2,7 +2,6 @@ import { useState, FormEvent, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useGameStore } from '../stores/gameStore';
 import {
-  Sword,
   Rocket,
   Coins,
   Users,
@@ -11,7 +10,6 @@ import {
   Globe,
   ChevronDown,
   Star,
-  Orbit,
   Target,
   Crown,
 } from 'lucide-react';
