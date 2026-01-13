@@ -29,12 +29,20 @@ export default function Register() {
     const fetchFactions = async () => {
       try {
         const response = await api.get('/factions');
-        setFactions(response.data);
-        if (response.data.length > 0) {
-          setFactionId(response.data[0].id);
+
+        // Type check: ensure response.data is an array
+        if (Array.isArray(response.data)) {
+          setFactions(response.data);
+          if (response.data.length > 0) {
+            setFactionId(response.data[0].id);
+          }
+        } else {
+          console.error('Expected factions array but got:', typeof response.data, response.data);
+          setFactions([]); // Fallback to empty array
         }
       } catch (err) {
         console.error('Failed to fetch factions:', err);
+        setFactions([]); // Ensure factions is always an array
         setError('Fraktionen konnten nicht geladen werden');
       }
     };
