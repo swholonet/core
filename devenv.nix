@@ -30,7 +30,7 @@
     enable = true;
     package = pkgs.postgresql_15;
     initialDatabases = [
-      { name = "swholo_game"; }
+      { name = "swuniverse_game"; }
     ];
     listen_addresses = "127.0.0.1";
     port = 5432;
@@ -93,7 +93,7 @@
     echo "  reset-db         - Reset & seed DB (factions, buildings, research, ships, galaxy)"
     echo ""
     echo "Services:"
-    echo "  PostgreSQL:      localhost:5432 (user: postgres, pass: postgres, db: swholo_game)"
+    echo "  PostgreSQL:      localhost:5432 (user: postgres, pass: postgres, db: swuniverse_game)"
     echo "  Redis:           localhost:6379"
     echo "  Backend API:     http://localhost:3000"
     echo "  Frontend:        http://localhost:5173"

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "🚀 Star Wars - HoloNet - Remote Deployment"
+echo "🚀 Star Wars Universe - Remote Deployment"
 echo "=========================================="
 echo ""
 
@@ -24,7 +24,7 @@ if [ ! -f .env.production ]; then
 fi
 
 echo -e "${BLUE}Schritt 1: Login zu GitHub Container Registry${NC}"
-echo "$GHCR_TOKEN" | docker login ghcr.io -u swholonet --password-stdin
+echo "$GHCR_TOKEN" | docker login ghcr.io -u swuniverse --password-stdin
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}✅ GHCR Login erfolgreich${NC}"
 else
