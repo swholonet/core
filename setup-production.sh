@@ -55,7 +55,7 @@ echo ""
 # Setup directory
 echo -e "${BLUE}Schritt 2: Richte Verzeichnis ein${NC}"
 
-DEPLOY_DIR="/root/swholonet/core"
+DEPLOY_DIR="/root/swuniverse/core"
 
 if [ ! -d "$DEPLOY_DIR" ]; then
     echo -e "${YELLOW}Verzeichnis $DEPLOY_DIR existiert nicht, erstelle es...${NC}"
@@ -64,7 +64,7 @@ if [ ! -d "$DEPLOY_DIR" ]; then
     
     # Clone the repo
     echo "Klone Repository..."
-    git clone https://github.com/swholonet/core.git .
+    git clone https://github.com/swuniverse/core.git .
 else
     cd "$DEPLOY_DIR"
     echo -e "${GREEN}✅ Verzeichnis existiert${NC}"
@@ -153,7 +153,7 @@ NODE_ENV=production
 PORT=3000
 
 # Database Connection String (password must be URL-encoded)
-DATABASE_URL=postgresql://postgres:${ENCODED_PASSWORD}@postgres:5432/swholo_game?schema=public
+DATABASE_URL=postgresql://postgres:${ENCODED_PASSWORD}@postgres:5432/swuniverse_game?schema=public
 
 # JWT Authentication
 JWT_SECRET=${JWT_SECRET}
@@ -168,7 +168,7 @@ CORS_ORIGIN=${CORS_ORIGIN}
 VITE_API_URL=https://${DOMAIN_NAME}
 
 # Asset Repository URL
-VITE_ASSET_BASE_URL=https://swholonet.github.io/assets
+VITE_ASSET_BASE_URL=https://swuniverse.github.io/assets/
 
 # ============================================
 # Deployment (for deploy-remote.sh)

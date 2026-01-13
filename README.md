@@ -7,12 +7,8 @@ Ein tick-basiertes Strategie-Browserspiel im Star Wars Universum.
 ## Überblick
 
 - **Fraktionen**: Galaktisches Imperium & Rebellenallianz
-- **Planeten**: Kolonisierung und Ressourcenmanagement
-- **Gebäude**: 11 Typen mit Echtzeit-Konstruktion
-- **Schiffe**: 14 Schiffstypen, Navigation und Flotten
-- **Forschung**: Tech-Tree System
+- **Gameplay**: Planeten kolonisieren, Gebäude errichten, Schiffe bauen, Forschung betreiben
 - **Comnet**: Galaxieweites RP-Forum
-- **Tick-System**: Ressourcenproduktion zu festen Uhrzeiten (12:00, 15:00, 18:00, 21:00, 00:00)
 
 ## 🚀 Development
 
@@ -25,27 +21,53 @@ Ein tick-basiertes Strategie-Browserspiel im Star Wars Universum.
 
 **Voraussetzungen:** [Nix](https://nixos.org/download.html) + [devenv](https://devenv.sh/)
 
-## 🐳 Production Deployment
+### Nützliche Befehle
+- **Database reset:** `cd backend && npm run db:reset`
+- **Admin Code:** `npm run seed:admin`
 
+## 🚀 Production
+
+### Voraussetzungen
+- **Docker & Docker Compose** installiert
+- **Git** für Repository-Kloning
+- **Domain** mit DNS-Konfiguration auf Server-IP
+- **GitHub Container Registry Zugang** (GHCR_TOKEN)
+
+### Erster Rollout
+1. **Repository setup:** `git clone https://github.com/swuniverse/core.git && cd core`
+2. **Environment konfigurieren:** `bash .env.production.setup.sh`
+3. **Vollständiges Deployment:** `bash setup-production.sh`
+4. **Domain im Caddyfile anpassen:** Domain in `Caddyfile` ändern
+5. **SSL-Setup:** Reverse proxy setup siehe [CADDY.md](CADDY.md)
+
+### Datenbank Seeding
 ```bash
-# 1. Build Docker images
-./deploy.sh
+# Vollständiges DB Reset + Seeding (nur bei Erstinstallation)
+docker compose -f docker-compose.prod.yml exec backend npm run db:reset
 
-# 2. Configure environment
-cp .env.production.example .env.production
-# Edit .env.production with your secrets
-
-# 3. Start containers
-docker compose -f docker-compose.prod.yml up -d
+# Einzelne Seeding-Optionen
+docker compose -f docker-compose.prod.yml exec backend npm run seed:factions
+docker compose -f docker-compose.prod.yml exec backend npm run seed:buildings
+docker compose -f docker-compose.prod.yml exec backend npm run seed:research
 ```
 
-**Detaillierte Anleitung:** [DEPLOYMENT.md](DEPLOYMENT.md)
+### Wichtige Befehle
+- **Services starten:** `docker compose -f docker-compose.prod.yml up -d`
+- **Services stoppen:** `docker compose -f docker-compose.prod.yml down`
+- **Logs verfolgen:** `docker compose -f docker-compose.prod.yml logs -f backend`
+- **Health Check:** `curl http://localhost:3000/health`
+- **Updates deployen:** `./deploy-remote.sh`
+
+### Troubleshooting
+- **Container Status:** `docker compose -f docker-compose.prod.yml ps`
+- **Logs:** `docker compose -f docker-compose.prod.yml logs [service]`
+- **Database Verbindung:** `.env.production` Einstellungen prüfen
+- **SSL/Domain:** [CADDY.md](CADDY.md) Konfiguration prüfen
 
 ## Tech Stack
 
-- **Backend:** Node.js + TypeScript + PostgreSQL + Redis + Socket.io
-- **Frontend:** React + TypeScript + Tailwind + Zustand
-- **Dev:** devenv (Nix) + Docker
+**Backend:** Node.js + TypeScript + PostgreSQL + Redis + Socket.io
+**Frontend:** React + TypeScript + Tailwind + Zustand
 
 ## License
 
