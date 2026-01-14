@@ -2,10 +2,6 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     devenv.url = "github:cachix/devenv";
-    devenv-root = {
-      url = "file+file:///dev/null";
-      flake = false;
-    };
   };
 
   nixConfig = {
@@ -13,11 +9,10 @@
     extra-substituters = "https://devenv.cachix.org";
   };
 
-  outputs = { self, nixpkgs, devenv, devenv-root, ... } @ inputs:
+  outputs = { self, nixpkgs, devenv, ... } @ inputs:
     let
       systems = [ "x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin" ];
       forAllSystems = f: builtins.listToAttrs (map (name: { inherit name; value = f name; }) systems);
-      devenvRootFileContent = builtins.readFile devenv-root.outPath;
     in
     {
       packages = forAllSystems (system: {
@@ -33,13 +28,6 @@
             default = devenv.lib.mkShell {
               inherit inputs pkgs;
               modules = [
-                {
-                  devenv.root =
-                    let
-                      devenvRoot = builtins.readFile devenv-root.outPath;
-                    in
-                    pkgs.lib.mkIf (devenvRoot != "") devenvRoot;
-                }
                 ./devenv.nix
               ];
             };

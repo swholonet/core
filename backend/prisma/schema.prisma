@@ -72,6 +72,9 @@ model Player {
   research      PlayerResearch[]
   fleets        Fleet[]
   holonetMessages HoloNetMessage[]
+  holonetPlots    HoloNetPlot[]
+  plotMemberships HoloNetPlotMember[] // Plots where this player is a member
+  addedPlotMembers HoloNetPlotMember[] @relation("PlotMemberAddedBy") // Plot members added by this player
   blueprints    ShipBlueprint[]
 }
 
@@ -525,12 +528,47 @@ model InviteCode {
 model HoloNetMessage {
   id        Int      @id @default(autoincrement())
   playerId  Int
+  plotId    Int?     // Optional reference to plot
   title     String?
   message   String   @db.Text
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
-  
+
   player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
-  
+  plot      HoloNetPlot? @relation(fields: [plotId], references: [id], onDelete: SetNull)
+
   @@index([createdAt])
+  @@index([plotId])
+}
+
+model HoloNetPlot {
+  id          Int      @id @default(autoincrement())
+  title       String   // Plot title (e.g., "Rebellion auf Tatooine")
+  description String?  @db.Text // Optional plot description
+  creatorId   Int      // Player who created the plot
+  isActive    Boolean  @default(true) // Active plots can receive new messages
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  creator     Player   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  messages    HoloNetMessage[] // Related messages
+  members     HoloNetPlotMember[] // Plot members for access control
+
+  @@index([isActive, createdAt])
+}
+
+model HoloNetPlotMember {
+  id       Int @id @default(autoincrement())
+  plotId   Int
+  playerId Int
+  addedAt  DateTime @default(now())
+  addedBy  Int // Player who added this member
+
+  plot          HoloNetPlot @relation(fields: [plotId], references: [id], onDelete: Cascade)
+  player        Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  addedByPlayer Player @relation("PlotMemberAddedBy", fields: [addedBy], references: [id])
+
+  @@unique([plotId, playerId]) // Prevent duplicate memberships
+  @@index([plotId])
+  @@index([playerId])
 }

@@ -81,6 +81,15 @@ if [ -z "$REDIS_PORT" ]; then
 fi
 echo ""
 
+# Redis Password
+read -sp "Redis Password (oder Enter für: openssl rand -base64 24): " REDIS_PASSWORD
+if [ -z "$REDIS_PASSWORD" ]; then
+    REDIS_PASSWORD=$(openssl rand -base64 24)
+    echo ""
+    echo -e "${GREEN}Generiert: ${REDIS_PASSWORD}${NC}"
+fi
+echo ""
+
 # URL encode the password
 ENCODED_PASSWORD=$(urlencode "$POSTGRES_PASSWORD")
 
@@ -131,9 +140,11 @@ JWT_EXPIRES_IN=7d
 CORS_ORIGIN=${CORS_ORIGIN}
 
 # Redis Connection
+REDIS_PASSWORD=${REDIS_PASSWORD}
 REDIS_HOST=${REDIS_HOST}
 REDIS_PORT=${REDIS_PORT}
-REDIS_URL=redis://${REDIS_HOST}:${REDIS_PORT}
+# Wird automatisch mit Passwort in docker-compose.prod.yml gesetzt
+# REDIS_URL=redis://:PASSWORT@redis:6379
 
 # Asset Repository URL
 VITE_ASSET_BASE_URL=https://swuniverse.github.io/assets/
@@ -160,6 +171,7 @@ echo -e "${YELLOW}Deine Werte:${NC}"
 echo "  POSTGRES_PASSWORD: $POSTGRES_PASSWORD"
 echo "  POSTGRES_HOST: $POSTGRES_HOST"
 echo "  POSTGRES_PORT: $POSTGRES_PORT"
+echo "  REDIS_PASSWORD: $REDIS_PASSWORD"
 echo "  REDIS_HOST: $REDIS_HOST"
 echo "  REDIS_PORT: $REDIS_PORT"
 echo "  JWT_SECRET: $JWT_SECRET"

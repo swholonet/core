@@ -36,9 +36,17 @@ Ein tick-basiertes Strategie-Browserspiel im Star Wars Universum.
 ### Erster Rollout
 1. **Repository setup:** `git clone https://github.com/swuniverse/core.git && cd core`
 2. **Environment konfigurieren:** `bash .env.production.setup.sh`
+   - Generiert automatisch sichere Passwörter für PostgreSQL, Redis und JWT
+   - **Wichtig:** Speichere diese Werte sicher ab!
 3. **Vollständiges Deployment:** `bash setup-production.sh`
 4. **Domain im Caddyfile anpassen:** Domain in `Caddyfile` ändern
 5. **SSL-Setup:** Reverse proxy setup siehe [CADDY.md](CADDY.md)
+
+### Sicherheitshinweise
+- **Port-Bindings:** Redis & PostgreSQL sind nur intern im Docker-Netzwerk erreichbar (keine öffentlichen Ports)
+- **Passwortschutz:** Redis verwendet `requirepass` mit generiertem Passwort
+- **Firewall:** Stelle sicher, dass nur Ports 80/443 öffentlich erreichbar sind
+- **Updates:** Bei bestehenden Deployments `.env.production` um `REDIS_PASSWORD` ergänzen (siehe `.env.production.example`)
 
 ### Datenbank Seeding
 ```bash

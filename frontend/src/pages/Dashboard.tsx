@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useGameStore } from '../stores/gameStore';
 import { Link } from 'react-router-dom';
-import { Rocket, Wrench, Coins, Clock, Gem, Wind, Battery, Sparkles, Heart, Shield, FlaskConical, X } from 'lucide-react';
+import { Rocket, Wrench, Clock, FlaskConical, X, Radio, FileText } from 'lucide-react';
 import api from '../lib/api';
 
 interface DashboardData {
@@ -72,6 +72,24 @@ interface DashboardData {
   };
 }
 
+interface HoloNetMessage {
+  id: number;
+  title?: string;
+  message: string;
+  createdAt: string;
+  updatedAt?: string;
+  player: {
+    id: number;
+    username: string;
+    factionName: string;
+  };
+  plot?: {
+    id: number;
+    title: string;
+    description?: string;
+  } | null;
+}
+
 export default function Dashboard() {
   const { user } = useGameStore();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
@@ -79,6 +97,7 @@ export default function Dashboard() {
   const [nextTickTime, setNextTickTime] = useState<Date | null>(null);
   const [timeUntilTick, setTimeUntilTick] = useState<string>('');
   const [tickProgress, setTickProgress] = useState<number>(0);
+  const [holoNetMessages, setHoloNetMessages] = useState<HoloNetMessage[]>([]);
 
   // Calculate next tick time (12:00, 15:00, 18:00, 21:00, 00:00)
   useEffect(() => {
@@ -191,6 +210,33 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    const fetchHoloNetMessages = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/holonet/messages', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          // Take only the last 3 messages
+          setHoloNetMessages(data.slice(-3).reverse());
+        } else {
+          console.error('HoloNet error:', response.status, await response.text());
+        }
+      } catch (error) {
+        console.error('Failed to load HoloNet messages:', error);
+      }
+    };
+
+    fetchHoloNetMessages();
+    const interval = setInterval(fetchHoloNetMessages, 60000); // Refresh every 60s
+    return () => clearInterval(interval);
+  }, []);
+
   const cancelResearch = async () => {
     if (!confirm('Forschung wirklich abbrechen? Der Fortschritt geht verloren.')) {
       return;
@@ -299,104 +345,70 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Imperial Command Resource Overview */}
-      {dashboardData && (
-        <div className="space-y-4 mb-8">
-          {/* Erste Reihe: Credits, Durastahl, Kristallines Silizium, Tibanna-Gas */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-gradient-to-br from-yellow-900/30 to-yellow-950/20 border border-yellow-500/30 p-4 rounded backdrop-blur-sm">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-yellow-200 text-sm font-mono tracking-wide">CREDITS</span>
-                <div className="p-1 bg-yellow-900/40 border border-yellow-500/40 rounded">
-                  <Coins size={16} className="text-yellow-300" />
-                </div>
-              </div>
-              <p className="text-xl font-bold text-yellow-100 font-mono mb-1">{dashboardData.totals.credits.toLocaleString()}</p>
-              <p className="text-xs text-yellow-400/80 font-mono">+{dashboardData.production.credits}/TICK</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-slate-900/30 to-slate-950/20 border border-slate-500/30 p-4 rounded backdrop-blur-sm">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-slate-200 text-sm font-mono tracking-wide">DURASTAHL</span>
-                <div className="p-1 bg-slate-900/40 border border-slate-500/40 rounded">
-                  <Wrench size={16} className="text-slate-300" />
-                </div>
-              </div>
-              <p className="text-xl font-bold text-slate-100 font-mono mb-1">{dashboardData.totals.durastahl.toLocaleString()}</p>
-              <p className="text-xs text-slate-400/80 font-mono">+{dashboardData.production.durastahl}/TICK</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-purple-900/30 to-purple-950/20 border border-purple-500/30 p-4 rounded backdrop-blur-sm">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-purple-200 text-sm font-mono tracking-wide">K. SILIZIUM</span>
-                <div className="p-1 bg-purple-900/40 border border-purple-500/40 rounded">
-                  <Gem size={16} className="text-purple-300" />
-                </div>
-              </div>
-              <p className="text-xl font-bold text-purple-100 font-mono mb-1">{dashboardData.totals.kristallinesSilizium.toLocaleString()}</p>
-              <p className="text-xs text-purple-400/80 font-mono">+{dashboardData.production.kristallinesSilizium}/TICK</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-cyan-900/30 to-cyan-950/20 border border-cyan-500/30 p-4 rounded backdrop-blur-sm">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-cyan-200 text-sm font-mono tracking-wide">TIBANNA-GAS</span>
-                <div className="p-1 bg-cyan-900/40 border border-cyan-500/40 rounded">
-                  <Wind size={16} className="text-cyan-300" />
-                </div>
-              </div>
-              <p className="text-xl font-bold text-cyan-100 font-mono mb-1">{dashboardData.totals.tibannaGas.toLocaleString()}</p>
-              <p className="text-xs text-cyan-400/80 font-mono">+{dashboardData.production.tibannaGas}/TICK</p>
-            </div>
+      {/* Imperial Command HoloNet Terminal */}
+      <div className="bg-gradient-to-r from-blue-950/30 to-indigo-950/20 border border-blue-500/30 p-6 rounded backdrop-blur-sm mb-8">
+        <div className="flex items-center gap-3 mb-6 pb-3 border-b border-blue-500/20">
+          <div className="p-2 bg-blue-900/40 border border-blue-500/40 rounded">
+            <Radio size={18} className="text-blue-300" />
           </div>
-
-          {/* Zweite Reihe: Energiemodule, Kyber-Kristalle, Bacta, Beskar */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-gradient-to-br from-blue-900/30 to-blue-950/20 border border-blue-500/30 p-4 rounded backdrop-blur-sm">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-blue-200 text-sm font-mono tracking-wide">ENERGIE</span>
-                <div className="p-1 bg-blue-900/40 border border-blue-500/40 rounded">
-                  <Battery size={16} className="text-blue-300" />
-                </div>
-              </div>
-              <p className="text-xl font-bold text-blue-100 font-mono mb-1">{dashboardData.totals.energiemodule.toLocaleString()}</p>
-              <p className="text-xs text-blue-400/80 font-mono">+{dashboardData.production.energiemodule}/TICK</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-green-900/30 to-green-950/20 border border-green-500/30 p-4 rounded backdrop-blur-sm">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-green-200 text-sm font-mono tracking-wide">KYBER</span>
-                <div className="p-1 bg-green-900/40 border border-green-500/40 rounded">
-                  <Sparkles size={16} className="text-green-300" />
-                </div>
-              </div>
-              <p className="text-xl font-bold text-green-100 font-mono mb-1">{dashboardData.totals.kyberKristalle.toLocaleString()}</p>
-              <p className="text-xs text-green-400/80 font-mono">+{dashboardData.production.kyberKristalle}/TICK</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-rose-900/30 to-rose-950/20 border border-rose-500/30 p-4 rounded backdrop-blur-sm">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-rose-200 text-sm font-mono tracking-wide">BACTA</span>
-                <div className="p-1 bg-rose-900/40 border border-rose-500/40 rounded">
-                  <Heart size={16} className="text-rose-300" />
-                </div>
-              </div>
-              <p className="text-xl font-bold text-rose-100 font-mono mb-1">{dashboardData.totals.bacta.toLocaleString()}</p>
-              <p className="text-xs text-rose-400/80 font-mono">+{dashboardData.production.bacta}/TICK</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-amber-900/30 to-amber-950/20 border border-amber-500/30 p-4 rounded backdrop-blur-sm">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-amber-200 text-sm font-mono tracking-wide">BESKAR</span>
-                <div className="p-1 bg-amber-900/40 border border-amber-500/40 rounded">
-                  <Shield size={16} className="text-amber-300" />
-                </div>
-              </div>
-              <p className="text-xl font-bold text-amber-100 font-mono mb-1">{dashboardData.totals.beskar.toLocaleString()}</p>
-              <p className="text-xs text-amber-400/80 font-mono">+{dashboardData.production.beskar}/TICK</p>
-            </div>
-          </div>
+          <h3 className="text-lg font-mono font-semibold text-blue-100 tracking-wider">HOLONET-NACHRICHTEN</h3>
         </div>
-      )}
+
+        <div className="space-y-4">
+          {holoNetMessages.length > 0 ? (
+            holoNetMessages.map((message) => (
+              <div key={message.id} className="bg-blue-950/20 border border-blue-500/20 p-4 rounded">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1">
+                    {message.title && (
+                      <h4 className="text-blue-100 font-mono font-semibold text-sm mb-2">{message.title}</h4>
+                    )}
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="text-xs px-2 py-1 rounded border border-blue-500/40 bg-blue-900/30 text-blue-300 font-mono">
+                        {message.player.factionName}
+                      </span>
+                      <span className="text-xs text-blue-400 font-mono">
+                        {message.player.username}
+                      </span>
+                      {message.plot && (
+                        <div className="inline-flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-purple-900/40 to-violet-800/30 border border-purple-500/30 rounded text-xs font-mono tracking-wider text-purple-300 backdrop-blur-sm">
+                          <FileText size={12} />
+                          <span>RPG: {message.plot.title.toUpperCase()}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-xs text-blue-400/60 font-mono">
+                    {new Date(message.createdAt).toLocaleString('de-DE', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </div>
+                </div>
+                <p className="text-blue-200/90 text-sm leading-relaxed font-mono whitespace-pre-wrap">
+                  {message.message}
+                </p>
+                {message.updatedAt && (
+                  <div className="mt-2 text-xs text-blue-500/50 font-mono">
+                    Bearbeitet: {new Date(message.updatedAt).toLocaleString('de-DE', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </div>
+                )}
+              </div>
+            ))
+          ) : (
+            <p className="text-blue-400/60 text-sm font-mono text-center py-8">
+              KEINE HOLONET-NACHRICHTEN VERFÜGBAR
+            </p>
+          )}
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 gap-6">
         {/* Imperial Command Construction Terminal */}

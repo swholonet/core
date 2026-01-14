@@ -8,6 +8,7 @@
   packages = [ 
     pkgs.git
     pkgs.nodejs_20
+    pkgs.postgresql_15
   ];
 
   # https://devenv.sh/languages/
@@ -45,21 +46,53 @@
   };
 
   # https://devenv.sh/scripts/
+  scripts.wait-for-db.exec = ''
+    echo "Waiting for PostgreSQL to be ready..."
+    max_attempts=30
+    attempt=0
+    
+    # Try to find the socket directory
+    socket_dir=""
+    if [ -n "$PGHOST" ]; then
+      socket_dir="$PGHOST"
+    fi
+    
+    while [ $attempt -lt $max_attempts ]; do
+      # Try connection via psql
+      if psql -h localhost -p 5432 -U postgres -d swuniverse_game -c "SELECT 1;" > /dev/null 2>&1; then
+        echo "✓ PostgreSQL is ready!"
+        exit 0
+      fi
+      attempt=$((attempt + 1))
+      echo "Attempt $attempt/$max_attempts: Waiting for PostgreSQL..."
+      sleep 1
+    done
+    echo "✗ PostgreSQL did not become ready in time"
+    exit 1
+  '';
+
   scripts.setup.exec = ''
     echo "Setting up Star Wars Universe development environment..."
+    echo ""
+    echo "⚠️  Make sure 'devenv up' is running in another terminal first!"
+    echo "   Press Ctrl+C to cancel, or wait 5 seconds to continue..."
+    sleep 5
+    echo ""
+    
+    # Wait for PostgreSQL
+    wait-for-db
+    
     cd backend
     cp .env.example .env 2>/dev/null || true
     npm install
     npx prisma generate
     npx prisma migrate dev --name init
     echo "Note: Use 'reset-db' script for seeding (backend/scripts/reset-and-seed.ts)"
-    echo "Initializing galaxy and start planets..."
-    curl -X POST http://localhost:3000/api/galaxy/initialize 2>/dev/null || echo "Note: Galaxy initialization requires backend to be running"
     cd ../frontend
     npm install
     echo ""
-    echo "✨ Setup complete! Run 'devenv up' to start all services."
-    echo "After services start, run: curl -X POST http://localhost:3000/api/galaxy/initialize"
+    echo "✨ Setup complete!"
+    echo "After backend starts, run: curl -X POST http://localhost:3000/api/galaxy/initialize"
   '';
 
   scripts.init-galaxy.exec = ''
@@ -87,7 +120,8 @@
     echo ""
     echo "Available commands:"
     echo "  devenv up        - Start all services (backend, frontend, postgres, redis)"
-    echo "  setup            - Initial setup (install deps, migrate, seed)"
+    echo "  setup            - Initial setup (install deps, migrate) - requires 'devenv up' running!"
+    echo "  wait-for-db      - Wait until PostgreSQL is ready"
     echo "  migrate          - Run database migrations"
     echo "  studio           - Open Prisma Studio"
     echo "  reset-db         - Reset & seed DB (factions, buildings, research, ships, galaxy)"
