@@ -9,6 +9,45 @@ router.get('/profile', authMiddleware, (req, res) => {
   res.json({ message: 'Player profile - to be implemented' });
 });
 
+// Search players for autocomplete (HoloNet plot member management)
+router.get('/search', authMiddleware, async (req, res) => {
+  try {
+    const { q } = req.query;
+
+    if (!q || typeof q !== 'string' || q.length < 2) {
+      return res.json([]);
+    }
+
+    const players = await prisma.player.findMany({
+      where: {
+        user: {
+          username: {
+            contains: q,
+            mode: 'insensitive'
+          }
+        }
+      },
+      include: {
+        user: { select: { username: true } },
+        faction: { select: { name: true } }
+      },
+      take: 10,
+      orderBy: {
+        user: { username: 'asc' }
+      }
+    });
+
+    res.json(players.map(p => ({
+      id: p.id,
+      username: p.user.username,
+      factionName: p.faction.name
+    })));
+  } catch (error) {
+    console.error('Player search error:', error);
+    res.status(500).json({ error: 'Fehler bei der Spielersuche' });
+  }
+});
+
 // Dashboard overview - all player data in one request
 router.get('/dashboard', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {

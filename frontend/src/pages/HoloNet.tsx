@@ -1,8 +1,23 @@
 import { useState, useEffect, useRef } from 'react';
 import { useGameStore } from '../stores/gameStore';
-import { Radio, Send, FileText, Edit2, X } from 'lucide-react';
+import { Radio, Send, FileText, Edit2, X, Users } from 'lucide-react';
 import api from '../lib/api';
 import logger from '../lib/logger';
+
+interface HoloNetPlot {
+  id: number;
+  title: string;
+  description?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  creator: {
+    id: number;
+    username: string;
+    factionName: string;
+  };
+  messageCount: number;
+}
 
 interface HoloNetMessage {
   id: number;
@@ -15,6 +30,24 @@ interface HoloNetMessage {
     username: string;
     factionName: string;
   };
+  plot?: {
+    id: number;
+    title: string;
+    description?: string;
+  } | null;
+}
+
+interface PlotMember {
+  id: number;
+  username: string;
+  factionName: string;
+  addedAt: string;
+}
+
+interface PlayerSearchResult {
+  id: number;
+  username: string;
+  factionName: string;
 }
 
 export default function HoloNet() {
@@ -28,10 +61,28 @@ export default function HoloNet() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editMessage, setEditMessage] = useState('');
+  const [plots, setPlots] = useState<HoloNetPlot[]>([]);
+  const [selectedPlotId, setSelectedPlotId] = useState<number | null>(null);
+  const [showCreatePlot, setShowCreatePlot] = useState(false);
+  const [newPlotTitle, setNewPlotTitle] = useState('');
+  const [newPlotDescription, setNewPlotDescription] = useState('');
+
+  // Member management state
+  const [selectedMembers, setSelectedMembers] = useState<PlotMember[]>([]);
+  const [memberSearch, setMemberSearch] = useState('');
+  const [searchResults, setSearchResults] = useState<PlayerSearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+
+  // Plot management modal state
+  const [showPlotManager, setShowPlotManager] = useState(false);
+  const [managingPlotId, setManagingPlotId] = useState<number | null>(null);
+  const [plotMembers, setPlotMembers] = useState<PlotMember[]>([]);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadMessages();
+    loadPlots();
   }, []);
 
   useEffect(() => {
@@ -39,7 +90,13 @@ export default function HoloNet() {
 
     const handleNewMessage = (message: HoloNetMessage) => {
       logger.socket('New HoloNet message received:', message);
-      setMessages((prev) => [...prev, message]);
+      setMessages((prev) => {
+        // Check if message already exists to prevent duplicates
+        if (prev.some(msg => msg.id === message.id)) {
+          return prev; // Skip duplicate
+        }
+        return [...prev, message];
+      });
       setTimeout(scrollToBottom, 100);
     };
 
@@ -87,20 +144,158 @@ export default function HoloNet() {
     }
   };
 
+  const loadPlots = async () => {
+    try {
+      const response = await api.get('/holonet/plots');
+      setPlots(response.data);
+    } catch (error) {
+      console.error('Failed to load plots:', error);
+      setPlots([]);
+    }
+  };
+
+  const createPlot = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPlotTitle.trim()) return;
+
+    try {
+      const initialMembers = selectedMembers.map(member => member.username);
+      const response = await api.post('/holonet/plots', {
+        title: newPlotTitle.trim(),
+        description: newPlotDescription.trim() || undefined,
+        initialMembers: initialMembers.length > 0 ? initialMembers : undefined,
+      });
+
+      setPlots((prev) => [response.data, ...prev]);
+      setNewPlotTitle('');
+      setNewPlotDescription('');
+      setSelectedMembers([]);
+      setMemberSearch('');
+      setSearchResults([]);
+      setShowCreatePlot(false);
+    } catch (error: any) {
+      alert(error.response?.data?.error || 'Fehler beim Erstellen des Plots');
+    }
+  };
+
+  // Member management functions
+  const searchPlayers = async (query: string) => {
+    if (query.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const response = await api.get(`/player/search?q=${encodeURIComponent(query)}`);
+      setSearchResults(response.data);
+    } catch (error) {
+      console.error('Player search error:', error);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleMemberSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setMemberSearch(value);
+
+    // Debounce search
+    const timeoutId = setTimeout(() => {
+      searchPlayers(value);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  };
+
+  const addMember = (player: PlayerSearchResult) => {
+    // Check if player is already selected
+    if (selectedMembers.some(member => member.id === player.id)) {
+      return;
+    }
+
+    const newMember: PlotMember = {
+      id: player.id,
+      username: player.username,
+      factionName: player.factionName,
+      addedAt: new Date().toISOString(),
+    };
+
+    setSelectedMembers(prev => [...prev, newMember]);
+    setMemberSearch('');
+    setSearchResults([]);
+  };
+
+  const removeMember = (memberId: number) => {
+    setSelectedMembers(prev => prev.filter(member => member.id !== memberId));
+  };
+
+  // Plot management functions
+  const loadPlotMembers = async (plotId: number) => {
+    try {
+      const response = await api.get(`/holonet/plots/${plotId}/members`);
+      setPlotMembers(response.data);
+    } catch (error: any) {
+      console.error('Failed to load plot members:', error);
+      alert(error.response?.data?.error || 'Fehler beim Laden der Plot-Mitglieder');
+    }
+  };
+
+  const addPlotMember = async (username: string) => {
+    if (!managingPlotId) return;
+
+    try {
+      await api.post(`/holonet/plots/${managingPlotId}/members`, { username });
+      // Reload members after successful add
+      await loadPlotMembers(managingPlotId);
+      setMemberSearch('');
+      setSearchResults([]);
+    } catch (error: any) {
+      console.error('Failed to add plot member:', error);
+      alert(error.response?.data?.error || 'Fehler beim Hinzufügen des Mitglieds');
+    }
+  };
+
+  const removePlotMember = async (memberId: number) => {
+    if (!managingPlotId) return;
+
+    if (!confirm('Mitglied wirklich aus dem Plot entfernen?')) {
+      return;
+    }
+
+    try {
+      await api.delete(`/holonet/plots/${managingPlotId}/members/${memberId}`);
+      // Reload members after successful removal
+      await loadPlotMembers(managingPlotId);
+    } catch (error: any) {
+      console.error('Failed to remove plot member:', error);
+      alert(error.response?.data?.error || 'Fehler beim Entfernen des Mitglieds');
+    }
+  };
+
+  const openPlotManager = async (plotId: number) => {
+    setManagingPlotId(plotId);
+    setShowPlotManager(true);
+    setMemberSearch('');
+    setSearchResults([]);
+    await loadPlotMembers(plotId);
+  };
+
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim() || sending) return;
 
     setSending(true);
     try {
-      const response = await api.post('/holonet/messages', { 
+      await api.post('/holonet/messages', {
         title: title.trim() || undefined,
-        message: newMessage 
+        message: newMessage,
+        plotId: selectedPlotId
       });
-      // Füge die neue Nachricht direkt hinzu, falls Socket nicht sofort triggert
-      setMessages((prev) => [...prev, response.data]);
       setTitle('');
       setNewMessage('');
+      setSelectedPlotId(null);
       setTimeout(scrollToBottom, 100);
     } catch (error: any) {
       alert(error.response?.data?.error || 'Fehler beim Senden der Nachricht');
@@ -219,6 +414,81 @@ export default function HoloNet() {
               className="w-full bg-slate-800/60 border border-cyan-500/30 rounded px-4 py-3 text-cyan-100 focus:outline-none focus:border-cyan-400 font-mono backdrop-blur-sm"
               disabled={sending}
             />
+
+            {/* Plot Selection */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="block text-cyan-400 text-xs font-mono tracking-wider uppercase font-medium">
+                  RPG PLOT (OPTIONAL)
+                </label>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowCreatePlot(true)}
+                    className="text-xs text-cyan-400/70 hover:text-cyan-300 font-mono tracking-wider flex items-center gap-1 transition-colors"
+                    disabled={sending}
+                  >
+                    <span className="text-cyan-400">+</span> NEUEN PLOT ERSTELLEN
+                  </button>
+
+                </div>
+              </div>
+
+              <select
+                value={selectedPlotId || ''}
+                onChange={(e) => setSelectedPlotId(e.target.value ? parseInt(e.target.value) : null)}
+                className="w-full bg-slate-800/60 border border-cyan-500/30 rounded px-4 py-3 text-cyan-100 focus:outline-none focus:border-cyan-400 font-mono backdrop-blur-sm appearance-none"
+                disabled={sending}
+              >
+                <option value="">KEIN PLOT AUSGEWÄHLT</option>
+                {plots.map(plot => (
+                  <option key={plot.id} value={plot.id}>
+                    {plot.title.toUpperCase()} ({plot.messageCount} BEITRÄGE)
+                  </option>
+                ))}
+              </select>
+
+              {selectedPlotId && (
+                <div className="bg-slate-900/40 border border-cyan-500/20 rounded px-3 py-2">
+                  {plots.find(p => p.id === selectedPlotId) && (
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-cyan-300 font-mono text-xs tracking-wider font-medium">
+                          {plots.find(p => p.id === selectedPlotId)!.title.toUpperCase()}
+                        </span>
+                        <span className="text-cyan-500/60 font-mono text-xs">
+                          {plots.find(p => p.id === selectedPlotId)!.messageCount} BEITRÄGE
+                        </span>
+                      </div>
+                      {plots.find(p => p.id === selectedPlotId)!.description && (
+                        <p className="text-cyan-400/70 font-mono text-xs leading-relaxed">
+                          {plots.find(p => p.id === selectedPlotId)!.description}
+                        </p>
+                      )}
+                      <div className="text-cyan-500/50 font-mono text-xs">
+                        ERSTELLER: {plots.find(p => p.id === selectedPlotId)!.creator.username.toUpperCase()}
+                      </div>
+
+                      {/* Context-sensitive management button - only show if user owns the selected plot */}
+                      {plots.find(p => p.id === selectedPlotId)!.creator.id === user?.player?.id && (
+                        <div className="pt-2 border-t border-cyan-500/10">
+                          <button
+                            type="button"
+                            onClick={() => openPlotManager(selectedPlotId)}
+                            className="w-full px-3 py-2 bg-gradient-to-r from-cyan-900/30 to-blue-900/20 border border-cyan-500/30 text-cyan-300 rounded hover:from-cyan-800/40 hover:to-blue-800/30 hover:border-cyan-500/40 transition-all font-mono text-xs tracking-wider flex items-center justify-center gap-2"
+                            disabled={sending}
+                          >
+                            <Users size={14} />
+                            MITGLIEDER VERWALTEN
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
             <textarea
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
@@ -275,13 +545,19 @@ export default function HoloNet() {
                       {msg.player.username.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-cyan-100 font-semibold font-mono tracking-wider">
                           {msg.player.username.toUpperCase()}
                         </span>
                         <span className={`text-xs font-mono tracking-wider ${getFactionColor(msg.player.factionName)}`}>
                           [{msg.player.factionName.toUpperCase()}]
                         </span>
+                        {msg.plot && (
+                          <div className="inline-flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-purple-900/40 to-violet-800/30 border border-purple-500/30 rounded text-xs font-mono tracking-wider text-purple-300 backdrop-blur-sm">
+                            <FileText size={12} />
+                            <span>RPG: {msg.plot.title.toUpperCase()}</span>
+                          </div>
+                        )}
                       </div>
                       <span className="text-xs text-cyan-400/60 font-mono tracking-wider">
                         {formatTime(msg.createdAt).toUpperCase()}
@@ -363,6 +639,283 @@ export default function HoloNet() {
         )}
         <div ref={messagesEndRef} />
       </div>
+
+      {/* Plot Creation Modal */}
+      {showCreatePlot && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 border border-cyan-500/30 rounded-lg max-w-md w-full backdrop-blur-sm">
+            {/* Modal Header */}
+            <div className="p-6 border-b border-cyan-500/20">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-cyan-100 flex items-center gap-2 font-mono tracking-wider">
+                  <FileText size={18} />
+                  NEUEN RPG PLOT ERSTELLEN
+                </h2>
+                <button
+                  onClick={() => {
+                    setShowCreatePlot(false);
+                    setNewPlotTitle('');
+                    setNewPlotDescription('');
+                    setSelectedMembers([]);
+                    setMemberSearch('');
+                    setSearchResults([]);
+                  }}
+                  className="text-cyan-400/70 hover:text-cyan-300 transition-colors p-1"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <form onSubmit={createPlot} className="p-6 space-y-4">
+              <div>
+                <label className="block text-cyan-400 text-xs font-mono tracking-wider uppercase font-medium mb-2">
+                  PLOT TITEL *
+                </label>
+                <input
+                  type="text"
+                  value={newPlotTitle}
+                  onChange={(e) => setNewPlotTitle(e.target.value)}
+                  placeholder="z.B. Rebellion auf Tatooine"
+                  maxLength={100}
+                  className="w-full bg-slate-800/60 border border-cyan-500/30 rounded px-4 py-3 text-cyan-100 focus:outline-none focus:border-cyan-400 font-mono backdrop-blur-sm"
+                  required
+                />
+                <div className="flex justify-between mt-1">
+                  <span className="text-cyan-500/50 font-mono text-xs">ERFORDERLICH</span>
+                  <span className="text-cyan-500/50 font-mono text-xs">{newPlotTitle.length}/100</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-cyan-400 text-xs font-mono tracking-wider uppercase font-medium mb-2">
+                  BESCHREIBUNG (OPTIONAL)
+                </label>
+                <textarea
+                  value={newPlotDescription}
+                  onChange={(e) => setNewPlotDescription(e.target.value)}
+                  placeholder="Kurze Beschreibung des Plots für andere Spieler..."
+                  maxLength={1000}
+                  rows={4}
+                  className="w-full bg-slate-800/60 border border-cyan-500/30 rounded px-4 py-3 text-cyan-100 focus:outline-none focus:border-cyan-400 font-mono resize-y backdrop-blur-sm"
+                />
+                <div className="flex justify-between mt-1">
+                  <span className="text-cyan-500/50 font-mono text-xs">NUR ERSTELLER KANN MITGLIEDER HINZUFÜGEN</span>
+                  <span className="text-cyan-500/50 font-mono text-xs">{newPlotDescription.length}/1000</span>
+                </div>
+              </div>
+
+              {/* Member Search Section */}
+              <div className="relative">
+                <label className="block text-cyan-400 text-xs font-mono tracking-wider uppercase font-medium mb-2">
+                  MITGLIEDER HINZUFÜGEN (OPTIONAL)
+                </label>
+                <input
+                  type="text"
+                  value={memberSearch}
+                  onChange={handleMemberSearch}
+                  placeholder="Benutzername eingeben..."
+                  className="w-full bg-slate-800/60 border border-cyan-500/30 rounded px-4 py-3 text-cyan-100 focus:outline-none focus:border-cyan-400 font-mono backdrop-blur-sm"
+                />
+                <div className="mt-1 text-cyan-500/50 font-mono text-xs">
+                  MINDESTENS 2 ZEICHEN FÜR SUCHE
+                </div>
+
+                {/* Autocomplete Dropdown */}
+                {searchResults.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 bg-slate-900/95 border border-cyan-500/30 rounded mt-1 max-h-48 overflow-y-auto z-10 backdrop-blur-sm">
+                    {searchResults.map(player => (
+                      <button
+                        key={player.id}
+                        type="button"
+                        onClick={() => addMember(player)}
+                        className="w-full px-4 py-3 text-left hover:bg-cyan-900/30 border-b border-cyan-500/10 last:border-b-0 transition-colors"
+                      >
+                        <div className="text-cyan-100 font-mono text-sm">{player.username}</div>
+                        <div className="text-cyan-400/60 font-mono text-xs">{player.factionName}</div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Selected Members Cards */}
+                {selectedMembers.length > 0 && (
+                  <div className="mt-3 space-y-2">
+                    <div className="text-cyan-400/70 text-xs font-mono uppercase tracking-wider">
+                      Ausgewählte Mitglieder ({selectedMembers.length}):
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedMembers.map(member => (
+                        <div key={member.id} className="inline-flex items-center gap-2 px-3 py-2 bg-cyan-900/30 border border-cyan-500/30 rounded font-mono text-xs backdrop-blur-sm">
+                          <div className="w-5 h-5 bg-gradient-to-br from-cyan-500/80 to-blue-600/80 border border-cyan-400/40 rounded-full flex items-center justify-center text-white font-bold text-xs">
+                            {member.username.charAt(0).toUpperCase()}
+                          </div>
+                          <span className="text-cyan-100">{member.username}</span>
+                          <span className="text-cyan-400/60">({member.factionName})</span>
+                          <button
+                            type="button"
+                            onClick={() => removeMember(member.id)}
+                            className="text-red-400 hover:text-red-300 ml-1 transition-colors"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Search Status */}
+                {isSearching && (
+                  <div className="mt-2 text-cyan-400/60 font-mono text-xs">
+                    SUCHE LÄUFT...
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCreatePlot(false);
+                    setNewPlotTitle('');
+                    setNewPlotDescription('');
+                    setSelectedMembers([]);
+                    setMemberSearch('');
+                    setSearchResults([]);
+                  }}
+                  className="px-4 py-2 bg-slate-800/60 border border-slate-500/30 text-slate-300 rounded hover:bg-slate-700/60 transition-all font-mono tracking-wider text-sm"
+                >
+                  ABBRECHEN
+                </button>
+                <button
+                  type="submit"
+                  disabled={!newPlotTitle.trim()}
+                  className="px-6 py-2 bg-gradient-to-r from-cyan-900/40 to-cyan-800/30 border border-cyan-500/30 text-cyan-100 rounded hover:from-cyan-800/50 hover:to-cyan-700/40 transition-all disabled:from-slate-800/30 disabled:to-slate-700/20 disabled:border-slate-600/20 disabled:text-slate-400 disabled:cursor-not-allowed flex items-center gap-2 font-mono tracking-wider text-sm"
+                >
+                  <FileText size={16} />
+                  PLOT ERSTELLEN
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Plot Management Modal */}
+      {showPlotManager && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 border border-cyan-500/30 rounded-lg max-w-2xl w-full backdrop-blur-sm max-h-[80vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="p-6 border-b border-cyan-500/20 sticky top-0 bg-slate-900/95 backdrop-blur-sm">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-cyan-100 flex items-center gap-2 font-mono tracking-wider">
+                  <Users size={18} />
+                  PLOT MITGLIEDER VERWALTEN
+                </h2>
+                <button
+                  onClick={() => {
+                    setShowPlotManager(false);
+                    setManagingPlotId(null);
+                    setPlotMembers([]);
+                    setMemberSearch('');
+                    setSearchResults([]);
+                  }}
+                  className="text-cyan-400/70 hover:text-cyan-300 transition-colors p-1"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6">
+              {/* Add Member Section */}
+              <div className="mb-8">
+                <h3 className="text-cyan-100 font-mono font-medium mb-4 tracking-wider uppercase text-sm">
+                  NEUES MITGLIED HINZUFÜGEN
+                </h3>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={memberSearch}
+                    onChange={handleMemberSearch}
+                    placeholder="Benutzername für Suche eingeben..."
+                    className="w-full bg-slate-800/60 border border-cyan-500/30 rounded px-4 py-3 text-cyan-100 focus:outline-none focus:border-cyan-400 font-mono backdrop-blur-sm"
+                  />
+                  <div className="mt-1 text-cyan-500/50 font-mono text-xs">
+                    MINDESTENS 2 ZEICHEN FÜR SUCHE
+                  </div>
+
+                  {/* Autocomplete Dropdown for Management */}
+                  {searchResults.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 bg-slate-900/95 border border-cyan-500/30 rounded mt-1 max-h-48 overflow-y-auto z-10 backdrop-blur-sm">
+                      {searchResults.map(player => (
+                        <button
+                          key={player.id}
+                          type="button"
+                          onClick={() => addPlotMember(player.username)}
+                          className="w-full px-4 py-3 text-left hover:bg-cyan-900/30 border-b border-cyan-500/10 last:border-b-0 transition-colors"
+                        >
+                          <div className="text-cyan-100 font-mono text-sm">{player.username}</div>
+                          <div className="text-cyan-400/60 font-mono text-xs">{player.factionName}</div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Search Status */}
+                  {isSearching && (
+                    <div className="mt-2 text-cyan-400/60 font-mono text-xs">
+                      SUCHE LÄUFT...
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Current Members Section */}
+              <div>
+                <h3 className="text-cyan-100 font-mono font-medium mb-4 tracking-wider uppercase text-sm">
+                  AKTUELLE MITGLIEDER ({plotMembers.length})
+                </h3>
+                {plotMembers.length > 0 ? (
+                  <div className="grid gap-3">
+                    {plotMembers.map(member => (
+                      <div key={member.id} className="flex items-center justify-between p-4 bg-slate-800/40 border border-cyan-500/20 rounded backdrop-blur-sm">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-gradient-to-br from-cyan-500/80 to-blue-600/80 border border-cyan-400/40 rounded-full flex items-center justify-center text-white font-bold font-mono text-xs">
+                            {member.username.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <div className="text-cyan-100 font-mono font-medium">{member.username}</div>
+                            <div className="text-cyan-400/60 font-mono text-xs">{member.factionName}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="text-cyan-500/50 font-mono text-xs">
+                            {new Date(member.addedAt).toLocaleDateString('de-DE')}
+                          </div>
+                          <button
+                            onClick={() => removePlotMember(member.id)}
+                            className="px-3 py-2 bg-red-900/40 border border-red-500/40 text-red-300 rounded hover:bg-red-900/60 hover:border-red-500/60 transition-all font-mono text-xs tracking-wider"
+                          >
+                            ENTFERNEN
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-cyan-400/60 font-mono text-center py-8 tracking-wider">
+                    KEINE MITGLIEDER HINZUGEFÜGT
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
