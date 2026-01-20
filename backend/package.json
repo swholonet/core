@@ -15,7 +15,8 @@
     "seed:modules": "tsx prisma/seed-modules.ts",
     "seed:research": "tsx scripts/seed-research-types.ts",
     "seed:factions": "tsx scripts/seed-factions.ts",
-    "seed:all": "npm run seed:factions && npm run seed:buildings && npm run seed:research && npm run seed:modules"
+    "seed:galaxy": "tsx scripts/init-galaxy.ts",
+    "seed:all": "npm run seed:factions && npm run seed:buildings && npm run seed:research && npm run seed:modules && npm run seed:galaxy"
   },
   "keywords": [
     "game",

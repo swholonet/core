@@ -1,5 +1,10 @@
 import prisma from '../lib/prisma';
 import { PlanetClass, SystemType } from '@prisma/client';
+import {
+  isPositionSafeForPlanet,
+  calculateStarAreaSize,
+  getStarExclusionZone
+} from '../utils/starAreaCalculation';
 
 export class GalaxyService {
   // STU-Style Galaxy: 36 Sektoren (6x6), jeder Sektor hat 20x20 Felder
@@ -7,35 +12,68 @@ export class GalaxyService {
 
   /**
    * Generate a weighted random STU system type
-   * Only uses system types we have assets for
+   * Uses all 75 systemtypes with realistic distribution:
+   * - 50% häufig: 1049-1060 (mittlere Sterne)
+   * - 35% sehr viele: 1001-1040 (Binärsysteme)
+   * - 10% sehr wenig: 1041-1048, 1061-1066
+   * - 4% vereinzelt: 1067-1070
+   * - 1% sehr selten: 1071-1075 (jeweils nur 1-2 Systeme in ganzer Galaxie)
    */
   private static getRandomSystemType(): SystemType {
-    const systemTypesWeighted: SystemType[] = [
-      // Common systems (higher probability)
-      SystemType.SMALL_YELLOW,    // (1021) - most common like our sun
-      SystemType.SMALL_YELLOW,
-      SystemType.SMALL_YELLOW,
-      SystemType.SMALL_YELLOW,
-
-      // Less common
-      SystemType.SMALL_BLUE,      // (1001) - hot young stars
-      SystemType.SMALL_BLUE,
-      SystemType.MEDIUM_BLUE,     // (1041) - bright main sequence
-      SystemType.RED_DWARF,       // (1061) - long-lived small stars
-      SystemType.RED_DWARF,
-
-      // Uncommon
-      SystemType.BLUE_GIANT,      // (1053) - massive luminous stars
-
-      // Rare systems
-      SystemType.NEUTRON_STAR,    // (1070) - ultra-dense remnants
-      SystemType.BINARY_SYSTEM,   // (1074) - twin star systems
-
-      // Very rare
-      SystemType.BLACK_HOLE,      // (1072) - gravitational anomalies
+    const rand = Math.random();
+    
+    // 50% häufig: 1049-1060 (mittlere Sterne)
+    if (rand < 0.50) {
+      const commonTypes: SystemType[] = [
+        SystemType.SYS_1049, SystemType.SYS_1050, SystemType.SYS_1051, SystemType.SYS_1052,
+        SystemType.SYS_1053, SystemType.SYS_1054, SystemType.SYS_1055, SystemType.SYS_1056,
+        SystemType.SYS_1057, SystemType.SYS_1058, SystemType.SYS_1059, SystemType.SYS_1060
+      ];
+      return commonTypes[Math.floor(Math.random() * commonTypes.length)];
+    }
+    
+    // 35% sehr viele: 1001-1040 (Binärsysteme)
+    if (rand < 0.85) {
+      const binaryTypes: SystemType[] = [
+        SystemType.BIN_1001, SystemType.BIN_1002, SystemType.BIN_1003, SystemType.BIN_1004,
+        SystemType.BIN_1005, SystemType.BIN_1006, SystemType.BIN_1007, SystemType.BIN_1008,
+        SystemType.BIN_1009, SystemType.BIN_1010, SystemType.BIN_1011, SystemType.BIN_1012,
+        SystemType.BIN_1013, SystemType.BIN_1014, SystemType.BIN_1015, SystemType.BIN_1016,
+        SystemType.BIN_1017, SystemType.BIN_1018, SystemType.BIN_1019, SystemType.BIN_1020,
+        SystemType.BIN_1021, SystemType.BIN_1022, SystemType.BIN_1023, SystemType.BIN_1024,
+        SystemType.BIN_1025, SystemType.BIN_1026, SystemType.BIN_1027, SystemType.BIN_1028,
+        SystemType.BIN_1029, SystemType.BIN_1030, SystemType.BIN_1031, SystemType.BIN_1032,
+        SystemType.BIN_1033, SystemType.BIN_1034, SystemType.BIN_1035, SystemType.BIN_1036,
+        SystemType.BIN_1037, SystemType.BIN_1038, SystemType.BIN_1039, SystemType.BIN_1040
+      ];
+      return binaryTypes[Math.floor(Math.random() * binaryTypes.length)];
+    }
+    
+    // 10% sehr wenig: 1041-1048, 1061-1066
+    if (rand < 0.95) {
+      const uncommonTypes: SystemType[] = [
+        SystemType.SYS_1041, SystemType.SYS_1042, SystemType.SYS_1043, SystemType.SYS_1044,
+        SystemType.SYS_1045, SystemType.SYS_1046, SystemType.SYS_1047, SystemType.SYS_1048,
+        SystemType.SYS_1061, SystemType.SYS_1062, SystemType.SYS_1063,
+        SystemType.SYS_1064, SystemType.SYS_1065, SystemType.SYS_1066
+      ];
+      return uncommonTypes[Math.floor(Math.random() * uncommonTypes.length)];
+    }
+    
+    // 4% vereinzelt: 1067-1070
+    if (rand < 0.99) {
+      const rareTypes: SystemType[] = [
+        SystemType.SYS_1067, SystemType.SYS_1068, SystemType.SYS_1069, SystemType.SYS_1070
+      ];
+      return rareTypes[Math.floor(Math.random() * rareTypes.length)];
+    }
+    
+    // 1% sehr selten: 1071-1075
+    const veryRareTypes: SystemType[] = [
+      SystemType.SYS_1071, SystemType.SYS_1072, SystemType.SYS_1073,
+      SystemType.SYS_1074, SystemType.SYS_1075
     ];
-
-    return systemTypesWeighted[Math.floor(Math.random() * systemTypesWeighted.length)];
+    return veryRareTypes[Math.floor(Math.random() * veryRareTypes.length)];
   }
   private readonly SECTORS_X = 6;
   private readonly SECTORS_Y = 6;
@@ -182,6 +220,22 @@ export class GalaxyService {
         usedNames.add(systemName);
 
         // Use STU weighted random system type generation
+        const systemType = GalaxyService.getRandomSystemType();
+        const systemTypeId = GalaxyService.getSystemTypeId(systemType);
+        const gridSize = GalaxyService.getGridSizeForSystemType(systemTypeId);
+        
+        // Check if binary system and get component systemtypes
+        const isBinary = systemTypeId >= 1001 && systemTypeId <= 1040;
+        let primarySystemTypeId: number | null = null;
+        let secondarySystemTypeId: number | null = null;
+        
+        if (isBinary) {
+          const binaryCombo = GalaxyService.getBinarySystemCombo(systemTypeId);
+          if (binaryCombo) {
+            primarySystemTypeId = binaryCombo.primarySystemId;
+            secondarySystemTypeId = binaryCombo.secondarySystemId;
+          }
+        }
 
         // Create the system
         const system = await prisma.system.create({
@@ -190,8 +244,11 @@ export class GalaxyService {
             sectorId: sector.id,
             fieldX,
             fieldY,
-            systemType: GalaxyService.getRandomSystemType(), // Use STU system types
-            gridSize: Math.floor(Math.random() * 11) + 25, // 25-35 (STU-style larger systems)
+            systemType,
+            gridSize,
+            isBinary,
+            primarySystemTypeId,
+            secondarySystemTypeId,
           },
         });
 
@@ -231,19 +288,89 @@ export class GalaxyService {
     // Track occupied grid positions to avoid overlaps
     const occupiedPositions = new Set<string>();
 
-    // Reserve 3x3 area for central star
-    for (let dx = -1; dx <= 1; dx++) {
-      for (let dy = -1; dy <= 1; dy++) {
-        const x = gridCenter + dx;
-        const y = gridCenter + dy;
-        if (x >= 1 && x <= system.gridSize && y >= 1 && y <= system.gridSize) {
-          occupiedPositions.add(`${x},${y}`);
+    // Dynamic star area reservation with realistic collision avoidance
+    const isBinary = system.isBinary;
+
+    if (isBinary && system.primarySystemTypeId && system.secondarySystemTypeId) {
+      // Binary system: Reserve exclusion zones around both stars
+      for (let x = 1; x <= system.gridSize; x++) {
+        for (let y = 1; y <= system.gridSize; y++) {
+          // Check if position is safe for planets (outside both star exclusion zones)
+          const isSafe = isPositionSafeForPlanet(
+            x, y, system.systemType, system.gridSize,
+            system.primarySystemTypeId, system.secondarySystemTypeId
+          );
+
+          if (!isSafe) {
+            occupiedPositions.add(`${x},${y}`);
+          }
         }
       }
+
+      console.log(`🌟 Binary system ${systemName}: Reserved ${occupiedPositions.size} positions for dual-star exclusion zones`);
+    } else {
+      // Single star system: Reserve exclusion zone around central star
+      const exclusionZone = getStarExclusionZone(system.systemType, system.gridSize);
+      const starAreaSize = calculateStarAreaSize(system.systemType, system.gridSize);
+
+      for (let x = 1; x <= system.gridSize; x++) {
+        for (let y = 1; y <= system.gridSize; y++) {
+          const distanceFromCenter = Math.sqrt(Math.pow(x - gridCenter, 2) + Math.pow(y - gridCenter, 2));
+
+          // Reserve star exclusion zone (star area + realistic buffer distance)
+          if (distanceFromCenter <= exclusionZone.totalRadius) {
+            occupiedPositions.add(`${x},${y}`);
+          }
+        }
+      }
+
+      console.log(`⭐ Single star system ${systemName}: ${starAreaSize}x${starAreaSize} star area + ${exclusionZone.bufferZone} unit buffer zone (${occupiedPositions.size} reserved positions)`);
     }
 
-    // Phase 1: Generate 6-12 main planets in orbital zones
-    const planetsCount = Math.floor(Math.random() * 7) + 6; // 6-12 main planets
+    // Get numeric ID from systemType enum (e.g., "SYS_1049" => 1049)
+    const systemTypeId = GalaxyService.getSystemTypeId(system.systemType);
+
+    // Determine planet/asteroid counts based on systemType
+    let planetsCount: number;
+    let asteroidsCount: number;
+
+    // SYS_1071-1075: Very small systems, NO planets/asteroids
+    if (systemTypeId >= 1071 && systemTypeId <= 1075) {
+      planetsCount = 0;
+      asteroidsCount = 0;
+    }
+    // SYS_1067-1070: Very rare, small systems with few objects
+    else if (systemTypeId >= 1067 && systemTypeId <= 1070) {
+      planetsCount = Math.floor(Math.random() * 3) + 3; // 3-5 planets
+      asteroidsCount = Math.floor(Math.random() * 2) + 1; // 1-2 asteroids
+    }
+    // SYS_1041-1048: Rare, smaller systems
+    else if (systemTypeId >= 1041 && systemTypeId <= 1048) {
+      planetsCount = Math.floor(Math.random() * 4) + 4; // 4-7 planets
+      asteroidsCount = Math.floor(Math.random() * 3) + 2; // 2-4 asteroids
+    }
+    // SYS_1061-1066: Rare, medium systems
+    else if (systemTypeId >= 1061 && systemTypeId <= 1066) {
+      planetsCount = Math.floor(Math.random() * 5) + 5; // 5-9 planets
+      asteroidsCount = Math.floor(Math.random() * 4) + 2; // 2-5 asteroids
+    }
+    // SYS_1049-1060: Common, larger systems (most abundant)
+    else if (systemTypeId >= 1049 && systemTypeId <= 1060) {
+      planetsCount = Math.floor(Math.random() * 6) + 8; // 8-13 planets
+      asteroidsCount = Math.floor(Math.random() * 6) + 3; // 3-8 asteroids
+    }
+    // BIN_1001-1040: Binary systems, large with many objects
+    else if (systemTypeId >= 1001 && systemTypeId <= 1040) {
+      planetsCount = Math.floor(Math.random() * 8) + 10; // 10-17 planets (binaries are rich)
+      asteroidsCount = Math.floor(Math.random() * 8) + 5; // 5-12 asteroids
+    }
+    // Fallback for any other types (shouldn't happen with current schema)
+    else {
+      planetsCount = Math.floor(Math.random() * 7) + 6; // 6-12 planets (default)
+      asteroidsCount = Math.floor(Math.random() * 5) + 2; // 2-6 asteroids (default)
+    }
+
+    // Phase 1: Generate planets in orbital zones
     const createdPlanets = [];
 
     for (let p = 0; p < planetsCount; p++) {
@@ -897,6 +1024,103 @@ export class GalaxyService {
     });
 
     console.log(`✅ Built starter buildings on planet ${planetId}`);
+  }
+
+  /**
+   * Helper: Get systemtype numeric ID from SystemType enum
+   */
+  private static getSystemTypeId(systemType: SystemType): number {
+    const enumName = systemType.toString();
+    if (enumName.startsWith('SYS_')) {
+      return parseInt(enumName.replace('SYS_', ''));
+    } else if (enumName.startsWith('BIN_')) {
+      return parseInt(enumName.replace('BIN_', ''));
+    }
+    return 1050; // fallback
+  }
+
+  /**
+   * Helper: Get grid size based on systemtype
+   */
+  private static getGridSizeForSystemType(systemTypeId: number): number {
+    // 1071-1075: Sehr klein (keine Planeten)
+    if (systemTypeId >= 1071 && systemTypeId <= 1075) {
+      return 15;
+    }
+    
+    // 1067-1070: Klein
+    if (systemTypeId >= 1067 && systemTypeId <= 1070) {
+      return 20;
+    }
+    
+    // 1041-1048: Groß
+    if (systemTypeId >= 1041 && systemTypeId <= 1048) {
+      return Math.floor(Math.random() * 11) + 30; // 30-40
+    }
+    
+    // 1049-1066: Mittel bis groß
+    if (systemTypeId >= 1049 && systemTypeId <= 1066) {
+      return Math.floor(Math.random() * 11) + 25; // 25-35
+    }
+    
+    // Binärsysteme 1001-1040: Mittel bis groß
+    if (systemTypeId >= 1001 && systemTypeId <= 1040) {
+      return Math.floor(Math.random() * 11) + 25; // 25-35
+    }
+    
+    return 30; // fallback
+  }
+
+  /**
+   * Helper: Get binary system combo from systemtype ID
+   * Returns primary and secondary systemtype IDs for binary systems
+   */
+  private static getBinarySystemCombo(binaryId: number): { primarySystemId: number; secondarySystemId: number } | null {
+    // This mapping comes from frontend/src/config/systemAssets.ts BINARY_SYSTEMS
+    const binaryMappings: Record<number, { primarySystemId: number; secondarySystemId: number }> = {
+      1001: { primarySystemId: 1049, secondarySystemId: 1049 },
+      1002: { primarySystemId: 1050, secondarySystemId: 1049 },
+      1003: { primarySystemId: 1050, secondarySystemId: 1050 },
+      1004: { primarySystemId: 1050, secondarySystemId: 1051 },
+      1005: { primarySystemId: 1050, secondarySystemId: 1052 },
+      1006: { primarySystemId: 1051, secondarySystemId: 1049 },
+      1007: { primarySystemId: 1051, secondarySystemId: 1051 },
+      1008: { primarySystemId: 1051, secondarySystemId: 1052 },
+      1009: { primarySystemId: 1052, secondarySystemId: 1049 },
+      1010: { primarySystemId: 1052, secondarySystemId: 1052 },
+      1011: { primarySystemId: 1049, secondarySystemId: 1053 },
+      1012: { primarySystemId: 1050, secondarySystemId: 1053 },
+      1013: { primarySystemId: 1050, secondarySystemId: 1054 },
+      1014: { primarySystemId: 1050, secondarySystemId: 1055 },
+      1015: { primarySystemId: 1050, secondarySystemId: 1056 },
+      1016: { primarySystemId: 1051, secondarySystemId: 1053 },
+      1017: { primarySystemId: 1051, secondarySystemId: 1055 },
+      1018: { primarySystemId: 1051, secondarySystemId: 1056 },
+      1019: { primarySystemId: 1052, secondarySystemId: 1053 },
+      1020: { primarySystemId: 1052, secondarySystemId: 1056 },
+      1021: { primarySystemId: 1049, secondarySystemId: 1053 },
+      1022: { primarySystemId: 1050, secondarySystemId: 1053 },
+      1023: { primarySystemId: 1050, secondarySystemId: 1054 },
+      1024: { primarySystemId: 1050, secondarySystemId: 1055 },
+      1025: { primarySystemId: 1050, secondarySystemId: 1056 },
+      1026: { primarySystemId: 1051, secondarySystemId: 1053 },
+      1027: { primarySystemId: 1051, secondarySystemId: 1055 },
+      1028: { primarySystemId: 1051, secondarySystemId: 1056 },
+      1029: { primarySystemId: 1052, secondarySystemId: 1053 },
+      1030: { primarySystemId: 1052, secondarySystemId: 1056 },
+      1031: { primarySystemId: 1057, secondarySystemId: 1057 },
+      1032: { primarySystemId: 1058, secondarySystemId: 1057 },
+      1033: { primarySystemId: 1058, secondarySystemId: 1058 },
+      1034: { primarySystemId: 1058, secondarySystemId: 1059 },
+      1035: { primarySystemId: 1058, secondarySystemId: 1060 },
+      1036: { primarySystemId: 1059, secondarySystemId: 1057 },
+      1037: { primarySystemId: 1059, secondarySystemId: 1059 },
+      1038: { primarySystemId: 1059, secondarySystemId: 1060 },
+      1039: { primarySystemId: 1060, secondarySystemId: 1057 },
+      1040: { primarySystemId: 1060, secondarySystemId: 1060 },
+    };
+    
+    return binaryMappings[binaryId] || null;
   }
 }
 

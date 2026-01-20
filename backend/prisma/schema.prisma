@@ -43,15 +43,84 @@ enum PlanetClass {
 }
 
 enum SystemType {
-  // STU System Types with Asset IDs
-  SMALL_BLUE      // (1001) Kleiner Blauer Stern
-  SMALL_YELLOW    // (1021) Kleiner Gelber Stern
-  MEDIUM_BLUE     // (1041) Mittlerer Blauer Stern
-  BLUE_GIANT      // (1053) Blauer Riese
-  RED_DWARF       // (1061) Roter Zwerg
-  NEUTRON_STAR    // (1070) Neutronenstern
-  BLACK_HOLE      // (1072) Schwarzes Loch
-  BINARY_SYSTEM   // (1074) Doppelsternsystem
+  // Einzelsterne 1041-1075 (35 Systemtypes)
+  SYS_1041
+  SYS_1042
+  SYS_1043
+  SYS_1044
+  SYS_1045
+  SYS_1046
+  SYS_1047
+  SYS_1048
+  SYS_1049
+  SYS_1050
+  SYS_1051
+  SYS_1052
+  SYS_1053
+  SYS_1054
+  SYS_1055
+  SYS_1056
+  SYS_1057
+  SYS_1058
+  SYS_1059
+  SYS_1060
+  SYS_1061
+  SYS_1062
+  SYS_1063
+  SYS_1064
+  SYS_1065
+  SYS_1066
+  SYS_1067
+  SYS_1068
+  SYS_1069
+  SYS_1070
+  SYS_1071
+  SYS_1072
+  SYS_1073
+  SYS_1074
+  SYS_1075
+  
+  // Binärsysteme 1001-1040 (40 Systemtypes)
+  BIN_1001
+  BIN_1002
+  BIN_1003
+  BIN_1004
+  BIN_1005
+  BIN_1006
+  BIN_1007
+  BIN_1008
+  BIN_1009
+  BIN_1010
+  BIN_1011
+  BIN_1012
+  BIN_1013
+  BIN_1014
+  BIN_1015
+  BIN_1016
+  BIN_1017
+  BIN_1018
+  BIN_1019
+  BIN_1020
+  BIN_1021
+  BIN_1022
+  BIN_1023
+  BIN_1024
+  BIN_1025
+  BIN_1026
+  BIN_1027
+  BIN_1028
+  BIN_1029
+  BIN_1030
+  BIN_1031
+  BIN_1032
+  BIN_1033
+  BIN_1034
+  BIN_1035
+  BIN_1036
+  BIN_1037
+  BIN_1038
+  BIN_1039
+  BIN_1040
 }
 
 // Blueprint System Enums
@@ -174,6 +243,11 @@ model System {
   fieldX      Int      // X-coordinate in sector (1-20)
   fieldY      Int      // Y-coordinate in sector (1-20)
   gridSize    Int      @default(30) // Grid size for system view (20-40)
+  
+  // Binary system support
+  isBinary    Boolean  @default(false) // Is this a binary star system?
+  primarySystemTypeId   Int?     // For binary systems: primary star systemtype (e.g., 1049)
+  secondarySystemTypeId Int?     // For binary systems: secondary star systemtype (e.g., 1050)
 
   sector      Sector   @relation(fields: [sectorId], references: [id])
   planets     Planet[] // Includes regular planets, moons, and asteroid fields
