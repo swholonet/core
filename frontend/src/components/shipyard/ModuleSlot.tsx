@@ -13,6 +13,8 @@ import {
   HardDrive,
   Magnet,
   Sparkles,
+  BarChart3,
+  Swords,
 } from 'lucide-react';
 import {
   ModuleType,
@@ -20,6 +22,8 @@ import {
   BlueprintModule,
   MODULE_CATEGORY_NAMES,
   MODULE_CATEGORY_COLORS,
+  COMBAT_RATING_LABELS,
+  COMBAT_RATING_COLORS,
 } from '../../types/blueprint';
 
 // Icon-Mapping
@@ -58,6 +62,7 @@ interface ModuleSlotProps {
   onModuleSelect: (moduleTypeId: number, level: number) => void;
   onModuleRemove: () => void;
   onLevelChange: (level: number) => void;
+  onShowComparison?: (slotPosition: number, category: ModuleCategory) => void;
 }
 
 export default function ModuleSlot({
@@ -67,6 +72,7 @@ export default function ModuleSlot({
   onModuleSelect,
   onModuleRemove,
   onLevelChange,
+  onShowComparison,
 }: ModuleSlotProps) {
   const [isSelectOpen, setIsSelectOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<ModuleCategory | null>(
@@ -101,13 +107,25 @@ export default function ModuleSlot({
       {/* Slot Header */}
       <div className="px-3 py-2 border-b border-gray-700/50 flex items-center justify-between">
         <span className="text-xs text-gray-500 font-mono">SLOT {slotPosition}</span>
-        {module && (
-          <button
-            onClick={onModuleRemove}
-            className="text-gray-500 hover:text-red-400 transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
+        {module && selectedModuleType && (
+          <div className="flex items-center gap-1">
+            {onShowComparison && (
+              <button
+                onClick={() => onShowComparison(slotPosition, selectedModuleType.category)}
+                className="text-gray-500 hover:text-cyan-400 transition-colors p-1"
+                title="Module vergleichen"
+              >
+                <BarChart3 className="w-3 h-3" />
+              </button>
+            )}
+            <button
+              onClick={onModuleRemove}
+              className="text-gray-500 hover:text-red-400 transition-colors p-1"
+              title="Modul entfernen"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          </div>
         )}
       </div>
 
@@ -172,16 +190,11 @@ export default function ModuleSlot({
             {/* Quick Stats Preview */}
             {module.calculatedStats && (
               <div className="grid grid-cols-2 gap-1 text-xs">
-                {module.calculatedStats.damage > 0 && (
-                  <div className="flex items-center gap-1 text-red-400">
-                    <Crosshair className="w-3 h-3" />
-                    {module.calculatedStats.damage}
-                  </div>
-                )}
-                {module.calculatedStats.shieldStrength > 0 && (
-                  <div className="flex items-center gap-1 text-purple-400">
-                    <Shield className="w-3 h-3" />
-                    {module.calculatedStats.shieldStrength}
+                {/* Combat Rating - vage Anzeige statt exakter Werte */}
+                {module.combatRating && module.combatRating !== 'NIEDRIG' && (
+                  <div className={`flex items-center gap-1 ${COMBAT_RATING_COLORS[module.combatRating].split(' ')[0]}`}>
+                    <Swords className="w-3 h-3" />
+                    {COMBAT_RATING_LABELS[module.combatRating]}
                   </div>
                 )}
                 {module.calculatedStats.speed > 0 && (
@@ -194,6 +207,12 @@ export default function ModuleSlot({
                   <div className="flex items-center gap-1 text-gray-400">
                     <HardDrive className="w-3 h-3" />
                     {module.calculatedStats.hullPoints}
+                  </div>
+                )}
+                {module.calculatedStats.sensorRange > 0 && (
+                  <div className="flex items-center gap-1 text-yellow-400">
+                    <Radar className="w-3 h-3" />
+                    {module.calculatedStats.sensorRange}
                   </div>
                 )}
               </div>

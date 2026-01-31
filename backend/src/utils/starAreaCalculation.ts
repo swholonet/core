@@ -204,7 +204,7 @@ export function isPositionInStarExclusionZone(
  * Calculate binary star areas for binary systems
  * Places primary star (top-left) and secondary star (bottom-right) with proper separation
  *
- * @param systemType - The binary SystemType enum value (BIN_1001 - BIN_1040)
+ * @param systemType - The binary SystemType enum value (BIN_1001 - BIN_1048)
  * @param systemGridSize - The total system grid size
  * @param primarySystemTypeId - Primary star system type ID
  * @param secondarySystemTypeId - Secondary star system type ID
@@ -285,7 +285,7 @@ export function isPositionSafeForPlanet(
   secondarySystemTypeId?: number
 ): boolean {
   const systemTypeId = extractSystemTypeId(systemType);
-  const isBinary = systemTypeId >= 1001 && systemTypeId <= 1040;
+  const isBinary = systemTypeId >= 1001 && systemTypeId <= 1048;
 
   if (isBinary && primarySystemTypeId && secondarySystemTypeId) {
     // Binary system - check both stars

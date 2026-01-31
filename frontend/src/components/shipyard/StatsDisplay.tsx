@@ -1,14 +1,17 @@
 import {
-  Shield,
-  Crosshair,
   Gauge,
   Radar,
   Package,
   Users,
   HardDrive,
   Zap,
+  Swords,
 } from 'lucide-react';
-import { BlueprintStats } from '../../types/blueprint';
+import {
+  BlueprintStats,
+  COMBAT_RATING_LABELS,
+  COMBAT_RATING_COLORS,
+} from '../../types/blueprint';
 
 interface StatsDisplayProps {
   stats: BlueprintStats | null;
@@ -23,20 +26,6 @@ export default function StatsDisplay({ stats, isCalculating }: StatsDisplayProps
       icon: HardDrive,
       color: 'text-gray-400',
       bgColor: 'bg-gray-500/10',
-    },
-    {
-      label: 'Schildstaerke',
-      value: stats?.shieldStrength ?? 0,
-      icon: Shield,
-      color: 'text-purple-400',
-      bgColor: 'bg-purple-500/10',
-    },
-    {
-      label: 'Waffenschaden',
-      value: stats?.damage ?? 0,
-      icon: Crosshair,
-      color: 'text-red-400',
-      bgColor: 'bg-red-500/10',
     },
     {
       label: 'Geschwindigkeit',
@@ -76,6 +65,11 @@ export default function StatsDisplay({ stats, isCalculating }: StatsDisplayProps
     },
   ];
 
+  // Combat Rating als separates Element (keine exakten Werte)
+  const combatRating = stats?.combatRating ?? 'NIEDRIG';
+  const combatLabel = COMBAT_RATING_LABELS[combatRating];
+  const combatColor = COMBAT_RATING_COLORS[combatRating];
+
   return (
     <div className="bg-gray-900/50 rounded-lg border border-gray-700 p-4">
       <h3 className="text-xs text-gray-500 uppercase tracking-wider font-mono mb-3 flex items-center gap-2">
@@ -88,22 +82,36 @@ export default function StatsDisplay({ stats, isCalculating }: StatsDisplayProps
           <div className="w-6 h-6 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-2">
-          {statItems.map((item) => (
-            <div
-              key={item.label}
-              className={`${item.bgColor} rounded-lg p-3 border border-gray-800`}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <item.icon className={`w-4 h-4 ${item.color}`} />
-                <span className="text-xs text-gray-400">{item.label}</span>
+        <>
+          {/* Combat Rating - Vage Anzeige */}
+          <div className={`${combatColor} rounded-lg p-4 border border-gray-800 mb-3`}>
+            <div className="flex items-center gap-3">
+              <Swords className="w-6 h-6" />
+              <div>
+                <span className="text-xs text-gray-400 block">Kampfstaerke</span>
+                <p className="text-lg font-bold font-mono">{combatLabel}</p>
               </div>
-              <p className={`text-lg font-bold font-mono ${item.color}`}>
-                {item.format ? item.format(item.value) : item.value.toLocaleString()}
-              </p>
             </div>
-          ))}
-        </div>
+          </div>
+
+          {/* Other Stats */}
+          <div className="grid grid-cols-2 gap-2">
+            {statItems.map((item) => (
+              <div
+                key={item.label}
+                className={`${item.bgColor} rounded-lg p-3 border border-gray-800`}
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <item.icon className={`w-4 h-4 ${item.color}`} />
+                  <span className="text-xs text-gray-400">{item.label}</span>
+                </div>
+                <p className={`text-lg font-bold font-mono ${item.color}`}>
+                  {item.format ? item.format(item.value) : item.value.toLocaleString()}
+                </p>
+              </div>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );

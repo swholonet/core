@@ -2,6 +2,7 @@ import express from 'express';
 import { authMiddleware } from '../middleware/auth';
 import prisma from '../lib/prisma';
 import { shipMovementService } from '../services/shipMovementService';
+import { shipStatsService } from '../services/shipStatsService';
 
 const router = express.Router();
 
@@ -25,7 +26,7 @@ router.get('/:id', authMiddleware, async (req: any, res) => {
         playerId, // Check ownership directly
       },
       include: {
-        shipType: true,
+                blueprint: true,
         planet: {
           include: {
             system: true,
@@ -39,15 +40,14 @@ router.get('/:id', authMiddleware, async (req: any, res) => {
       return res.status(404).json({ error: 'Schiff nicht gefunden oder keine Berechtigung' });
     }
 
-    if (!ship.shipType) {
-      return res.status(400).json({ error: 'Schiff hat keinen gültigen Schiffstyp' });
-    }
+    // Get effective ship stats (blueprint > shipType > hardcoded)
+    const shipStats = await shipStatsService.getShipStats(shipId);
 
     // Calculate range
     const range = shipMovementService.calculateRange(ship);
 
     // Get sensor view (fields within sensor range)
-    const sensorData = await getSensorView(ship);
+    const sensorData = await getSensorView(ship, shipStats.sensorRange);
 
     res.json({
       ship: {
@@ -68,19 +68,25 @@ router.get('/:id', authMiddleware, async (req: any, res) => {
         energy: {
           weapons: ship.energyWeapons,
           drive: ship.energyDrive,
-          maxWeapons: ship.shipType.maxEnergyWeapons,
-          maxDrive: ship.shipType.maxEnergyDrive,
+          maxWeapons: shipStats.maxEnergyWeapons,
+          maxDrive: shipStats.maxEnergyDrive,
         },
-        hullPoints: ship.hullPoints,
+        hullPoints: shipStats.hullPoints,
         crew: ship.crew,
         range,
       },
-      shipType: {
-        name: ship.shipType.name,
-        sensorRange: ship.shipType.sensorRange,
-        driveEfficiency: ship.shipType.driveEfficiency,
-        attack: ship.shipType.attack,
-        defense: ship.shipType.defense,
+      shipStats: {
+        hullPoints: shipStats.hullPoints,
+        deflectorShieldStrength: shipStats.deflectorShieldStrength,
+        weaponDamage: shipStats.weaponDamage,
+        subLightSpeed: shipStats.subLightSpeed,
+        hyperdriveRating: shipStats.hyperdriveRating,
+        sensorRange: shipStats.sensorRange,
+        cargoCapacity: shipStats.cargoCapacity,
+        crewCapacity: shipStats.crewCapacity,
+        maxEnergyWeapons: shipStats.maxEnergyWeapons,
+        maxEnergyDrive: shipStats.maxEnergyDrive,
+        source: ship.blueprintId ? 'blueprint' : 'legacy',
       },
       sensorView: sensorData,
     });
@@ -164,7 +170,7 @@ router.post('/:id/move-system', authMiddleware, async (req: any, res) => {
         playerId,
       },
       include: {
-        shipType: true,
+                blueprint: true,
         system: true,
       },
     });
@@ -243,7 +249,7 @@ router.post('/:id/enter-system', authMiddleware, async (req: any, res) => {
         playerId,
       },
       include: {
-        shipType: true,
+                blueprint: true,
       },
     });
 
@@ -323,7 +329,7 @@ router.post('/:id/leave-system', authMiddleware, async (req: any, res) => {
         playerId,
       },
       include: {
-        shipType: true,
+                blueprint: true,
         system: {
           include: {
             sector: true,
@@ -388,7 +394,7 @@ router.post('/:id/charge', authMiddleware, async (req: any, res) => {
         playerId,
       },
       include: {
-        shipType: true,
+                blueprint: true,
         planet: true,
       },
     });
@@ -401,9 +407,8 @@ router.post('/:id/charge', authMiddleware, async (req: any, res) => {
       return res.status(400).json({ error: 'Schiff muss angedockt sein' });
     }
 
-    if (!ship.shipType) {
-      return res.status(400).json({ error: 'Schiff hat keinen gültigen Schiffstyp' });
-    }
+    // Get effective ship stats
+    const shipStats = await shipStatsService.getShipStats(shipId);
 
     // For now: charging is free (later: cost resources from planet)
     const updateData: any = {};
@@ -411,12 +416,12 @@ router.post('/:id/charge', authMiddleware, async (req: any, res) => {
     if (type === 'weapons') {
       updateData.energyWeapons = Math.min(
         ship.energyWeapons + amount,
-        ship.shipType.maxEnergyWeapons
+        shipStats.maxEnergyWeapons
       );
     } else if (type === 'drive') {
       updateData.energyDrive = Math.min(
         ship.energyDrive + amount,
-        ship.shipType.maxEnergyDrive
+        shipStats.maxEnergyDrive
       );
     } else {
       return res.status(400).json({ error: 'Ungültiger Energietyp' });
@@ -437,8 +442,7 @@ router.post('/:id/charge', authMiddleware, async (req: any, res) => {
 /**
  * Helper: Get sensor view around ship
  */
-async function getSensorView(ship: any) {
-  const sensorRange = ship.shipType.sensorRange;
+async function getSensorView(ship: any, sensorRange: number) {
   
   // If ship is in a system, return system-internal view
   if (ship.currentSystemId) {

@@ -7,16 +7,39 @@ interface Ship {
   id: number;
   name: string | null;
   status: string;
-  health: number;
   energyWeapons: number;
   energyDrive: number;
   currentGalaxyX: number | null;
   currentGalaxyY: number | null;
-  shipType: {
-    name: string;
+
+  // Blueprint-based effective stats
+  shipStats: {
+    hullPoints: number;
+    deflectorShieldStrength: number;
+    weaponDamage: number;
+    subLightSpeed: number;
+    hyperdriveRating: number;
+    sensorRange: number;
+    cargoCapacity: number;
+    crewCapacity: number;
     maxEnergyWeapons: number;
     maxEnergyDrive: number;
   };
+
+  // Display information
+  displayInfo: {
+    name: string;
+    shipClass: string;
+    source: 'blueprint' | 'shipType' | 'hardcoded' | 'fallback';
+  };
+
+  // Legacy compatibility (may be null for blueprint-only ships)
+  shipType?: {
+    name: string;
+    maxEnergyWeapons: number;
+    maxEnergyDrive: number;
+  } | null;
+
   planet: {
     id: number;
     name: string;
@@ -95,9 +118,18 @@ export default function Fleet() {
               <div className="flex items-start justify-between mb-4 pb-3 border-b border-cyan-500/20">
                 <div>
                   <h3 className="text-cyan-100 font-mono font-semibold tracking-wide">
-                    {ship.name || `${ship.shipType.name} ${ship.id}`}
+                    {ship.name || `${ship.displayInfo.name} ${ship.id}`}
                   </h3>
-                  <p className="text-cyan-400/60 text-sm font-mono">{ship.shipType.name}</p>
+                  <div className="flex items-center gap-2 text-sm font-mono">
+                    <p className="text-cyan-400/60">{ship.displayInfo.name}</p>
+                    <span className="text-cyan-500/40">•</span>
+                    <p className="text-cyan-400/40">{ship.displayInfo.shipClass}</p>
+                    {ship.displayInfo.source === 'blueprint' && (
+                      <span className="bg-green-900/30 text-green-400 px-1.5 py-0.5 rounded text-xs border border-green-500/20">
+                        BLUEPRINT
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className={`p-2 rounded border ${
                   ship.status === 'DOCKED'
@@ -146,12 +178,12 @@ export default function Fleet() {
                         <Battery size={12} />
                         ANTRIEB
                       </span>
-                      <span className="text-blue-100 font-mono">{ship.energyDrive}/{ship.shipType.maxEnergyDrive}</span>
+                      <span className="text-blue-100 font-mono">{ship.energyDrive}/{ship.shipStats.maxEnergyDrive}</span>
                     </div>
                     <div className="bg-slate-800/60 border border-slate-700/50 rounded-full h-1.5">
                       <div
                         className="bg-blue-500 h-1.5 rounded-full transition-all duration-300"
-                        style={{ width: `${(ship.energyDrive / ship.shipType.maxEnergyDrive) * 100}%` }}
+                        style={{ width: `${(ship.energyDrive / ship.shipStats.maxEnergyDrive) * 100}%` }}
                       />
                     </div>
                   </div>
@@ -162,12 +194,12 @@ export default function Fleet() {
                         <Zap size={12} />
                         WAFFEN
                       </span>
-                      <span className="text-yellow-100 font-mono">{ship.energyWeapons}/{ship.shipType.maxEnergyWeapons}</span>
+                      <span className="text-yellow-100 font-mono">{ship.energyWeapons}/{ship.shipStats.maxEnergyWeapons}</span>
                     </div>
                     <div className="bg-slate-800/60 border border-slate-700/50 rounded-full h-1.5">
                       <div
                         className="bg-yellow-500 h-1.5 rounded-full transition-all duration-300"
-                        style={{ width: `${(ship.energyWeapons / ship.shipType.maxEnergyWeapons) * 100}%` }}
+                        style={{ width: `${(ship.energyWeapons / ship.shipStats.maxEnergyWeapons) * 100}%` }}
                       />
                     </div>
                   </div>

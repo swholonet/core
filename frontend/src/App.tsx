@@ -4,6 +4,8 @@ import Layout from './components/Layout';
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import PlanetSelection from './pages/PlanetSelection';
 import Dashboard from './pages/Dashboard';
 import Planet from './pages/Planet';
@@ -18,6 +20,8 @@ import Planets from './pages/Planets';
 import Ship from './pages/Ship';
 import HoloNet from './pages/HoloNet';
 import BlueprintEditorPage from './pages/BlueprintEditor';
+import STUSunDemo from './pages/STUSunDemo';
+import Database from './pages/Database';
 
 function App() {
   return (
@@ -25,6 +29,9 @@ function App() {
       <Route path="/welcome" element={<LandingPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/stu-sun-demo" element={<STUSunDemo />} />
       <Route path="/select-planet" element={
         <ProtectedRoute>
           <PlanetSelection />
@@ -47,6 +54,7 @@ function App() {
         <Route path="/research" element={<Research />} />
         <Route path="/fleet" element={<Fleet />} />
         <Route path="/holonet" element={<HoloNet />} />
+        <Route path="/database" element={<Database />} />
         <Route path="/invite-codes" element={<InviteCodes />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/admin" element={<Admin />} />

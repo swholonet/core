@@ -164,11 +164,27 @@ model User {
   password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   player          Player?
   inviteCodes     InviteCode[]  @relation("UserInviteCodes")
   usedInviteCode  InviteCode?   @relation("UsedInviteCode", fields: [usedInviteCodeId], references: [id])
   usedInviteCodeId Int?
+  passwordResetTokens PasswordResetToken[]
+}
+
+model PasswordResetToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int
+  expiresAt DateTime
+  isUsed    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  usedAt    DateTime?
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([expiresAt])
 }
 
 model Player {
@@ -228,11 +244,27 @@ model Sector {
   x           Int
   y           Int
   sectorType  String   // NORMAL, NEBULA, ASTEROID_FIELD
-  
+
   galaxy      Galaxy   @relation(fields: [galaxyId], references: [id])
   systems     System[]
-  
+  sectorFields SectorField[] // Hyperlane route data
+
   @@unique([galaxyId, x, y])
+}
+
+model SectorField {
+  id          Int      @id @default(autoincrement())
+  sectorId    Int
+  fieldX      Int      // 1-20 within sector coordinates
+  fieldY      Int      // 1-20 within sector coordinates
+  isHyperlane Boolean  @default(false)
+  laneName    String?  // "Core Worlds Route", "Outer Rim Circuit"
+  laneColor   String?  // "#00ffff", "#ff6600" for theming
+  laneType    String?  // "MAJOR", "MINOR", "TRADE" for importance
+
+  sector      Sector   @relation(fields: [sectorId], references: [id])
+
+  @@unique([sectorId, fieldX, fieldY])
 }
 
 model System {
@@ -302,7 +334,6 @@ model Planet {
   buildings   Building[]
   fields      PlanetField[]
   ships       Ship[]
-  shipBuildQueue ShipBuildQueue[]
   blueprintBuildQueue BlueprintBuildQueue[]
 }
 
@@ -441,20 +472,24 @@ model ModuleType {
   category              ModuleCategory
   maxLevel              Int            @default(10)
 
-  // Basis-Stats pro Level (werden mit Level multipliziert/skaliert)
-  baseHullPoints        Int            @default(0)   // Huellenpunkte
-  baseDamage            Int            @default(0)   // Schaden
-  baseShieldStrength    Int            @default(0)   // Deflektorschild-Staerke
-  baseSensorRange       Int            @default(0)   // Sensorreichweite
-  baseCargoCapacity     Int            @default(0)   // Frachtraum
-  baseCrewCapacity      Int            @default(0)   // Crew-Kapazitaet
-  baseSpeed             Int            @default(0)   // Sublicht-Geschwindigkeit
+  // Sichtbarkeits-Kontrolle fuer geheimes Spieldaten-System
+  visibilityLevel       String         @default("PUBLIC") // PUBLIC, UNLOCKABLE, SECRET
+  requiredPlayerLevel   Int            @default(1)        // Minimum Spieler-Level fuer Freischaltung
 
-  // Star Wars spezifische Stats
-  hyperdriveRating      Float?                       // 1.0 = Standard, 0.5 = schneller (kleiner = besser)
-  tibannaConsumption    Int            @default(0)   // Tibanna-Gas Verbrauch pro Schuss/Aktion
+  // PUBLIC Basis-Stats pro Level (werden mit Level multipliziert/skaliert)
+  baseHullPoints        Int            @default(0)   // Huellenpunkte - PUBLIC
+  baseSensorRange       Int            @default(0)   // Sensorreichweite - PUBLIC
+  baseCargoCapacity     Int            @default(0)   // Frachtraum - PUBLIC
+  baseCrewCapacity      Int            @default(0)   // Crew-Kapazitaet - PUBLIC
+  baseSpeed             Int            @default(0)   // Sublicht-Geschwindigkeit - PUBLIC
+  hyperdriveRating      Float?                       // 1.0 = Standard, 0.5 = schneller - PUBLIC
 
-  // Kosten-Basis (exponentiell skaliert mit Level)
+  // SECRET Kampf-Stats (NIE an Client senden, nur server-seitig)
+  baseDamage            Int            @default(0)   // Schaden - SECRET
+  baseShieldStrength    Int            @default(0)   // Deflektorschild-Staerke - SECRET
+  tibannaConsumption    Int            @default(0)   // Tibanna-Gas Verbrauch pro Schuss/Aktion - SECRET
+
+  // PUBLIC Kosten-Basis (exponentiell skaliert mit Level)
   baseCostCredits       Int            @default(0)
   baseCostDurastahl     Int            @default(0)
   baseCostKyberKristalle Int           @default(0)
@@ -539,42 +574,13 @@ model BlueprintBuildQueue {
 
 // =====================================================
 
-model ShipType {
-  id                      Int      @id @default(autoincrement())
-  name                    String   @unique
-  description             String
-  shipClass               String   // FIGHTER, BOMBER, CORVETTE, FRIGATE, CRUISER, CAPITAL, TRANSPORT
-  buildCost               Int
-  buildCostDurastahl      Int      @default(0)
-  buildCostKristallinesSilizium Int @default(0)
-  buildCostTibannaGas     Int      @default(0)
-  buildCostEnergiemodule  Int      @default(0)
-  buildCostKyberKristalle Int      @default(0)
-  buildCostBacta          Int      @default(0)
-  buildCostBeskar         Int      @default(0)
-  buildTime               Int      // in minutes
-  crewRequired            Int
-  cargoCapacity           Int
-  fuelCapacity            Int
-  speed                   Int
-  attack                  Int
-  defense                 Int
-  requiredResearch        Int?
-  sensorRange             Int      @default(3)  // Sensor radius in fields
-  driveEfficiency         Int      @default(1) // Energy cost per field (always 1)
-  maxEnergyWeapons        Int      @default(50) // Max weapon/shield energy
-  maxEnergyDrive          Int      @default(50) // Max hyperdrive energy (50 fields range)
-  
-  ships                   Ship[]
-  shipBuildQueue          ShipBuildQueue[]
-}
+// ShipType model removed - migrated to Blueprint system
 
 model Ship {
   id              Int      @id @default(autoincrement())
   playerId        Int      // Owner of the ship
   fleetId         Int?
-  shipTypeId      Int?     // Legacy: deprecated, use blueprintId instead
-  blueprintId     Int?     // NEU: Relation zum Blueprint
+  blueprintId     Int?     // Relation zum Blueprint
   planetId        Int?     // Where it was built / is stationed (when DOCKED)
   name            String?
   crew            Int      @default(0)
@@ -605,23 +611,12 @@ model Ship {
 
   player          Player         @relation(fields: [playerId], references: [id])
   fleet           Fleet?         @relation(fields: [fleetId], references: [id])
-  shipType        ShipType?      @relation(fields: [shipTypeId], references: [id])
   blueprint       ShipBlueprint? @relation(fields: [blueprintId], references: [id])
   planet          Planet?        @relation(fields: [planetId], references: [id])
   system          System?        @relation(fields: [currentSystemId], references: [id])
 }
 
-model ShipBuildQueue {
-  id                     Int      @id @default(autoincrement())
-  planetId               Int
-  shipTypeId             Int
-  quantity               Int      @default(1)
-  constructionStartedAt  DateTime @default(now())
-  completedAt            DateTime?
-  
-  planet                 Planet   @relation(fields: [planetId], references: [id])
-  shipType               ShipType @relation(fields: [shipTypeId], references: [id])
-}
+// ShipBuildQueue model removed - replaced by BlueprintBuildQueue
 
 model Fleet {
   id              Int      @id @default(autoincrement())

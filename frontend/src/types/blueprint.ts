@@ -23,7 +23,26 @@ export type ShipClass =
   | 'CAPITAL'
   | 'TRANSPORT';
 
-// Modul-Typ Definition
+// Combat Rating - vage Kampfstaerke-Anzeige (ersetzt exakte Werte)
+export type CombatRating = 'NIEDRIG' | 'MITTEL' | 'HOCH' | 'SEHR_HOCH';
+
+// Combat Rating Labels (Deutsch)
+export const COMBAT_RATING_LABELS: Record<CombatRating, string> = {
+  NIEDRIG: 'Niedrig',
+  MITTEL: 'Mittel',
+  HOCH: 'Hoch',
+  SEHR_HOCH: 'Sehr Hoch',
+};
+
+// Combat Rating Colors
+export const COMBAT_RATING_COLORS: Record<CombatRating, string> = {
+  NIEDRIG: 'text-gray-400 bg-gray-500/20',
+  MITTEL: 'text-yellow-400 bg-yellow-500/20',
+  HOCH: 'text-orange-400 bg-orange-500/20',
+  SEHR_HOCH: 'text-red-400 bg-red-500/20',
+};
+
+// Modul-Typ Definition (PUBLIC - keine geheimen Kampfwerte)
 export interface ModuleType {
   id: number;
   name: string;
@@ -33,20 +52,20 @@ export interface ModuleType {
   isUnlocked: boolean;
   unlockedLevel: number;
   requiredResearchName?: string;
-  baseStats: ModuleBaseStats;
+  requiredPlayerLevel?: number;
+  baseStats: ModuleBaseStats;  // PUBLIC stats only
   baseCosts: ModuleBaseCosts;
+  combatRating: CombatRating;  // Vage Kampfstaerke-Anzeige
 }
 
+// PUBLIC Module Stats (KEINE damage, shieldStrength, tibannaConsumption)
 export interface ModuleBaseStats {
   hullPoints: number;
-  damage: number;
-  shieldStrength: number;
   sensorRange: number;
   cargoCapacity: number;
   crewCapacity: number;
   speed: number;
   hyperdriveRating: number | null;
-  tibannaConsumption: number;
 }
 
 export interface ModuleBaseCosts {
@@ -60,16 +79,15 @@ export interface ModuleBaseCosts {
   buildTime: number;
 }
 
-// Blueprint Stats
+// Blueprint Stats (PUBLIC - mit combatRating statt exakter Werte)
 export interface BlueprintStats {
   hullPoints: number;
-  shieldStrength: number;
-  damage: number;
   speed: number;
   sensorRange: number;
   cargoCapacity: number;
   crewRequired: number;
   hyperdriveRating: number;
+  combatRating: CombatRating;  // Ersetzt damage & shieldStrength
 }
 
 // Konstruktionskosten
@@ -91,8 +109,9 @@ export interface BlueprintModule {
   level: number;
   slotPosition: number;
   moduleType?: ModuleType;
-  calculatedStats?: ModuleBaseStats;
+  calculatedStats?: ModuleBaseStats;  // PUBLIC stats only
   calculatedCosts?: ModuleBaseCosts;
+  combatRating?: CombatRating;  // Kampfstaerke dieses Moduls
 }
 
 // Blueprint

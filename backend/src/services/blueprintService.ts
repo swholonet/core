@@ -1,11 +1,12 @@
 import prisma from '../lib/prisma';
-import { ShipClass, ModuleCategory } from '@prisma/client';
+import { ShipClass } from '@prisma/client';
 
 // Building names for shipyard functionality (supports both old and new names)
 const SHIPYARD_BUILDING_NAMES = ['Orbitales Raumdock', 'Raumschiffwerft', 'Shipyard'];
 
 import {
   BlueprintStats,
+  BlueprintStatsInternal,
   ConstructionCosts,
   CreateBlueprintInput,
   UpdateBlueprintInput,
@@ -15,7 +16,10 @@ import {
   BlueprintWithCalculations,
   BlueprintModuleWithType,
   ModuleBaseStats,
+  ModuleBaseStatsPublic,
   ModuleBaseCosts,
+  CombatRating,
+  calculateCombatRating,
   COST_EXPONENT,
   STAT_MULTIPLIER,
   SHIP_CLASS_CONFIG,
@@ -23,9 +27,10 @@ import {
 
 export class BlueprintService {
   /**
-   * Berechnet die Stats eines Moduls bei einem bestimmten Level
+   * Berechnet die INTERNEN Stats eines Moduls bei einem bestimmten Level
+   * SERVER-SIDE ONLY - enthaelt geheime Kampfwerte
    */
-  calculateModuleStats(
+  calculateModuleStatsInternal(
     moduleType: {
       baseHullPoints: number;
       baseDamage: number;
@@ -54,6 +59,51 @@ export class BlueprintService {
         : null,
       tibannaConsumption: Math.floor(moduleType.tibannaConsumption * levelMultiplier),
     };
+  }
+
+  /**
+   * Berechnet die OEFFENTLICHEN Stats eines Moduls bei einem bestimmten Level
+   * SAFE TO SEND TO CLIENT - keine Kampfwerte
+   */
+  calculateModuleStatsPublic(
+    moduleType: {
+      baseHullPoints: number;
+      baseSensorRange: number;
+      baseCargoCapacity: number;
+      baseCrewCapacity: number;
+      baseSpeed: number;
+      hyperdriveRating: number | null;
+    },
+    level: number
+  ): ModuleBaseStatsPublic {
+    const levelMultiplier = 1 + (level - 1) * (STAT_MULTIPLIER - 1);
+
+    return {
+      hullPoints: Math.floor(moduleType.baseHullPoints * levelMultiplier),
+      sensorRange: Math.floor(moduleType.baseSensorRange * levelMultiplier),
+      cargoCapacity: Math.floor(moduleType.baseCargoCapacity * levelMultiplier),
+      crewCapacity: Math.floor(moduleType.baseCrewCapacity * levelMultiplier),
+      speed: Math.floor(moduleType.baseSpeed * levelMultiplier),
+      hyperdriveRating: moduleType.hyperdriveRating
+        ? Math.max(0.1, moduleType.hyperdriveRating - (level - 1) * 0.1)
+        : null,
+    };
+  }
+
+  /**
+   * Berechnet Combat Rating fuer ein Modul (vage Anzeige, safe fuer Client)
+   */
+  calculateModuleCombatRating(
+    moduleType: {
+      baseDamage: number;
+      baseShieldStrength: number;
+    },
+    level: number
+  ): CombatRating {
+    const levelMultiplier = 1 + (level - 1) * (STAT_MULTIPLIER - 1);
+    const damage = Math.floor(moduleType.baseDamage * levelMultiplier);
+    const shield = Math.floor(moduleType.baseShieldStrength * levelMultiplier);
+    return calculateCombatRating(damage, shield);
   }
 
   /**
@@ -88,6 +138,7 @@ export class BlueprintService {
 
   /**
    * Berechnet die Gesamt-Stats eines Blueprints basierend auf allen Modulen
+   * Gibt PUBLIC stats zurueck (ohne geheime Kampfwerte, aber mit combatRating)
    */
   calculateBlueprintStats(
     modules: Array<{
@@ -108,31 +159,28 @@ export class BlueprintService {
   ): BlueprintStats {
     const classConfig = SHIP_CLASS_CONFIG[shipClass];
 
-    // Summiere alle Modul-Stats
-    let totalStats: BlueprintStats = {
-      hullPoints: 0,
-      shieldStrength: 0,
-      damage: 0,
-      speed: 0,
-      sensorRange: 0,
-      cargoCapacity: 0,
-      crewRequired: 0,
-      hyperdriveRating: 1.0, // Default: keine Hyperdrive-Fähigkeit
-    };
+    // Summiere alle Modul-Stats (intern mit Kampfwerten)
+    let totalHullPoints = 0;
+    let totalShieldStrength = 0; // SECRET - nur fuer combatRating
+    let totalDamage = 0;         // SECRET - nur fuer combatRating
+    let totalSpeed = 0;
+    let totalSensorRange = 0;
+    let totalCargoCapacity = 0;
+    let totalCrewRequired = 0;
 
     let hasHyperdrive = false;
-    let bestHyperdriveRating = 10.0; // Höher = schlechter
+    let bestHyperdriveRating = 10.0; // Hoeher = schlechter
 
     for (const module of modules) {
-      const stats = this.calculateModuleStats(module.moduleType, module.level);
+      const stats = this.calculateModuleStatsInternal(module.moduleType, module.level);
 
-      totalStats.hullPoints += stats.hullPoints;
-      totalStats.shieldStrength += stats.shieldStrength;
-      totalStats.damage += stats.damage;
-      totalStats.speed += stats.speed;
-      totalStats.sensorRange += stats.sensorRange;
-      totalStats.cargoCapacity += stats.cargoCapacity;
-      totalStats.crewRequired += stats.crewCapacity;
+      totalHullPoints += stats.hullPoints;
+      totalShieldStrength += stats.shieldStrength;
+      totalDamage += stats.damage;
+      totalSpeed += stats.speed;
+      totalSensorRange += stats.sensorRange;
+      totalCargoCapacity += stats.cargoCapacity;
+      totalCrewRequired += stats.crewCapacity;
 
       // Hyperdrive: nimm das beste Rating (niedrigste Zahl)
       if (stats.hyperdriveRating !== null) {
@@ -144,8 +192,81 @@ export class BlueprintService {
     }
 
     // Wende Schiffsklassen-Multiplikator an
+    totalHullPoints = Math.floor(totalHullPoints * classConfig.baseHullMultiplier);
+
+    // Berechne vages Combat Rating (statt exakte Werte)
+    const combatRating = calculateCombatRating(totalDamage, totalShieldStrength);
+
+    // Return PUBLIC stats (ohne damage/shieldStrength)
+    return {
+      hullPoints: totalHullPoints,
+      speed: totalSpeed,
+      sensorRange: totalSensorRange,
+      cargoCapacity: totalCargoCapacity,
+      crewRequired: totalCrewRequired,
+      hyperdriveRating: hasHyperdrive ? bestHyperdriveRating : 0,
+      combatRating,
+    };
+  }
+
+  /**
+   * Berechnet die INTERNEN Gesamt-Stats eines Blueprints (SERVER-SIDE ONLY)
+   * Fuer Kampfberechnungen - enthaelt geheime Werte
+   */
+  calculateBlueprintStatsInternal(
+    modules: Array<{
+      level: number;
+      moduleType: {
+        baseHullPoints: number;
+        baseDamage: number;
+        baseShieldStrength: number;
+        baseSensorRange: number;
+        baseCargoCapacity: number;
+        baseCrewCapacity: number;
+        baseSpeed: number;
+        hyperdriveRating: number | null;
+        tibannaConsumption: number;
+      };
+    }>,
+    shipClass: ShipClass
+  ): BlueprintStatsInternal {
+    const classConfig = SHIP_CLASS_CONFIG[shipClass];
+
+    let totalStats: BlueprintStatsInternal = {
+      hullPoints: 0,
+      shieldStrength: 0,
+      damage: 0,
+      speed: 0,
+      sensorRange: 0,
+      cargoCapacity: 0,
+      crewRequired: 0,
+      hyperdriveRating: 1.0,
+    };
+
+    let hasHyperdrive = false;
+    let bestHyperdriveRating = 10.0;
+
+    for (const module of modules) {
+      const stats = this.calculateModuleStatsInternal(module.moduleType, module.level);
+
+      totalStats.hullPoints += stats.hullPoints;
+      totalStats.shieldStrength += stats.shieldStrength;
+      totalStats.damage += stats.damage;
+      totalStats.speed += stats.speed;
+      totalStats.sensorRange += stats.sensorRange;
+      totalStats.cargoCapacity += stats.cargoCapacity;
+      totalStats.crewRequired += stats.crewCapacity;
+
+      if (stats.hyperdriveRating !== null) {
+        hasHyperdrive = true;
+        if (stats.hyperdriveRating < bestHyperdriveRating) {
+          bestHyperdriveRating = stats.hyperdriveRating;
+        }
+      }
+    }
+
     totalStats.hullPoints = Math.floor(totalStats.hullPoints * classConfig.baseHullMultiplier);
-    totalStats.hyperdriveRating = hasHyperdrive ? bestHyperdriveRating : 0; // 0 = kein Hyperdrive
+    totalStats.hyperdriveRating = hasHyperdrive ? bestHyperdriveRating : 0;
 
     return totalStats;
   }
@@ -326,6 +447,9 @@ export class BlueprintService {
     return allModules.map((module) => {
       const isUnlocked = !module.requiredResearchId || completedResearchIds.has(module.requiredResearchId);
 
+      // Calculate combat rating from secret values (vage Anzeige)
+      const combatRating = calculateCombatRating(module.baseDamage, module.baseShieldStrength);
+
       return {
         id: module.id,
         name: module.name,
@@ -335,16 +459,14 @@ export class BlueprintService {
         isUnlocked,
         unlockedLevel: isUnlocked ? module.maxLevel : 0,
         requiredResearchName: module.requiredResearch?.name,
+        // PUBLIC stats only - NO damage, shieldStrength, tibannaConsumption
         baseStats: {
           hullPoints: module.baseHullPoints,
-          damage: module.baseDamage,
-          shieldStrength: module.baseShieldStrength,
           sensorRange: module.baseSensorRange,
           cargoCapacity: module.baseCargoCapacity,
           crewCapacity: module.baseCrewCapacity,
           speed: module.baseSpeed,
           hyperdriveRating: module.hyperdriveRating,
-          tibannaConsumption: module.tibannaConsumption,
         },
         baseCosts: {
           credits: module.baseCostCredits,
@@ -356,6 +478,8 @@ export class BlueprintService {
           energiemodule: module.baseCostEnergiemodule,
           buildTime: module.baseBuildTime,
         },
+        // Vage Kampfstaerke-Anzeige (statt exakte Werte)
+        combatRating,
       };
     });
   }
@@ -413,11 +537,12 @@ export class BlueprintService {
       throw new Error(`Fehlende Forschung: ${missing}`);
     }
 
-    // Berechne Stats und Kosten
-    const stats = this.calculateBlueprintStats(modulesWithTypes, data.shipClass);
+    // Berechne Stats und Kosten (internal fuer DB, public fuer Response)
+    const statsPublic = this.calculateBlueprintStats(modulesWithTypes, data.shipClass);
+    const statsInternal = this.calculateBlueprintStatsInternal(modulesWithTypes, data.shipClass);
     const costs = this.calculateConstructionCosts(modulesWithTypes, data.shipClass);
 
-    // Erstelle Blueprint mit Modulen
+    // Erstelle Blueprint mit Modulen (speichere ALLE Stats intern)
     const blueprint = await prisma.shipBlueprint.create({
       data: {
         playerId,
@@ -425,15 +550,15 @@ export class BlueprintService {
         shipClass: data.shipClass,
         description: data.description,
         isPublic: data.isPublic ?? false,
-        // Gecachte Stats
-        totalHullPoints: stats.hullPoints,
-        totalShieldStrength: stats.shieldStrength,
-        totalDamage: stats.damage,
-        totalSpeed: stats.speed,
-        totalSensorRange: stats.sensorRange,
-        totalCargoCapacity: stats.cargoCapacity,
-        totalCrewRequired: stats.crewRequired,
-        hyperdriveRating: stats.hyperdriveRating,
+        // Gecachte Stats (inkl. geheime fuer Kampfberechnungen)
+        totalHullPoints: statsInternal.hullPoints,
+        totalShieldStrength: statsInternal.shieldStrength,
+        totalDamage: statsInternal.damage,
+        totalSpeed: statsInternal.speed,
+        totalSensorRange: statsInternal.sensorRange,
+        totalCargoCapacity: statsInternal.cargoCapacity,
+        totalCrewRequired: statsInternal.crewRequired,
+        hyperdriveRating: statsInternal.hyperdriveRating,
         // Gecachte Kosten
         totalCostCredits: costs.credits,
         totalCostDurastahl: costs.durastahl,
@@ -461,7 +586,7 @@ export class BlueprintService {
       },
     });
 
-    return this.formatBlueprintResponse(blueprint, stats, costs, researchValidation);
+    return this.formatBlueprintResponse(blueprint, statsPublic, costs, researchValidation);
   }
 
   /**
@@ -514,11 +639,12 @@ export class BlueprintService {
         throw new Error(`Fehlende Forschung: ${missing}`);
       }
 
-      // Berechne neue Stats und Kosten
-      const stats = this.calculateBlueprintStats(modulesWithTypes, existing.shipClass);
+      // Berechne neue Stats und Kosten (internal fuer DB, public fuer Response)
+      const statsPublic = this.calculateBlueprintStats(modulesWithTypes, existing.shipClass);
+      const statsInternal = this.calculateBlueprintStatsInternal(modulesWithTypes, existing.shipClass);
       const costs = this.calculateConstructionCosts(modulesWithTypes, existing.shipClass);
 
-      // Lösche alte Module und erstelle neue
+      // Loesche alte Module und erstelle neue
       await prisma.blueprintModule.deleteMany({
         where: { blueprintId },
       });
@@ -529,15 +655,15 @@ export class BlueprintService {
           name: data.name ?? existing.name,
           description: data.description ?? existing.description,
           isPublic: data.isPublic ?? existing.isPublic,
-          // Gecachte Stats
-          totalHullPoints: stats.hullPoints,
-          totalShieldStrength: stats.shieldStrength,
-          totalDamage: stats.damage,
-          totalSpeed: stats.speed,
-          totalSensorRange: stats.sensorRange,
-          totalCargoCapacity: stats.cargoCapacity,
-          totalCrewRequired: stats.crewRequired,
-          hyperdriveRating: stats.hyperdriveRating,
+          // Gecachte Stats (inkl. geheime fuer Kampfberechnungen)
+          totalHullPoints: statsInternal.hullPoints,
+          totalShieldStrength: statsInternal.shieldStrength,
+          totalDamage: statsInternal.damage,
+          totalSpeed: statsInternal.speed,
+          totalSensorRange: statsInternal.sensorRange,
+          totalCargoCapacity: statsInternal.cargoCapacity,
+          totalCrewRequired: statsInternal.crewRequired,
+          hyperdriveRating: statsInternal.hyperdriveRating,
           // Gecachte Kosten
           totalCostCredits: costs.credits,
           totalCostDurastahl: costs.durastahl,
@@ -565,7 +691,7 @@ export class BlueprintService {
         },
       });
 
-      return this.formatBlueprintResponse(blueprint, stats, costs, researchValidation);
+      return this.formatBlueprintResponse(blueprint, statsPublic, costs, researchValidation);
     }
 
     // Nur Metadaten aktualisieren
@@ -791,7 +917,7 @@ export class BlueprintService {
   }
 
   /**
-   * Formatiert die Blueprint-Antwort
+   * Formatiert die Blueprint-Antwort (PUBLIC - keine geheimen Kampfwerte)
    */
   private formatBlueprintResponse(
     blueprint: any,
@@ -812,8 +938,11 @@ export class BlueprintService {
         maxLevel: m.moduleType.maxLevel,
         hyperdriveRating: m.moduleType.hyperdriveRating,
       },
-      calculatedStats: this.calculateModuleStats(m.moduleType, m.level),
+      // PUBLIC stats only (keine damage/shieldStrength)
+      calculatedStats: this.calculateModuleStatsPublic(m.moduleType, m.level),
       calculatedCosts: this.calculateModuleCosts(m.moduleType, m.level),
+      // Vage Kampfstaerke-Anzeige
+      combatRating: this.calculateModuleCombatRating(m.moduleType, m.level),
     }));
 
     return {

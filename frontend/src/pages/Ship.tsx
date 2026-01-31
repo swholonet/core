@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Zap, Battery, AlertTriangle, Navigation } from 'lucide-react';
 import api from '../lib/api';
 import { useGameStore } from '../stores/gameStore';
+import '../styles/stu-sensor-view.css';
 
 interface ShipData {
   ship: {
@@ -30,12 +31,18 @@ interface ShipData {
     crew: number;
     range: number;
   };
-  shipType: {
-    name: string;
+  shipStats: {
+    hullPoints: number;
+    deflectorShieldStrength: number;
+    weaponDamage: number;
+    subLightSpeed: number;
+    hyperdriveRating: number;
     sensorRange: number;
-    driveEfficiency: number;
-    attack: number;
-    defense: number;
+    cargoCapacity: number;
+    crewCapacity: number;
+    maxEnergyWeapons: number;
+    maxEnergyDrive: number;
+    source: 'blueprint' | 'shipType' | 'hardcoded';
   };
   sensorView: {
     range: number;
@@ -150,13 +157,51 @@ export default function Ship() {
   const setDestination = async (targetX: number, targetY: number) => {
     if (!shipData) return;
 
+    // Get current ship position based on view mode
+    const currentX = viewMode === 'galaxy' ? ship.position.galaxyX : ship.position.systemX;
+    const currentY = viewMode === 'galaxy' ? ship.position.galaxyY : ship.position.systemY;
+
+    if (currentX === null || currentY === null) return;
+
+    // STU-Style: Only allow orthogonal movement (no diagonal)
+    const deltaX = Math.abs(targetX - currentX);
+    const deltaY = Math.abs(targetY - currentY);
+
+    if (deltaX > 0 && deltaY > 0) {
+      alert('Nur orthogonale Bewegung erlaubt (hoch, runter, links, rechts)');
+      return;
+    }
+
+    // Calculate energy cost
+    const energyCost = viewMode === 'galaxy'
+      ? deltaX + deltaY // 1 energy per field in hyperspace
+      : (deltaX + deltaY) * 0.5; // 0.5 energy per field in system
+
+    // Check if ship has enough energy
+    if (energyCost > ship.energy.drive) {
+      alert(`Nicht genug Antriebsenergie! Benötigt: ${energyCost}, Verfügbar: ${ship.energy.drive}`);
+      return;
+    }
+
+    // Show confirmation for longer movements
+    if (energyCost > 1) {
+      const confirmed = confirm(
+        `Bewegung bestätigen:\n` +
+        `Von: ${currentX}|${currentY}\n` +
+        `Nach: ${targetX}|${targetY}\n` +
+        `Energiekosten: ${energyCost}\n` +
+        `Verbleibende Energie: ${ship.energy.drive - energyCost}`
+      );
+      if (!confirmed) return;
+    }
+
     try {
       setIsMoving(true);
-      
+
       // Use universal move endpoint that auto-detects layer
       await api.post(`/ship/${id}/move`, { targetX, targetY });
       await loadShipData();
-      
+
       // Show movement effect for 300ms
       setTimeout(() => setIsMoving(false), 300);
     } catch (err: any) {
@@ -223,10 +268,49 @@ export default function Ship() {
     );
   }
 
-  const { ship, shipType, sensorView } = shipData;
+  const { ship, shipStats, sensorView } = shipData;
 
   // Determine if ship is in a system or in hyperspace
   const isInSystem = ship.currentSystemId !== null;
+
+  // Helper function to validate if a target is reachable with orthogonal movement
+  const isValidMovementTarget = (targetX: number, targetY: number) => {
+    const currentX = viewMode === 'galaxy' ? ship.position.galaxyX : ship.position.systemX;
+    const currentY = viewMode === 'galaxy' ? ship.position.galaxyY : ship.position.systemY;
+
+    if (currentX === null || currentY === null) return false;
+
+    // Can't move to current position
+    if (targetX === currentX && targetY === currentY) return false;
+
+    // Must be orthogonal movement only (no diagonal)
+    const deltaX = Math.abs(targetX - currentX);
+    const deltaY = Math.abs(targetY - currentY);
+    if (deltaX > 0 && deltaY > 0) return false;
+
+    // Calculate energy cost
+    const energyCost = viewMode === 'galaxy'
+      ? deltaX + deltaY
+      : (deltaX + deltaY) * 0.5;
+
+    // Must have sufficient energy
+    return energyCost <= ship.energy.drive;
+  };
+
+  // Helper function to get energy cost for movement
+  const getMovementCost = (targetX: number, targetY: number) => {
+    const currentX = viewMode === 'galaxy' ? ship.position.galaxyX : ship.position.systemX;
+    const currentY = viewMode === 'galaxy' ? ship.position.galaxyY : ship.position.systemY;
+
+    if (currentX === null || currentY === null) return 0;
+
+    const deltaX = Math.abs(targetX - currentX);
+    const deltaY = Math.abs(targetY - currentY);
+
+    return viewMode === 'galaxy'
+      ? deltaX + deltaY
+      : (deltaX + deltaY) * 0.5;
+  };
   
   // Check if ship is at a system position (in galaxy mode)
   const systemAtShipPosition = sensorView.systems.find(
@@ -293,9 +377,21 @@ export default function Ship() {
           Zurück zu Schiffe
         </button>
         <h1 className="text-3xl font-bold text-white">
-          {ship.name || `${shipType.name} ${ship.id}`}
+          {ship.name || `Schiff ${ship.id}`}
         </h1>
-        <p className="text-gray-400">{shipType.name} • Status: {ship.status === 'DOCKED' ? 'Angedockt' : ship.status === 'IN_FLIGHT' ? 'Im Flug' : 'Gestrandet'}</p>
+        <div className="flex items-center gap-4 text-gray-400">
+          <span>Status: {ship.status === 'DOCKED' ? 'Angedockt' : ship.status === 'IN_FLIGHT' ? 'Im Flug' : 'Gestrandet'}</span>
+          {shipStats.source === 'blueprint' && (
+            <span className="bg-green-900/30 text-green-400 px-2 py-1 rounded text-sm border border-green-500/20">
+              BLUEPRINT
+            </span>
+          )}
+          {shipStats.source === 'shipType' && (
+            <span className="bg-yellow-900/30 text-yellow-400 px-2 py-1 rounded text-sm border border-yellow-500/20">
+              LEGACY
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -367,7 +463,11 @@ export default function Ship() {
             
             {/* Sensor Grid */}
             <div className="relative z-10 p-4 overflow-auto">
-              <table className="border-collapse mx-auto">
+              {/* Sensor boundary overlay with radar sweep */}
+              <div className="sensor-boundary" />
+              {/* Sensor grid lines overlay */}
+              <div className="sensor-grid-overlay" />
+              <table className="border-collapse mx-auto stu-sensor-grid">
                 <tbody>
                   {sensorGrid.map((row, y) => (
                     <tr key={y}>
@@ -379,33 +479,56 @@ export default function Ship() {
                         const hasSystem = !!cell.system;
                         const hasPlanets = cell.planets && cell.planets.length > 0;
 
+                        // STU-Style movement validation
+                        const isValidTarget = !isCenter && ship.status === 'DOCKED' && isValidMovementTarget(cell.x, cell.y);
+                        const movementCost = getMovementCost(cell.x, cell.y);
+                        const isInvalidDiagonal = !isCenter && cell.x !== (viewMode === 'galaxy' ? ship.position.galaxyX : ship.position.systemX)
+                          && cell.y !== (viewMode === 'galaxy' ? ship.position.galaxyY : ship.position.systemY);
+
                         return (
                           <td
                             key={x}
-                            onClick={() => !isCenter && setDestination(cell.x, cell.y)}
-                            className={`w-12 h-12 border cursor-pointer relative text-center transition-all ${
-                              isCenter 
-                                ? 'bg-holo/30 border-holo ring-2 ring-holo shadow-holo' 
-                                : hasSystem && viewMode === 'galaxy' 
-                                  ? 'bg-blue-800/40 border-blue-600/50 hover:bg-blue-700/60 hover:shadow-lg hover:shadow-blue-500/30' 
-                                  : hasPlanets && viewMode === 'system'
-                                    ? 'bg-green-800/40 border-green-600/50 hover:bg-green-700/60 hover:shadow-lg hover:shadow-green-500/30'
-                                    : 'bg-black/20 border-gray-700/30 hover:bg-gray-800/40 hover:border-holo/50'
+                            onClick={() => !isCenter && ship.status === 'DOCKED' && setDestination(cell.x, cell.y)}
+                            className={`w-12 h-12 border relative text-center transition-all ${
+                              isCenter
+                                ? 'bg-holo/30 border-holo ring-2 ring-holo shadow-holo cursor-default ship-position-marker'
+                                : ship.status !== 'DOCKED'
+                                  ? 'bg-red-900/20 border-red-800/30 cursor-not-allowed'
+                                  : isValidTarget
+                                    ? 'bg-green-800/20 border-green-600/40 hover:bg-green-700/40 hover:shadow-lg hover:shadow-green-500/30 cursor-pointer sensor-field-valid'
+                                    : isInvalidDiagonal
+                                      ? 'bg-red-800/20 border-red-600/30 hover:bg-red-700/30 cursor-not-allowed sensor-field-invalid'
+                                      : hasSystem && viewMode === 'galaxy'
+                                        ? 'bg-blue-800/40 border-blue-600/50 hover:bg-blue-700/60 hover:shadow-lg hover:shadow-blue-500/30 cursor-pointer'
+                                        : hasPlanets && viewMode === 'system'
+                                          ? 'bg-green-800/40 border-green-600/50 hover:bg-green-700/60 hover:shadow-lg hover:shadow-green-500/30 cursor-pointer'
+                                          : 'bg-black/20 border-gray-700/30 hover:bg-gray-800/40 hover:border-holo/50 cursor-pointer'
                             }`}
-                            title={`${cell.x}|${cell.y}${hasSystem ? ` - ${cell.system.name}` : ''}${hasPlanets ? ` - ${cell.planets[0].name}` : ''}`}
+                            title={
+                              `${cell.x}|${cell.y}` +
+                              `${hasSystem ? ` - ${cell.system.name}` : ''}` +
+                              `${hasPlanets ? ` - ${cell.planets[0].name}` : ''}` +
+                              `${!isCenter && ship.status === 'DOCKED' ? ` - Energiekosten: ${movementCost}` : ''}` +
+                              `${isValidTarget ? ' - Gültiges Ziel ✓' : ''}` +
+                              `${isInvalidDiagonal ? ' - Nur orthogonale Bewegung!' : ''}`
+                            }
                           >
                             <div className="flex items-center justify-center h-full">
                               {hasShips && !isCenter && (
-                                <span className="text-red-400 font-bold text-sm animate-pulse">{cell.ships.length}</span>
+                                <span className="sensor-contact-ship font-bold text-sm">{cell.ships.length}</span>
                               )}
                               {isCenter && (
                                 <span className="text-holo font-bold text-2xl drop-shadow-[0_0_8px_rgba(0,255,255,0.8)]">●</span>
                               )}
                               {hasSystem && viewMode === 'galaxy' && !isCenter && (
-                                <span className="text-yellow-400 text-xl drop-shadow-[0_0_6px_rgba(255,255,0,0.6)]">★</span>
+                                <span className="sensor-contact-system text-xl">★</span>
                               )}
                               {hasPlanets && viewMode === 'system' && !isCenter && (
-                                <span className="text-green-400 text-xl drop-shadow-[0_0_6px_rgba(0,255,0,0.6)]">◉</span>
+                                <span className="sensor-contact-planet text-xl">◉</span>
+                              )}
+                              {/* Energy cost preview for valid targets */}
+                              {isValidTarget && movementCost > 0 && (
+                                <span className="energy-cost-preview">{movementCost}</span>
                               )}
                             </div>
                           </td>
@@ -546,27 +669,35 @@ export default function Ship() {
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div>
                 <p className="text-gray-400">Angriff</p>
-                <p className="text-white">{shipType.attack}</p>
+                <p className="text-white">{shipStats.weaponDamage}</p>
               </div>
               <div>
-                <p className="text-gray-400">Verteidigung</p>
-                <p className="text-white">{shipType.defense}</p>
+                <p className="text-gray-400">Schilde</p>
+                <p className="text-white">{shipStats.deflectorShieldStrength}</p>
               </div>
               <div>
                 <p className="text-gray-400">Hülle</p>
-                <p className="text-white">{ship.health}%</p>
+                <p className="text-white">{shipStats.hullPoints}</p>
               </div>
               <div>
                 <p className="text-gray-400">Besatzung</p>
-                <p className="text-white">{ship.crew}</p>
+                <p className="text-white">{ship.crew}/{shipStats.crewCapacity}</p>
               </div>
               <div>
-                <p className="text-gray-400">Verbrauch</p>
-                <p className="text-white">1 Energie/Feld</p>
+                <p className="text-gray-400">Geschwindigkeit</p>
+                <p className="text-white">{shipStats.subLightSpeed}</p>
               </div>
               <div>
                 <p className="text-gray-400">Sensoren</p>
-                <p className="text-white">{shipType.sensorRange} Felder</p>
+                <p className="text-white">{shipStats.sensorRange} Felder</p>
+              </div>
+              <div>
+                <p className="text-gray-400">Hyperantrieb</p>
+                <p className="text-white">Klasse {shipStats.hyperdriveRating}</p>
+              </div>
+              <div>
+                <p className="text-gray-400">Frachtraum</p>
+                <p className="text-white">{shipStats.cargoCapacity}</p>
               </div>
             </div>
           </div>

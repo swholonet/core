@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 import { PrismaClient } from '@prisma/client';
 import { execSync } from 'child_process';
-import { galaxyService } from '../src/services/galaxyService';
+import { galaxyService, HyperlaneGenerator } from '../src/services/galaxyService';
 
 // Construct DATABASE_URL if not set
 if (!process.env.DATABASE_URL) {
@@ -69,11 +69,8 @@ async function resetAndSeed() {
 
     // Run the research types seed script
     execSync('npx tsx scripts/seed-research-types.ts', { stdio: 'inherit' });
-    console.log('\n🚀 Seeding ship types...');
 
-    // Run the ship types seed script
-    execSync('npx tsx scripts/seed-ship-types.ts', { stdio: 'inherit' });
-    console.log('\n�️  Creating admin invite code...');
+    console.log('\n🔑 Creating admin invite code...');
 
     // Run the admin invite seed script
     execSync('npx tsx scripts/seed-admin-invite.ts', { stdio: 'inherit' });
@@ -84,6 +81,11 @@ async function resetAndSeed() {
     const galaxy = await galaxyService.initializeGalaxy();
     console.log('✓ Galaxy initialized with dynamic start planet selection');
     console.log('✓ Players will select from generated habitable planets in faction territories');
+
+    console.log('\n🛤️  Generating hyperlane routes...');
+    const hyperlaneGenerator = new HyperlaneGenerator();
+    await hyperlaneGenerator.generateHyperlanes();
+    console.log('✓ Hyperlane routes generated');
 
     console.log('\n✨ Database reset and seeding complete!\n');
     

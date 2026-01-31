@@ -1,0 +1,25 @@
+name: Discord Release Notification
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord Message
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          # Hier kannst du den Namen und das Logo anpassen
+          username: "stuniverse.net Bot"
+          title: "🚀 Neues Update für stuniverse.net verfügbar!"
+          description: |
+            **Version:** `${{ github.event.release.tag_name }}`
+            
+            **Changelog:**
+            ${{ github.event.release.body }}
+            
+            [Vollständiges Release auf GitHub ansehen](${{ github.event.release.html_url }})
+          color: 0x3498db # Ein schönes Blau, passend zum "Universe"-Thema

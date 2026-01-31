@@ -1,0 +1,508 @@
+/*
+ * STU-Style Ship Sensor View Styling
+ *
+ * Enhanced radar/scanner aesthetic for ship sensor displays
+ * Matches the Imperial Command theme with cyan accents
+ */
+
+/* ================================================
+ * SENSOR GRID BASE STYLING
+ * ================================================ */
+
+/* Hyperspace map background with animated stars */
+.hyperspace-map {
+  background:
+    radial-gradient(2px 2px at 20% 30%, #fff, transparent),
+    radial-gradient(2px 2px at 40% 70%, rgba(255,255,255,0.8), transparent),
+    radial-gradient(1px 1px at 90% 40%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 50% 50%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(2px 2px at 60% 90%, rgba(255,255,255,0.3), transparent),
+    radial-gradient(ellipse at center, #001122 0%, #000508 100%);
+  background-size: 200px 200px, 300px 300px, 150px 150px, 250px 250px, 180px 180px, 100% 100%;
+  animation: starsMove 60s ease-in-out infinite alternate;
+}
+
+/* System map background with central sun glow */
+.system-map {
+  background:
+    radial-gradient(ellipse at center, rgba(255, 200, 0, 0.1) 0%, transparent 40%),
+    radial-gradient(ellipse at center, #001a33 0%, #000610 100%);
+}
+
+/* Sensor scanning animation */
+@keyframes sensorScan {
+  0% { transform: rotate(0deg); opacity: 0.3; }
+  50% { opacity: 0.8; }
+  100% { transform: rotate(360deg); opacity: 0.3; }
+}
+
+/* Hyperspace stars movement */
+@keyframes starsMove {
+  0% { transform: translateY(0px); }
+  100% { transform: translateY(-20px); }
+}
+
+/* System sun with pulsing animation */
+.system-sun {
+  position: absolute;
+  background:
+    radial-gradient(circle, rgba(255, 200, 0, 0.8) 0%, rgba(255, 150, 0, 0.4) 30%, transparent 70%);
+  border-radius: 50%;
+  animation: sunPulse 4s ease-in-out infinite alternate;
+  z-index: 1;
+}
+
+@keyframes sunPulse {
+  0% {
+    box-shadow: 0 0 20px rgba(255, 200, 0, 0.6), 0 0 40px rgba(255, 200, 0, 0.4);
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    box-shadow: 0 0 30px rgba(255, 200, 0, 0.8), 0 0 60px rgba(255, 200, 0, 0.6);
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+}
+
+/* ================================================
+ * HYPERSPACE MOVEMENT EFFECTS
+ * ================================================ */
+
+/* Hyperspace streaks overlay */
+.hyperspace-streaks {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 5;
+  background:
+    linear-gradient(45deg, transparent 30%, rgba(0, 255, 255, 0.2) 50%, transparent 70%),
+    linear-gradient(-45deg, transparent 30%, rgba(0, 255, 255, 0.15) 50%, transparent 70%),
+    linear-gradient(90deg, transparent 40%, rgba(255, 255, 255, 0.1) 50%, transparent 60%),
+    radial-gradient(ellipse at center, rgba(0, 255, 255, 0.1) 0%, transparent 70%);
+  background-size: 30px 30px, 25px 25px, 15px 15px, 100% 100%;
+  transition: opacity 0.3s ease;
+}
+
+.hyperspace-streaks.active {
+  opacity: 1;
+  animation: hyperspaceJump 0.8s ease-out;
+}
+
+@keyframes hyperspaceJump {
+  0% {
+    background-position: -150px -150px, 150px 150px, -75px 0, 0 0;
+    opacity: 0;
+    transform: scale(1);
+    filter: blur(0px);
+  }
+  25% {
+    background-position: -50px -50px, 50px 50px, -25px 0, 0 0;
+    opacity: 0.6;
+    transform: scale(1.05);
+    filter: blur(1px);
+  }
+  50% {
+    background-position: 0px 0px, 0px 0px, 0px 0, 0 0;
+    opacity: 1;
+    transform: scale(1.1);
+    filter: blur(2px);
+  }
+  75% {
+    background-position: 50px 50px, -50px -50px, 25px 0, 0 0;
+    opacity: 0.8;
+    transform: scale(1.05);
+    filter: blur(1px);
+  }
+  100% {
+    background-position: 150px 150px, -150px -150px, 75px 0, 0 0;
+    opacity: 0;
+    transform: scale(1);
+    filter: blur(0px);
+  }
+}
+
+/* Enhanced movement trail for individual targets */
+.movement-trail {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0;
+}
+
+.movement-trail.active {
+  opacity: 1;
+  animation: movementTrail 0.6s ease-out;
+}
+
+@keyframes movementTrail {
+  0% {
+    box-shadow:
+      inset 0 0 0 1px rgba(0, 255, 255, 0),
+      0 0 0 0 rgba(0, 255, 255, 0);
+  }
+  50% {
+    box-shadow:
+      inset 0 0 20px 2px rgba(0, 255, 255, 0.3),
+      0 0 20px 4px rgba(0, 255, 255, 0.2);
+  }
+  100% {
+    box-shadow:
+      inset 0 0 0 1px rgba(0, 255, 255, 0),
+      0 0 0 0 rgba(0, 255, 255, 0);
+  }
+}
+
+/* ================================================
+ * MAP ZOOM TRANSITIONS
+ * ================================================ */
+
+/* System entry zoom animation */
+.map-zoom-in {
+  animation: zoomIn 0.8s ease-out;
+}
+
+@keyframes zoomIn {
+  0% {
+    transform: scale(1);
+    filter: blur(0px);
+  }
+  50% {
+    transform: scale(1.5);
+    filter: blur(2px);
+  }
+  100% {
+    transform: scale(1);
+    filter: blur(0px);
+  }
+}
+
+/* System exit zoom animation */
+.map-zoom-out {
+  animation: zoomOut 0.8s ease-out;
+}
+
+@keyframes zoomOut {
+  0% {
+    transform: scale(1);
+    filter: blur(0px);
+  }
+  50% {
+    transform: scale(0.5);
+    filter: blur(2px);
+  }
+  100% {
+    transform: scale(1);
+    filter: blur(0px);
+  }
+}
+
+/* ================================================
+ * SENSOR GRID ENHANCEMENTS
+ * ================================================ */
+
+/* STU-style sensor grid table */
+.stu-sensor-grid {
+  background: rgba(0, 20, 40, 0.3);
+  border: 1px solid rgba(6, 182, 212, 0.2);
+  border-radius: 8px;
+  backdrop-filter: blur(4px);
+}
+
+/* Enhanced sensor field styling */
+.sensor-field-valid {
+  position: relative;
+  overflow: hidden;
+}
+
+.sensor-field-valid::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    linear-gradient(45deg, transparent 30%, rgba(34, 197, 94, 0.1) 50%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.sensor-field-valid:hover::before {
+  opacity: 1;
+  animation: validTargetPulse 1s ease-in-out infinite;
+}
+
+@keyframes validTargetPulse {
+  0%, 100% { opacity: 0.1; }
+  50% { opacity: 0.3; }
+}
+
+/* Invalid diagonal movement indicator */
+.sensor-field-invalid::after {
+  content: '⚠';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 8px;
+  color: rgba(239, 68, 68, 0.8);
+  animation: warningBlink 2s ease-in-out infinite;
+}
+
+@keyframes warningBlink {
+  0%, 70%, 100% { opacity: 0; }
+  35% { opacity: 1; }
+}
+
+/* Ship position marker enhancement */
+.ship-position-marker {
+  position: relative;
+  z-index: 10;
+}
+
+.ship-position-marker::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border: 2px solid rgba(6, 182, 212, 0.6);
+  border-radius: 50%;
+  animation: sensorSweep 3s linear infinite;
+}
+
+@keyframes sensorSweep {
+  0% {
+    border-color: rgba(6, 182, 212, 0.8);
+    transform: scale(1);
+  }
+  50% {
+    border-color: rgba(6, 182, 212, 0.3);
+    transform: scale(1.1);
+  }
+  100% {
+    border-color: rgba(6, 182, 212, 0.8);
+    transform: scale(1);
+  }
+}
+
+/* ================================================
+ * CONTACT CLASSIFICATION MARKERS
+ * ================================================ */
+
+/* Enhanced system markers */
+.sensor-contact-system {
+  text-shadow: 0 0 8px rgba(255, 255, 0, 0.8);
+  animation: systemGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes systemGlow {
+  0% { filter: brightness(1) saturate(1); }
+  100% { filter: brightness(1.2) saturate(1.3); }
+}
+
+/* Enhanced ship markers */
+.sensor-contact-ship {
+  color: #ef4444;
+  text-shadow: 0 0 6px rgba(239, 68, 68, 0.8);
+  animation: shipBlink 1.5s ease-in-out infinite;
+}
+
+@keyframes shipBlink {
+  0%, 70%, 100% { opacity: 1; }
+  35% { opacity: 0.4; }
+}
+
+/* Enhanced planet markers */
+.sensor-contact-planet {
+  text-shadow: 0 0 6px rgba(34, 197, 94, 0.8);
+  animation: planetRotate 8s linear infinite;
+}
+
+@keyframes planetRotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ================================================
+ * SENSOR BOUNDARY VISUALIZATION
+ * ================================================ */
+
+/* Sensor range boundary indicator */
+.sensor-boundary {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 2;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.sensor-boundary::after {
+  content: '';
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  border: 1px dashed rgba(6, 182, 212, 0.4);
+  border-radius: 8px;
+  animation: sensorBoundaryPulse 4s ease-in-out infinite;
+}
+
+/* Radar sweep effect */
+.sensor-boundary::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 50%;
+  background: linear-gradient(to bottom, rgba(0, 255, 255, 0.8), transparent);
+  transform-origin: bottom center;
+  transform: translate(-50%, -100%) rotate(0deg);
+  animation: radarSweep 6s linear infinite;
+  border-radius: 2px 2px 0 0;
+}
+
+@keyframes radarSweep {
+  0% {
+    transform: translate(-50%, -100%) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -100%) rotate(360deg);
+    opacity: 1;
+  }
+}
+
+@keyframes sensorBoundaryPulse {
+  0%, 100% {
+    border-color: rgba(6, 182, 212, 0.4);
+    box-shadow: none;
+  }
+  50% {
+    border-color: rgba(6, 182, 212, 0.8);
+    box-shadow:
+      inset 0 0 20px rgba(6, 182, 212, 0.2),
+      0 0 15px rgba(6, 182, 212, 0.3);
+  }
+}
+
+/* Sensor grid lines overlay */
+.sensor-grid-overlay {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  pointer-events: none;
+  z-index: 1;
+  background-image:
+    linear-gradient(rgba(6, 182, 212, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(6, 182, 212, 0.1) 1px, transparent 1px);
+  background-size: 48px 48px; /* Matches sensor grid cell size */
+  animation: gridShimmer 8s ease-in-out infinite alternate;
+}
+
+@keyframes gridShimmer {
+  0% {
+    opacity: 0.3;
+    background-image:
+      linear-gradient(rgba(6, 182, 212, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(6, 182, 212, 0.1) 1px, transparent 1px);
+  }
+  100% {
+    opacity: 0.6;
+    background-image:
+      linear-gradient(rgba(6, 182, 212, 0.2) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(6, 182, 212, 0.2) 1px, transparent 1px);
+  }
+}
+
+/* ================================================
+ * ENERGY COST PREVIEW
+ * ================================================ */
+
+/* Energy cost tooltip enhancement */
+.energy-cost-preview {
+  position: absolute;
+  bottom: 2px;
+  left: 2px;
+  font-size: 8px;
+  color: rgba(59, 130, 246, 0.8);
+  background: rgba(0, 0, 0, 0.6);
+  padding: 1px 3px;
+  border-radius: 2px;
+  font-weight: bold;
+}
+
+/* ================================================
+ * RESPONSIVE DESIGN
+ * ================================================ */
+
+@media (max-width: 768px) {
+  .stu-sensor-grid td {
+    width: 10px;
+    height: 10px;
+    font-size: 10px;
+  }
+
+  .sensor-field-invalid::after {
+    font-size: 6px;
+  }
+
+  .energy-cost-preview {
+    font-size: 6px;
+  }
+}
+
+/* ================================================
+ * ACCESSIBILITY ENHANCEMENTS
+ * ================================================ */
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .sensor-field-valid {
+    border: 2px solid #22c55e;
+  }
+
+  .sensor-contact-system {
+    color: #ffff00;
+    text-shadow: 0 0 4px #000;
+  }
+
+  .sensor-contact-ship {
+    color: #ff0000;
+    text-shadow: 0 0 4px #000;
+  }
+
+  .sensor-contact-planet {
+    color: #00ff00;
+    text-shadow: 0 0 4px #000;
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .hyperspace-map,
+  .system-sun,
+  .sensor-contact-system,
+  .sensor-contact-ship,
+  .sensor-contact-planet,
+  .ship-position-marker::after,
+  .sensor-boundary::after,
+  .hyperspace-streaks {
+    animation: none !important;
+  }
+}

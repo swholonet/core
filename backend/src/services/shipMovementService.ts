@@ -48,7 +48,7 @@ class ShipMovementService {
           destinationY: { not: null },
         },
         include: {
-          shipType: true,
+          blueprint: true,
           planet: {
             include: {
               player: true,
@@ -274,7 +274,7 @@ class ShipMovementService {
       const ship = await prisma.ship.findUnique({
         where: { id: shipId },
         include: {
-          shipType: true,
+          blueprint: true,
           system: true,
         },
       });

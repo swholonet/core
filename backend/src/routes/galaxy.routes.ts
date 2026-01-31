@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
-import { galaxyService } from '../services/galaxyService';
+import { adminAuthMiddleware } from '../middleware/adminAuth';
+import { galaxyService, HyperlaneGenerator } from '../services/galaxyService';
 import { PrismaClient } from '@prisma/client';
 
 const router = Router();
@@ -34,23 +35,35 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response) => {
       },
     });
 
+    // Get all sectors with hyperlane data
+    const sectorsData = await prisma.sector.findMany({
+      include: {
+        sectorFields: {
+          where: {
+            isHyperlane: true
+          }
+        }
+      }
+    });
+
     // Group systems by sector
     const sectorMap = new Map<string, any>();
 
     systems.forEach((system) => {
       const key = `${system.sector.x},${system.sector.y}`;
-      
+
       if (!sectorMap.has(key)) {
         sectorMap.set(key, {
           x: system.sector.x,
           y: system.sector.y,
           systems: [],
+          sectorFields: []
         });
       }
 
       const currentPlayerId = (req as any).user?.player?.id;
       const hasOwnPlanets = system.planets.some(p => p.player?.id === currentPlayerId);
-      
+
       sectorMap.get(key).systems.push({
         id: system.id,
         name: system.name,
@@ -62,6 +75,21 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response) => {
         hasOwnPlanets,
         factionName: system.planets.find(p => p.player)?.player?.faction.name,
       });
+    });
+
+    // Add hyperlane data to sectors
+    sectorsData.forEach((sectorData) => {
+      const key = `${sectorData.x},${sectorData.y}`;
+      if (sectorMap.has(key)) {
+        sectorMap.get(key).sectorFields = sectorData.sectorFields.map(field => ({
+          fieldX: field.fieldX,
+          fieldY: field.fieldY,
+          isHyperlane: field.isHyperlane,
+          laneName: field.laneName,
+          laneColor: field.laneColor,
+          laneType: field.laneType
+        }));
+      }
     });
 
     const sectors = Array.from(sectorMap.values());
@@ -216,7 +244,7 @@ router.post('/initialize', async (req, res) => {
   try {
     const galaxy = await galaxyService.initializeGalaxy();
     const startPlanets = await galaxyService.createStartPlanets();
-    
+
     res.json({
       message: 'Galaxy initialized successfully',
       galaxy,
@@ -224,6 +252,53 @@ router.post('/initialize', async (req, res) => {
     });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Generate hyperlanes (admin endpoint)
+router.post('/generate-hyperlanes', adminAuthMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    console.log('🌌 Admin request to generate hyperlanes...');
+
+    const hyperlaneGenerator = new HyperlaneGenerator();
+
+    // Clear existing hyperlanes first
+    await hyperlaneGenerator.clearHyperlanes();
+
+    // Generate new hyperlanes
+    await hyperlaneGenerator.generateHyperlanes();
+
+    res.json({
+      success: true,
+      message: 'Hyperlane-Routen wurden erfolgreich generiert'
+    });
+  } catch (error: any) {
+    console.error('Error generating hyperlanes:', error);
+    res.status(500).json({
+      error: 'Fehler beim Generieren der Hyperlane-Routen',
+      details: error.message
+    });
+  }
+});
+
+// Clear hyperlanes (admin endpoint)
+router.delete('/hyperlanes', adminAuthMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    console.log('🧹 Admin request to clear hyperlanes...');
+
+    const hyperlaneGenerator = new HyperlaneGenerator();
+    await hyperlaneGenerator.clearHyperlanes();
+
+    res.json({
+      success: true,
+      message: 'Alle Hyperlane-Routen wurden gelöscht'
+    });
+  } catch (error: any) {
+    console.error('Error clearing hyperlanes:', error);
+    res.status(500).json({
+      error: 'Fehler beim Löschen der Hyperlane-Routen',
+      details: error.message
+    });
   }
 });
 

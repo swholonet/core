@@ -1,0 +1,408 @@
+/**
+ * Hyperlane Visual Effects
+ * CSS animations and effects for Star Wars Universe hyperspace routes
+ * Enhanced with sophisticated galactic aesthetics
+ */
+
+/* Galactic Color Palette Custom Properties */
+:root {
+  /* Base galactic colors */
+  --galactic-deep-space: #000205;
+  --galactic-space-blue: #000810;
+  --galactic-space-variant: #000408;
+
+  /* Hyperspace route colors */
+  --hyperspace-cyan: #00D4FF;
+  --hyperspace-blue: #00ffff;
+  --hyperspace-orange: #ff6600;
+  --hyperspace-green: #00ff00;
+  --hyperspace-red: #ff0000;
+  --hyperspace-purple: #9900ff;
+
+  /* System status colors */
+  --system-owned: rgba(255, 215, 0, 0.8);
+  --system-faction: rgba(255, 100, 100, 0.6);
+  --system-neutral: rgba(0, 255, 255, 0.6);
+
+  /* UI accent colors */
+  --ui-cyan-primary: #22D3EE;
+  --ui-cyan-secondary: #0891B2;
+  --ui-slate-primary: rgba(100, 116, 139, 0.8);
+  --ui-slate-secondary: rgba(71, 85, 105, 0.9);
+}
+
+/* Base hyperlane field styling with extended background coverage */
+.hyperlane-field {
+  position: relative;
+  z-index: 1; /* Above grid background, below system icons */
+
+  /* Extended background glow - reaches neighboring cells */
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--lane-color, #00ffff) 25%, transparent) 0%,
+    color-mix(in srgb, var(--lane-color, #00ffff) 15%, transparent) 40%,
+    color-mix(in srgb, var(--lane-color, #00ffff) 8%, transparent) 80%,
+    transparent 100%
+  );
+}
+
+/* Hyperlane overlay with wide-reaching glow effects */
+.hyperlane-overlay {
+  position: absolute;
+  inset: -8px; /* Extend beyond cell boundaries for continuity */
+  z-index: 2; /* Above hyperlane background, below systems */
+
+  /* Enhanced background with better coverage */
+  background: linear-gradient(
+    45deg,
+    transparent 20%,
+    color-mix(in srgb, var(--lane-color, #00ffff) 15%, transparent) 50%,
+    transparent 80%
+  );
+
+  animation: hyperlanePulse 3s ease-in-out infinite alternate;
+  border-radius: 2px;
+}
+
+/* Pulsing animation for hyperlane effects */
+@keyframes hyperlanePulse {
+  0% {
+    opacity: 0.3;
+    filter: blur(1px);
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 0.7;
+    filter: blur(0px);
+    transform: scale(1.05);
+  }
+}
+
+/* Major route styling with wide-reaching glow for field connectivity */
+.hyperlane-major .hyperlane-overlay {
+  /* Dramatically increased glow spread to connect neighboring fields */
+  box-shadow:
+    0 0 24px 8px color-mix(in srgb, var(--lane-color, #00ffff) 20%, transparent),
+    0 0 16px 4px color-mix(in srgb, var(--lane-color, #00ffff) 30%, transparent),
+    0 0 8px 2px color-mix(in srgb, var(--lane-color, #00ffff) 40%, transparent),
+    inset 0 0 6px color-mix(in srgb, var(--lane-color, #00ffff) 20%, transparent);
+  animation-duration: 2.5s;
+}
+
+.hyperlane-major {
+  border-color: color-mix(in srgb, var(--lane-color, #00ffff) 40%, transparent) !important;
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--lane-color, #00ffff) 15%, transparent) 0%,
+    color-mix(in srgb, var(--lane-color, #00ffff) 5%, transparent) 50%,
+    transparent 100%
+  ) !important;
+}
+
+/* Trade route styling with extended connectivity glow */
+.hyperlane-trade .hyperlane-overlay {
+  /* Enhanced glow spread for inter-field connection */
+  box-shadow:
+    0 0 20px 6px color-mix(in srgb, var(--lane-color, #00ff00) 18%, transparent),
+    0 0 12px 3px color-mix(in srgb, var(--lane-color, #00ff00) 25%, transparent),
+    0 0 6px 1px color-mix(in srgb, var(--lane-color, #00ff00) 35%, transparent),
+    inset 0 0 4px color-mix(in srgb, var(--lane-color, #00ff00) 15%, transparent);
+  animation-duration: 3.5s;
+}
+
+.hyperlane-trade {
+  border-color: color-mix(in srgb, var(--lane-color, #00ff00) 30%, transparent) !important;
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--lane-color, #00ff00) 12%, transparent) 0%,
+    transparent 80%
+  ) !important;
+}
+
+/* Minor route styling with subtle extended glow */
+.hyperlane-minor .hyperlane-overlay {
+  /* More subtle but still extended glow for continuity */
+  box-shadow:
+    0 0 16px 4px color-mix(in srgb, var(--lane-color, #9900ff) 15%, transparent),
+    0 0 8px 2px color-mix(in srgb, var(--lane-color, #9900ff) 20%, transparent),
+    0 0 4px 1px color-mix(in srgb, var(--lane-color, #9900ff) 25%, transparent);
+  animation-duration: 4s;
+  opacity: 0.6;
+}
+
+.hyperlane-minor {
+  border-color: color-mix(in srgb, var(--lane-color, #9900ff) 25%, transparent) !important;
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--lane-color, #9900ff) 8%, transparent) 0%,
+    transparent 85%
+  ) !important;
+}
+
+/* Enhanced hover effects with extended glow */
+.hyperlane-field:hover .hyperlane-overlay {
+  animation-duration: 1.5s;
+  opacity: 0.9;
+  /* Intensified glow on hover for better visibility */
+  box-shadow:
+    0 0 32px 12px color-mix(in srgb, var(--lane-color, #00ffff) 25%, transparent),
+    0 0 20px 6px color-mix(in srgb, var(--lane-color, #00ffff) 40%, transparent),
+    0 0 12px 3px color-mix(in srgb, var(--lane-color, #00ffff) 50%, transparent),
+    inset 0 0 8px color-mix(in srgb, var(--lane-color, #00ffff) 25%, transparent);
+}
+
+/* Flowing animation for continuous route feel */
+@keyframes hyperlaneFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Enhanced background flow for major routes with sophisticated energy effects */
+.hyperlane-major .hyperlane-overlay::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--lane-color, #00ffff) 8%, transparent) 20%,
+    color-mix(in srgb, var(--lane-color, #00ffff) 25%, transparent) 50%,
+    color-mix(in srgb, var(--lane-color, #00ffff) 8%, transparent) 80%,
+    transparent 100%
+  );
+  background-size: 400% 100%;
+  animation: hyperlaneFlow 4s ease-in-out infinite;
+  border-radius: inherit;
+  opacity: 0.8;
+  filter: blur(0.5px);
+}
+
+/* Subtle starfield effect for trade routes */
+.hyperlane-trade .hyperlane-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, color-mix(in srgb, var(--lane-color, #00ff00) 60%, transparent), transparent),
+    radial-gradient(1px 1px at 60% 70%, color-mix(in srgb, var(--lane-color, #00ff00) 50%, transparent), transparent),
+    radial-gradient(1px 1px at 80% 20%, color-mix(in srgb, var(--lane-color, #00ff00) 40%, transparent), transparent);
+  opacity: 0.3;
+  animation: hyperlanePulse 4s ease-in-out infinite alternate;
+}
+
+/* Performance optimizations moved to bottom - see Z-Index Layer Management section */
+
+/* Enhanced reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .hyperlane-overlay,
+  .hyperlane-overlay::before,
+  .hyperlane-overlay::after {
+    animation: none !important;
+  }
+
+  .hyperlane-overlay {
+    opacity: 0.6;
+    filter: none;
+    transform: none;
+  }
+
+  .sector-grid::after {
+    animation: none !important;
+  }
+
+  .hyperlane-field {
+    transition: opacity 0.2s ease;
+  }
+
+  .hyperlane-field:hover .hyperlane-overlay {
+    animation: none !important;
+    filter: brightness(1.2);
+  }
+}
+
+/* Dark theme adjustments */
+@media (prefers-color-scheme: dark) {
+  .hyperlane-field {
+    background: radial-gradient(
+      ellipse at center,
+      color-mix(in srgb, var(--lane-color, #00ffff) 25%, transparent) 0%,
+      transparent 65%
+    );
+  }
+}
+
+/* System icon compatibility - ensure icons stay visible over hyperlanes */
+.hyperlane-field .sun-image,
+.hyperlane-field .system-icon {
+  position: relative;
+  z-index: 10; /* Always above hyperlanes (z-index: 2) */
+  /* Enhanced drop-shadow for better visibility over glowing backgrounds */
+  filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.8))
+          drop-shadow(0 0 1px rgba(0, 0, 0, 1.0));
+}
+
+/* Tooltip styling for hyperlane names */
+.hyperlane-overlay[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: var(--lane-color, #00ffff);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  white-space: nowrap;
+  z-index: 20; /* Above system icons */
+  pointer-events: none;
+  border: 1px solid color-mix(in srgb, var(--lane-color, #00ffff) 40%, transparent);
+}
+
+/* ========================================
+ * Background Glow for Route Continuity
+ * ======================================== */
+
+/* Sector grid background enhancement for hyperlane continuity */
+.sector-grid {
+  position: relative;
+  z-index: 0; /* Base layer */
+}
+
+/* Subtle background routes - helps visualize connections between hyperlane fields */
+.sector-grid::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0; /* Behind everything */
+  opacity: 0.3;
+  /* This creates a faint underlying glow that helps connect hyperlane segments */
+  background-image:
+    radial-gradient(ellipse 60px 40px at 25% 25%, color-mix(in srgb, #00ffff 2%, transparent), transparent),
+    radial-gradient(ellipse 60px 40px at 75% 25%, color-mix(in srgb, #ff6600 2%, transparent), transparent),
+    radial-gradient(ellipse 60px 40px at 25% 75%, color-mix(in srgb, #00ff00 2%, transparent), transparent),
+    radial-gradient(ellipse 60px 40px at 75% 75%, color-mix(in srgb, #ff0000 2%, transparent), transparent);
+}
+
+/* ========================================
+ * Z-Index Layer Management
+ * ======================================== */
+
+/*
+Z-Index Hierarchy for Hyperlane System:
+- Background grid: z-index: 0
+- Hyperlane background glow: z-index: 1
+- Hyperlane overlay effects: z-index: 2
+- System icons: z-index: 10
+- Hover effects: z-index: 15
+- Tooltips: z-index: 20
+*/
+
+/* Enhanced visual separation for system hover states */
+.hyperlane-field:hover {
+  z-index: 15; /* Above normal hyperlanes when hovered */
+}
+
+/* Enhanced smooth transitions for all hyperlane interactions */
+.hyperlane-field {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hyperlane-overlay {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Sophisticated pulse animation with better energy flow feel */
+@keyframes sophisticatedPulse {
+  0% {
+    opacity: 0.4;
+    filter: blur(1.5px) brightness(0.8);
+    transform: scale(0.96);
+  }
+  33% {
+    opacity: 0.7;
+    filter: blur(0.8px) brightness(1.1);
+    transform: scale(1.02);
+  }
+  66% {
+    opacity: 0.8;
+    filter: blur(0.3px) brightness(1.2);
+    transform: scale(1.04);
+  }
+  100% {
+    opacity: 0.5;
+    filter: blur(1px) brightness(0.9);
+    transform: scale(0.98);
+  }
+}
+
+/* Apply sophisticated pulse to all hyperlane types */
+.hyperlane-major .hyperlane-overlay {
+  animation: sophisticatedPulse 3s ease-in-out infinite;
+}
+
+.hyperlane-trade .hyperlane-overlay {
+  animation: sophisticatedPulse 4s ease-in-out infinite;
+}
+
+.hyperlane-minor .hyperlane-overlay {
+  animation: sophisticatedPulse 5s ease-in-out infinite;
+}
+
+/* Enhanced connectivity glow for route visualization */
+.sector-grid::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.15;
+  background-image:
+    /* Major route connecting lines */
+    linear-gradient(90deg, transparent 48%, rgba(0, 255, 255, 0.1) 49%, rgba(0, 255, 255, 0.1) 51%, transparent 52%),
+    linear-gradient(0deg, transparent 48%, rgba(0, 255, 255, 0.1) 49%, rgba(0, 255, 255, 0.1) 51%, transparent 52%),
+    /* Trade route connecting lines */
+    linear-gradient(45deg, transparent 48%, rgba(0, 255, 0, 0.08) 49%, rgba(0, 255, 0, 0.08) 51%, transparent 52%),
+    linear-gradient(-45deg, transparent 48%, rgba(0, 255, 0, 0.08) 49%, rgba(0, 255, 0, 0.08) 51%, transparent 52%);
+  background-size: 40px 2px, 2px 40px, 80px 80px, 80px 80px;
+  background-repeat: repeat;
+  mix-blend-mode: screen;
+  animation: connectivityFlow 20s linear infinite;
+}
+
+@keyframes connectivityFlow {
+  0% {
+    background-position: 0 0, 0 0, 0 0, 0 0;
+  }
+  100% {
+    background-position: 40px 0, 0 40px, 80px 80px, -80px -80px;
+  }
+}
+
+/* Performance optimizations for enhanced effects */
+.hyperlane-overlay {
+  will-change: opacity, filter, transform, box-shadow;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  contain: layout style paint;
+}
+
+/* Enhanced interaction feedback */
+.hyperlane-field:hover {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hyperlane-field:hover .hyperlane-overlay {
+  animation-duration: 1s;
+  opacity: 0.95;
+  filter: blur(0px) brightness(1.3);
+  transform: scale(1.05);
+}

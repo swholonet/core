@@ -4,16 +4,37 @@ import { ModuleCategory, ShipClass } from '@prisma/client';
 // Blueprint System Types
 // =====================================================
 
-// Stats eines Schiffs/Blueprints
+// Visibility levels for game data
+export type VisibilityLevel = 'PUBLIC' | 'UNLOCKABLE' | 'SECRET';
+
+// Combat rating for vague strength indication (shown to players instead of exact values)
+export type CombatRating = 'NIEDRIG' | 'MITTEL' | 'HOCH' | 'SEHR_HOCH';
+
+// Calculate combat rating from actual values (server-side only)
+export function calculateCombatRating(damage: number, shieldStrength: number): CombatRating {
+  const combinedPower = damage + shieldStrength;
+  if (combinedPower <= 20) return 'NIEDRIG';
+  if (combinedPower <= 50) return 'MITTEL';
+  if (combinedPower <= 100) return 'HOCH';
+  return 'SEHR_HOCH';
+}
+
+// Stats eines Schiffs/Blueprints (PUBLIC - sent to client)
 export interface BlueprintStats {
   hullPoints: number;
-  shieldStrength: number;      // deflectorShieldStrength
-  damage: number;              // weaponDamage
   speed: number;               // subLightSpeed
   sensorRange: number;
   cargoCapacity: number;
   crewRequired: number;
   hyperdriveRating: number;    // 1.0 = Standard, 0.5 = schneller
+  // Combat stats are SECRET - only sent as rating
+  combatRating: CombatRating;
+}
+
+// Internal stats (SERVER-SIDE ONLY - never exposed to client)
+export interface BlueprintStatsInternal extends Omit<BlueprintStats, 'combatRating'> {
+  shieldStrength: number;      // deflectorShieldStrength - SECRET
+  damage: number;              // weaponDamage - SECRET
 }
 
 // Kosten für Konstruktion
@@ -67,7 +88,7 @@ export interface MissingResearch {
   playerLevel: number;
 }
 
-// Verfügbares Modul (mit Freischaltungs-Status)
+// Verfügbares Modul (mit Freischaltungs-Status) - PUBLIC VERSION
 export interface AvailableModule {
   id: number;
   name: string;
@@ -77,20 +98,35 @@ export interface AvailableModule {
   isUnlocked: boolean;
   unlockedLevel: number;  // Max Level das der Spieler nutzen kann
   requiredResearchName?: string;
-  baseStats: ModuleBaseStats;
+  requiredPlayerLevel?: number;
+  baseStats: ModuleBaseStatsPublic;  // PUBLIC stats only
   baseCosts: ModuleBaseCosts;
+  // Vage Kampfstaerke-Anzeige (ersetzt exakte Werte)
+  combatRating: CombatRating;
 }
 
-export interface ModuleBaseStats {
+// PUBLIC module stats (sent to client)
+export interface ModuleBaseStatsPublic {
   hullPoints: number;
-  damage: number;
-  shieldStrength: number;
   sensorRange: number;
   cargoCapacity: number;
   crewCapacity: number;
   speed: number;
   hyperdriveRating: number | null;
-  tibannaConsumption: number;
+  // NO: damage, shieldStrength, tibannaConsumption - these are SECRET
+}
+
+// INTERNAL module stats (server-side only) - includes secret combat values
+export interface ModuleBaseStats {
+  hullPoints: number;
+  damage: number;              // SECRET
+  shieldStrength: number;      // SECRET
+  sensorRange: number;
+  cargoCapacity: number;
+  crewCapacity: number;
+  speed: number;
+  hyperdriveRating: number | null;
+  tibannaConsumption: number;  // SECRET
 }
 
 export interface ModuleBaseCosts {
@@ -133,9 +169,16 @@ export interface BlueprintModuleWithType {
     maxLevel: number;
     hyperdriveRating: number | null;
   };
-  // Berechnete Stats für dieses Modul bei diesem Level
-  calculatedStats: ModuleBaseStats;
+  // Berechnete Stats für dieses Modul bei diesem Level (PUBLIC only)
+  calculatedStats: ModuleBaseStatsPublic;
   calculatedCosts: ModuleBaseCosts;
+  // Kampfstaerke-Indikator fuer dieses Modul
+  combatRating: CombatRating;
+}
+
+// Internal version with full stats (server-side only)
+export interface BlueprintModuleWithTypeInternal extends Omit<BlueprintModuleWithType, 'calculatedStats' | 'combatRating'> {
+  calculatedStats: ModuleBaseStats;
 }
 
 // Konstanten für Berechnungen

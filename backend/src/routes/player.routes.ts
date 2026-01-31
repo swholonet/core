@@ -2,6 +2,7 @@ import { Router, Response } from 'express';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import prisma from '../lib/prisma';
 import { inviteService } from '../services/inviteService';
+import { shipStatsService } from '../services/shipStatsService';
 
 const router = Router();
 
@@ -317,7 +318,7 @@ router.get('/invite-codes', authMiddleware, async (req: AuthRequest, res: Respon
   }
 });
 
-// Get player's ships
+// Get player's ships with Blueprint-based stats
 router.get('/ships', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
     const user = await prisma.user.findUnique({
@@ -334,11 +335,18 @@ router.get('/ships', authMiddleware, async (req: AuthRequest, res: Response) => 
         playerId: user.player.id,
       },
       include: {
-        shipType: {
+        blueprint: {
           select: {
+            id: true,
             name: true,
-            maxEnergyWeapons: true,
-            maxEnergyDrive: true,
+            shipClass: true,
+            totalHullPoints: true,
+            totalDamage: true,
+            totalShieldStrength: true,
+            totalSpeed: true,
+            totalSensorRange: true,
+            totalCargoCapacity: true,
+            totalCrewRequired: true,
           },
         },
         planet: {
@@ -353,7 +361,92 @@ router.get('/ships', authMiddleware, async (req: AuthRequest, res: Response) => 
       },
     });
 
-    res.json({ ships });
+    // Get effective stats for all ships
+    const shipsWithStats = await Promise.all(
+      ships.map(async (ship) => {
+        try {
+          const stats = await shipStatsService.getShipStats(ship.id);
+
+          return {
+            id: ship.id,
+            name: ship.name,
+            status: ship.status,
+            energyWeapons: ship.energyWeapons,
+            energyDrive: ship.energyDrive,
+            currentGalaxyX: ship.currentGalaxyX,
+            currentGalaxyY: ship.currentGalaxyY,
+            currentSystemX: ship.currentSystemX,
+            currentSystemY: ship.currentSystemY,
+            currentSystemId: ship.currentSystemId,
+            planet: ship.planet,
+
+            // Effective stats (blueprint > shipType > hardcoded)
+            shipStats: {
+              hullPoints: stats.hullPoints,
+              deflectorShieldStrength: stats.deflectorShieldStrength,
+              weaponDamage: stats.weaponDamage,
+              subLightSpeed: stats.subLightSpeed,
+              hyperdriveRating: stats.hyperdriveRating,
+              sensorRange: stats.sensorRange,
+              cargoCapacity: stats.cargoCapacity,
+              crewCapacity: stats.crewCapacity,
+              maxEnergyWeapons: stats.maxEnergyWeapons,
+              maxEnergyDrive: stats.maxEnergyDrive,
+            },
+
+            // Display information
+            displayInfo: {
+              name: ship.blueprint ? ship.blueprint.name : 'Unknown Ship',
+              shipClass: ship.blueprint ? ship.blueprint.shipClass : 'LEGACY',
+              source: ship.blueprintId ? 'blueprint' : 'legacy',
+            },
+
+            // Legacy compatibility (empty after migration)
+            shipType: null,
+          };
+        } catch (error) {
+          console.error(`Error getting stats for ship ${ship.id}:`, error);
+
+          // Fallback to basic data if stats service fails
+          return {
+            id: ship.id,
+            name: ship.name,
+            status: ship.status,
+            energyWeapons: ship.energyWeapons,
+            energyDrive: ship.energyDrive,
+            currentGalaxyX: ship.currentGalaxyX,
+            currentGalaxyY: ship.currentGalaxyY,
+            currentSystemX: ship.currentSystemX,
+            currentSystemY: ship.currentSystemY,
+            currentSystemId: ship.currentSystemId,
+            planet: ship.planet,
+
+            shipStats: {
+              hullPoints: ship.hullPoints,
+              deflectorShieldStrength: ship.deflectorShieldStrength,
+              weaponDamage: ship.weaponDamage,
+              subLightSpeed: ship.subLightSpeed,
+              hyperdriveRating: ship.hyperdriveRating,
+              sensorRange: ship.sensorRange,
+              cargoCapacity: ship.cargoCapacity,
+              crewCapacity: ship.crewCapacity,
+              maxEnergyWeapons: 50, // Default fallback values
+              maxEnergyDrive: 50,
+            },
+
+            displayInfo: {
+              name: ship.blueprint ? ship.blueprint.name : 'Unknown Ship',
+              shipClass: ship.blueprint ? ship.blueprint.shipClass : 'LEGACY',
+              source: 'fallback',
+            },
+
+            shipType: null, // Legacy compatibility removed
+          };
+        }
+      })
+    );
+
+    res.json({ ships: shipsWithStats });
   } catch (error: any) {
     console.error('Ships error:', error);
     res.status(500).json({ error: error.message });

@@ -24,6 +24,7 @@ import adminRoutes from './routes/admin.routes';
 import shipRoutes from './routes/ship.routes';
 import holonetRoutes from './routes/holonet.routes';
 import blueprintRoutes from './routes/blueprint.routes';
+import databaseRoutes from './routes/database.routes';
 
 dotenv.config();
 
@@ -103,6 +104,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/ship', shipRoutes);
 app.use('/api/holonet', holonetRoutes);
 app.use('/api/blueprints', blueprintRoutes);
+app.use('/api/database', databaseRoutes);
 
 // Error handling
 app.use(errorHandler);

@@ -99,14 +99,19 @@ export default function Register() {
     setIsLoading(true);
 
     try {
-      const result = await register({ email, username, password, factionId, inviteCode });
-      
-      // Show success message with reference to settings
-      if (result.inviteCodes) {
-        alert(`Willkommen! Deine Invite-Codes:\n${result.inviteCodes.join('\n')}\n\nDu findest deine Codes jederzeit in den Einstellungen.\nTeile sie mit Freunden!`);
-      }
-      
-      navigate('/');
+      await register({ email, username, password, factionId, inviteCode });
+
+      // Show professional success message about email
+      setError(''); // Clear any previous errors
+
+      // Show success in the UI instead of alert
+      document.getElementById('success-message')?.classList.remove('hidden');
+
+      // Navigate after short delay to let user see the message
+      setTimeout(() => {
+        navigate('/');
+      }, 2000);
+
     } catch (err: any) {
       setError(err.message || 'Registrierung fehlgeschlagen. Bitte versuche es erneut.');
     } finally {
@@ -176,6 +181,21 @@ export default function Register() {
                 <p>{error}</p>
               </div>
             )}
+
+            {/* Success Message */}
+            <div id="success-message" className="hidden mb-6 bg-green-950/30 border border-green-500/40 text-green-300 p-4 rounded-lg font-mono text-sm">
+              <p className="font-bold mb-1 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                REGISTRIERUNG ERFOLGREICH
+              </p>
+              <p className="text-green-200 mb-2">
+                Willkommen im Star Wars Universe, Kommandeur!
+              </p>
+              <p className="text-green-300/80 text-xs">
+                📧 Überprüfe deine E-Mails für Invite-Codes und weitere Informationen.<br/>
+                Du wirst automatisch zur Startseite weitergeleitet...
+              </p>
+            </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Invite Code */}

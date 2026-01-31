@@ -16,7 +16,12 @@
     "seed:research": "tsx scripts/seed-research-types.ts",
     "seed:factions": "tsx scripts/seed-factions.ts",
     "seed:galaxy": "tsx scripts/init-galaxy.ts",
-    "seed:all": "npm run seed:factions && npm run seed:buildings && npm run seed:research && npm run seed:modules && npm run seed:galaxy"
+    "seed:all": "npm run seed:factions && npm run seed:buildings && npm run seed:research && npm run seed:modules && npm run seed:galaxy",
+    "migrate:blueprints": "tsx scripts/migrate-ships-to-blueprints.ts",
+    "migrate:blueprints:dry": "tsx scripts/migrate-ships-to-blueprints.ts --dry-run --verbose",
+    "migrate:blueprints:force": "tsx scripts/migrate-ships-to-blueprints.ts --force-rebuild --verbose",
+    "migrate:validate": "tsx scripts/validate-blueprint-migration.ts",
+    "migrate:validate:detailed": "tsx scripts/validate-blueprint-migration.ts --detailed"
   },
   "keywords": [
     "game",
@@ -31,9 +36,11 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
+    "handlebars": "^4.7.8",
     "ioredis": "^5.4.1",
     "jsonwebtoken": "^9.0.2",
     "node-cron": "^4.2.1",
+    "nodemailer": "^6.9.8",
     "socket.io": "^4.8.1",
     "zod": "^3.23.8"
   },
@@ -43,6 +50,7 @@
     "@types/express": "^5.0.0",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.10.1",
+    "@types/nodemailer": "^6.4.14",
     "prisma": "^5.22.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"

@@ -7,11 +7,11 @@ import {
   Users,
   Shield,
   Zap,
-  Globe,
   ChevronDown,
   Star,
   Target,
   Crown,
+  KeyRound,
 } from 'lucide-react';
 
 // Feature data with improved hierarchy and visual structure
@@ -283,22 +283,34 @@ export default function LandingPage() {
             <div className="h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent my-6" />
 
             {/* Navigation Links */}
-            <div className="flex items-center justify-center gap-6 text-sm">
-              <Link
-                to="/register"
-                className="text-cyan-400 hover:text-cyan-300 font-mono tracking-wider flex items-center gap-2 transition-colors group"
-              >
-                <Users className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                Neuen Account erstellen
-              </Link>
-              <div className="w-px h-4 bg-cyan-600/30" />
-              <button
-                disabled
-                className="text-cyan-600/40 font-mono tracking-wider flex items-center gap-2 cursor-not-allowed"
-              >
-                <Globe className="w-4 h-4" />
-                Passwort vergessen
-              </button>
+            <div className="text-center space-y-4">
+              <div>
+                <p className="text-cyan-500/70 text-sm font-mono mb-3">
+                  Kein Zugang vorhanden?
+                </p>
+                <Link
+                  to="/register"
+                  className="text-cyan-400 hover:text-cyan-300 font-mono tracking-wider flex items-center justify-center gap-2 transition-colors group"
+                >
+                  <Users className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  Neuen Account erstellen
+                </Link>
+              </div>
+
+              <div className="h-px bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent" />
+
+              <div>
+                <p className="text-amber-500/70 text-sm font-mono mb-3">
+                  Sicherheitscode vergessen?
+                </p>
+                <Link
+                  to="/forgot-password"
+                  className="text-amber-400 hover:text-amber-300 font-mono tracking-wider flex items-center justify-center gap-2 transition-colors group"
+                >
+                  <KeyRound className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  Code zurücksetzen
+                </Link>
+              </div>
             </div>
 
             {/* Terminal Status */}
@@ -370,30 +382,9 @@ export default function LandingPage() {
               <h3 className="text-2xl font-bold text-cyan-200 mb-4 font-mono tracking-wide">
                 {feature.title}
               </h3>
-              <p className="text-cyan-300/70 leading-relaxed text-base mb-6">
+              <p className="text-cyan-300/70 leading-relaxed text-base">
                 {feature.description}
               </p>
-
-              {/* Visual Preview Placeholder */}
-              <div className="relative h-48 bg-gradient-to-br from-slate-900/50 to-slate-800/30 rounded-xl border border-cyan-600/20 overflow-hidden">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className={`text-center p-4 rounded-lg bg-gradient-to-br ${feature.bgColor}`}>
-                    <feature.icon className={`w-8 h-8 mx-auto mb-2 bg-gradient-to-br ${feature.color} bg-clip-text text-transparent`} />
-                    <div className="text-xs text-cyan-500/60 font-mono">
-                      Game Preview
-                    </div>
-                  </div>
-                </div>
-                {/* Subtle overlay grid */}
-                <div
-                  className="absolute inset-0 opacity-10"
-                  style={{
-                    backgroundImage: `linear-gradient(0deg, transparent 90%, rgba(0, 255, 255, 0.1) 100%),
-                                     linear-gradient(90deg, transparent 90%, rgba(0, 255, 255, 0.1) 100%)`,
-                    backgroundSize: '24px 24px',
-                  }}
-                />
-              </div>
             </div>
           ))}
         </div>

@@ -88,7 +88,7 @@ router.patch('/update-password', authMiddleware, async (req: AuthRequest, res: R
 router.post('/validate-invite', async (req: Request, res: Response) => {
   try {
     const { code } = req.body;
-    
+
     if (!code) {
       return res.status(400).json({ valid: false, error: 'Invite-Code erforderlich' });
     }
@@ -97,6 +97,32 @@ router.post('/validate-invite', async (req: Request, res: Response) => {
     res.json({ valid: isValid });
   } catch (error: any) {
     res.status(500).json({ valid: false, error: error.message });
+  }
+});
+
+// Request password reset (public endpoint)
+router.post('/forgot-password', async (req: Request, res: Response) => {
+  try {
+    const result = await authService.requestPasswordReset(req.body);
+    res.json(result);
+  } catch (error: any) {
+    console.error('Forgot password error:', error);
+    res.status(400).json({
+      error: error.message || 'Password reset request failed'
+    });
+  }
+});
+
+// Reset password with token (public endpoint)
+router.post('/reset-password', async (req: Request, res: Response) => {
+  try {
+    const result = await authService.resetPasswordWithToken(req.body);
+    res.json(result);
+  } catch (error: any) {
+    console.error('Password reset error:', error);
+    res.status(400).json({
+      error: error.message || 'Password reset failed'
+    });
   }
 });
 

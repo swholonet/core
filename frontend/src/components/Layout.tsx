@@ -1,5 +1,5 @@
 import { Outlet, Link, useNavigate } from 'react-router-dom';
-import { Rocket, Globe, FlaskConical, Users, LogOut, Settings, Shield, Map, Menu, X, Radio } from 'lucide-react';
+import { Rocket, Globe, FlaskConical, Users, LogOut, Settings, Shield, Map, Menu, X, Radio, Database } from 'lucide-react';
 import { useGameStore } from '../stores/gameStore';
 import { useState } from 'react';
 
@@ -46,6 +46,10 @@ export default function Layout() {
                 <Link to="/research" className="flex items-center gap-2 text-cyan-200/70 hover:text-cyan-100 px-3 py-2 rounded border border-transparent hover:border-cyan-500/30 transition-all font-mono">
                   <FlaskConical size={16} />
                   Forschung
+                </Link>
+                <Link to="/database" className="flex items-center gap-2 text-cyan-200/70 hover:text-cyan-100 px-3 py-2 rounded border border-transparent hover:border-cyan-500/30 transition-all font-mono">
+                  <Database size={16} />
+                  Datenbank
                 </Link>
                 <Link to="/galaxy" className="flex items-center gap-2 text-cyan-200/70 hover:text-cyan-100 px-3 py-2 rounded border border-transparent hover:border-cyan-500/30 transition-all font-mono">
                   <Map size={16} />
@@ -123,6 +127,10 @@ export default function Layout() {
               <Link to="/research" className="flex items-center gap-3 text-cyan-200/70 hover:text-cyan-100 py-3 px-4 rounded border border-transparent hover:border-cyan-500/30 hover:bg-cyan-950/20 transition-all font-mono mb-1" onClick={() => setMobileMenuOpen(false)}>
                 <FlaskConical size={18} />
                 Forschung
+              </Link>
+              <Link to="/database" className="flex items-center gap-3 text-cyan-200/70 hover:text-cyan-100 py-3 px-4 rounded border border-transparent hover:border-cyan-500/30 hover:bg-cyan-950/20 transition-all font-mono mb-1" onClick={() => setMobileMenuOpen(false)}>
+                <Database size={18} />
+                Datenbank
               </Link>
               <Link to="/galaxy" className="flex items-center gap-3 text-cyan-200/70 hover:text-cyan-100 py-3 px-4 rounded border border-transparent hover:border-cyan-500/30 hover:bg-cyan-950/20 transition-all font-mono mb-1" onClick={() => setMobileMenuOpen(false)}>
                 <Map size={18} />

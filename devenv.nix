@@ -9,6 +9,8 @@
     pkgs.git
     pkgs.nodejs_20
     pkgs.postgresql_15
+    pkgs.python3
+    pkgs.python3Packages.pillow
   ];
 
   # https://devenv.sh/languages/

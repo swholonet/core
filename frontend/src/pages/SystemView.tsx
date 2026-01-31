@@ -5,7 +5,11 @@ import api from '../lib/api';
 import PlanetImage, { getPlanetClassLabel } from '../components/PlanetImage';
 import MoonImage, { getMoonClassLabel } from '../components/MoonImage';
 import AsteroidField, { getAsteroidFieldLabel } from '../components/AsteroidField';
-import SunImage from '../components/SunImage';
+import { getSystemTypeLabel } from '../components/SunImage';
+import MultiLayerSun from '../components/MultiLayerSun';
+import GridCellStarmap from '../components/GridCellStarmap';
+import StarmapErrorBoundary from '../components/StarmapErrorBoundary';
+import { getMultiLayerAssetForSystemType } from '../utils/assetDiscovery';
 
 interface Planet {
   id: string;
@@ -38,7 +42,7 @@ interface Planet {
 interface System {
   id: string;
   name: string;
-  systemType: 'SMALL_BLUE' | 'SMALL_YELLOW' | 'MEDIUM_BLUE' | 'BLUE_GIANT' | 'RED_DWARF' | 'NEUTRON_STAR' | 'BLACK_HOLE' | 'BINARY_SYSTEM';
+  systemType: string; // SystemType enum (e.g., "SYS_1065", "BIN_1001")
   fieldX: number;
   fieldY: number;
   gridSize: number;
@@ -77,19 +81,6 @@ export default function SystemView() {
     }
   };
 
-  const getSystemTypeLabel = (type: System['systemType']) => {
-    const labels: Record<string, string> = {
-      'SMALL_BLUE': 'Kleiner Blauer Stern',
-      'SMALL_YELLOW': 'Kleiner Gelber Stern',
-      'MEDIUM_BLUE': 'Mittlerer Blauer Stern',
-      'BLUE_GIANT': 'Blauer Riese',
-      'RED_DWARF': 'Roter Zwerg',
-      'NEUTRON_STAR': 'Neutronenstern',
-      'BLACK_HOLE': 'Schwarzes Loch',
-      'BINARY_SYSTEM': 'Doppelsternsystem',
-    };
-    return labels[type] || type;
-  };
 
 
   const convertPlanetToGridPosition = (planet: Planet) => {
@@ -102,22 +93,52 @@ export default function SystemView() {
     return { x: Math.max(1, Math.min(system.gridSize, x)), y: Math.max(1, Math.min(system.gridSize, y)) };
   };
 
+  // Get star area size based on system type
+  const getStarAreaSize = () => {
+    // Get multi-layer asset set for dynamic sizing
+    const assetSet = system?.systemType ? getMultiLayerAssetForSystemType(system.systemType) : null;
+
+    if (assetSet) {
+      // CHANGE: Allow stars to take much more space - up to 1/2 of grid instead of 1/3
+      const maxStarArea = Math.floor((system?.gridSize || 20) / 2); // Was: /3, now: /2
+      return Math.min(Math.max(assetSet.gridSize, 8), maxStarArea); // Minimum 8 instead of assetSet.gridSize
+    }
+
+    // Increased default from 5 to 8
+    return 8; // Default 8x8 for multi-layer mode
+  };
+
   const getCellContent = (x: number, y: number) => {
     if (!system) return { type: 'empty' };
     const center = Math.floor(system.gridSize / 2);
+    const starAreaSize = getStarAreaSize();
+    const starRadius = Math.floor(starAreaSize / 2);
 
-    // STU-style: Central star takes 3x3 area
+    // Dynamic star area based on system type and mode
     const isInStarArea = (
-      x >= center - 1 && x <= center + 1 &&
-      y >= center - 1 && y <= center + 1
+      x >= center - starRadius && x <= center + starRadius &&
+      y >= center - starRadius && y <= center + starRadius
     );
 
     if (isInStarArea) {
-      // Different parts of the 3x3 star
+      // Calculate relative position within star area
+      const relativeX = x - (center - starRadius);
+      const relativeY = y - (center - starRadius);
+
       if (x === center && y === center) {
-        return { type: 'star_center', data: system };
+        return {
+          type: 'star_center',
+          data: system,
+          starAreaSize,
+          relativePos: { x: relativeX, y: relativeY }
+        };
       } else {
-        return { type: 'star_outer', data: system };
+        return {
+          type: 'star_outer',
+          data: system,
+          starAreaSize,
+          relativePos: { x: relativeX, y: relativeY }
+        };
       }
     }
 
@@ -183,7 +204,7 @@ export default function SystemView() {
       <div className="bg-gradient-to-r from-cyan-950/40 to-slate-900/60 border border-cyan-500/30 rounded-lg p-6 backdrop-blur-sm">
         <div className="flex items-center gap-4">
           <button
-            onClick={() => navigate('/galaxy')}
+            onClick={() => navigate(`/galaxy?sector=${system.sector.x},${system.sector.y}`)}
             className="flex items-center gap-2 text-cyan-400/70 hover:text-cyan-300 transition-all font-mono"
           >
             <div className="p-1 bg-cyan-900/40 border border-cyan-500/40 rounded">
@@ -203,20 +224,21 @@ export default function SystemView() {
               </div>
             </div>
           </div>
+
         </div>
       </div>
 
       <div className="flex gap-6">
         {/* Imperial Command Grid View */}
-        <div className="flex-1 bg-gradient-to-br from-slate-950/40 to-cyan-950/20 border border-cyan-500/30 rounded p-6 backdrop-blur-sm">
-          <div className="overflow-auto">
+        <div className="flex-1 bg-gradient-to-br from-slate-950/40 to-cyan-950/20 border border-cyan-500/30 rounded p-6 backdrop-blur-sm relative">
+          <div className="overflow-auto relative z-10">
             <table className="border-collapse" style={{ minWidth: '800px' }}>
               {/* Column headers */}
               <thead>
                 <tr>
                   <th className="w-6 h-6"></th>
                   {Array.from({ length: system.gridSize }, (_, i) => i + 1).map(x => (
-                    <th key={x} className="w-6 h-6 text-xs text-gray-400 font-normal">{x}</th>
+                    <th key={x} className="w-6 h-6 text-xs text-gray-300/70 font-mono tracking-wider">{x}</th>
                   ))}
                 </tr>
               </thead>
@@ -226,7 +248,7 @@ export default function SystemView() {
                   return (
                     <tr key={row}>
                       {/* Row header */}
-                      <td className="w-6 h-6 text-xs text-gray-400 text-right pr-1">{row}</td>
+                      <td className="w-6 h-6 text-xs text-gray-300/70 font-mono tracking-wider text-right pr-1">{row}</td>
                       {/* Grid cells */}
                       {Array.from({ length: system.gridSize }, (_, x) => {
                         const col = x + 1;
@@ -236,27 +258,59 @@ export default function SystemView() {
                         return (
                           <td
                             key={col}
-                            className="border border-gray-800 relative group cursor-pointer"
-                            style={{ width: '24px', height: '24px', padding: 0 }}
+                            className="relative group cursor-pointer transition-colors duration-200"
+                            style={{
+                              width: '24px',
+                              height: '24px',
+                              padding: 0,
+                              backgroundColor: isHovered && cell.type === 'empty'
+                                ? 'rgba(59, 130, 246, 0.08)'
+                                : 'transparent',
+                              border: '1px solid rgba(100, 116, 139, 0.15)',
+                              boxSizing: 'border-box'
+                            }}
                             onMouseEnter={() => setHoveredCell({ x: col, y: row })}
                             onMouseLeave={() => setHoveredCell(null)}
                             onClick={() => (cell.type === 'planet' || cell.type === 'moon') && cell.data && navigate(`/planet/${cell.data.id}`)}
                           >
-                            {/* STU-style 3x3 Central Star */}
+                            {/* Individual grid cell starmap background */}
+                            <StarmapErrorBoundary>
+                              <GridCellStarmap
+                                gridX={col}
+                                gridY={row}
+                                sectorX={system.sector.x}
+                                sectorY={system.sector.y}
+                                fieldX={system.fieldX}
+                                fieldY={system.fieldY}
+                                className="opacity-40 z-0"
+                              />
+                            </StarmapErrorBoundary>
+
+                            {/* Dynamic Central Star System */}
                             {cell.type === 'star_center' && (
-                              <div className="w-full h-full flex items-center justify-center">
-                                <SunImage
+                              <div
+                                className="absolute z-10 pointer-events-none flex items-center justify-center"
+                                style={{
+                                  left: `-${((cell.starAreaSize || 8) - 1) * 15}px`, // Was: * 12, now: * 15 (30px/2)
+                                  top: `-${((cell.starAreaSize || 8) - 1) * 15}px`,
+                                  width: `${(cell.starAreaSize || 8) * 30}px`, // Was: * 24, now: * 30 (match STU)
+                                  height: `${(cell.starAreaSize || 8) * 30}px`,
+                                }}
+                              >
+                                <MultiLayerSun
                                   systemType={system.systemType}
-                                  size={24}
+                                  cellSize={Math.min(30, Math.max(24, 30 / Math.max(1, (cell.starAreaSize || 8) / 6)))} // STU approach: 24-30px per asset cell
                                   alt={system.name}
-                                  className="drop-shadow-lg"
+                                  debug={false}
+                                  showLoading={false}
+                                  className="drop-shadow-2xl opacity-100 filter brightness-110 saturate-110 z-10" // Enhanced styling with opacity:1 like STU
                                 />
                               </div>
                             )}
+
+                            {/* Star Outer Areas - empty space for Multi-Layer system */}
                             {cell.type === 'star_outer' && (
-                              <div className="w-full h-full" style={{
-                                background: `radial-gradient(circle, rgba(255,255,200,0.1) 0%, rgba(255,255,100,0.05) 70%, transparent 100%)`
-                              }} />
+                              <div className="w-full h-full" />
                             )}
 
                             {/* Planets */}

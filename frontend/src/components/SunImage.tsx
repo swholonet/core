@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { isBinarySystem } from '../config/systemAssets';
+import { AssetErrorBoundary, AssetFallback } from './AssetErrorBoundary';
 
 interface SunImageProps {
-  systemType: 'SMALL_BLUE' | 'SMALL_YELLOW' | 'MEDIUM_BLUE' | 'BLUE_GIANT' | 'RED_DWARF' | 'NEUTRON_STAR' | 'BLACK_HOLE' | 'BINARY_SYSTEM';
+  systemType: string; // SystemType enum value (e.g., "SYS_1049" or "BIN_1001")
   visualSeed?: number;
   alt?: string;
   className?: string;
@@ -13,19 +15,10 @@ const ASSET_BASE_URL = import.meta.env.VITE_ASSET_BASE_URL || 'https://swunivers
 /**
  * Generate fallback sun image (neutral gray circle SVG)
  */
-const getFallbackImage = (systemType: string): string => {
-  const colors = {
-    'SMALL_BLUE': { inner: '#6B7280', outer: '#4B5563' },
-    'SMALL_YELLOW': { inner: '#6B7280', outer: '#4B5563' },
-    'MEDIUM_BLUE': { inner: '#6B7280', outer: '#4B5563' },
-    'BLUE_GIANT': { inner: '#6B7280', outer: '#4B5563' },
-    'RED_DWARF': { inner: '#6B7280', outer: '#4B5563' },
-    'NEUTRON_STAR': { inner: '#6B7280', outer: '#4B5563' },
-    'BLACK_HOLE': { inner: '#374151', outer: '#1F2937' },
-    'BINARY_SYSTEM': { inner: '#6B7280', outer: '#4B5563' },
-  };
-
-  const color = colors[systemType as keyof typeof colors] || colors['SMALL_YELLOW'];
+const getFallbackImage = (isBinary: boolean): string => {
+  const color = isBinary 
+    ? { inner: '#8B5CF6', outer: '#6D28D9' } // Purple for binary
+    : { inner: '#6B7280', outer: '#4B5563' }; // Gray for single stars
 
   return 'data:image/svg+xml,' + encodeURIComponent(`
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
@@ -41,30 +34,33 @@ const getFallbackImage = (systemType: string): string => {
 };
 
 /**
+ * Extract systemtype numeric ID from SystemType enum value
+ * e.g., "SYS_1049" => 1049, "BIN_1001" => 1001
+ */
+const getSystemTypeId = (systemType: string): number => {
+  if (systemType.startsWith('SYS_')) {
+    return parseInt(systemType.replace('SYS_', ''));
+  } else if (systemType.startsWith('BIN_')) {
+    return parseInt(systemType.replace('BIN_', ''));
+  }
+  return 1050; // fallback to yellow sun
+};
+
+/**
  * Get sun image URL from STU asset repository
- * @param systemType - STU system type
+ * Uses systemAssets config for accurate mapping
  */
 const getSunImageUrl = (systemType: string): string => {
-  // Map STU system type to asset ID
-  const typeMapping: Record<string, number> = {
-    'SMALL_BLUE': 1001,      // (1001) Kleiner Blauer Stern
-    'SMALL_YELLOW': 1021,    // (1021) Kleiner Gelber Stern
-    'MEDIUM_BLUE': 1041,     // (1041) Mittlerer Blauer Stern
-    'BLUE_GIANT': 1053,      // (1053) Blauer Riese
-    'RED_DWARF': 1061,       // (1061) Roter Zwerg
-    'NEUTRON_STAR': 1070,    // (1070) Neutronenstern
-    'BLACK_HOLE': 1072,      // (1072) Schwarzes Loch
-    'BINARY_SYSTEM': 1074,   // (1074) Doppelsternsystem
-  };
-
-  const assetId = typeMapping[systemType] || 1021; // Default to small yellow
-
-  return `${ASSET_BASE_URL}map/systemtypes/${assetId}.png`;
+  const systemTypeId = getSystemTypeId(systemType);
+  
+  // All systemtypes (1001-1075) use their ID as galaxy icon
+  return `${ASSET_BASE_URL}map/systemtypes/${systemTypeId}.png`;
 };
 
 /**
  * SunImage component with automatic fallback handling
  * Loads sun/star images from the asset repository dynamically
+ * Supports all systemtypes (1049-1075 single stars + 1001-1048 binary systems)
  */
 export default function SunImage({
   systemType,
@@ -75,6 +71,8 @@ export default function SunImage({
 }: SunImageProps) {
   const [imageSrc, setImageSrc] = useState<string>(getSunImageUrl(systemType));
   const [imageError, setImageError] = useState(false);
+  const systemTypeId = getSystemTypeId(systemType);
+  const binary = isBinarySystem(systemTypeId);
 
   useEffect(() => {
     // Reset error state when props change
@@ -83,9 +81,11 @@ export default function SunImage({
   }, [systemType, visualSeed]);
 
   const handleImageError = () => {
-    console.warn(`Failed to load sun image: ${imageSrc}, using fallback`);
-    setImageError(true);
-    setImageSrc(getFallbackImage(systemType));
+    if (!imageError) {
+      console.warn(`Failed to load sun image: ${imageSrc}, using fallback`);
+      setImageError(true);
+      setImageSrc(getFallbackImage(binary));
+    }
   };
 
   const handleImageLoad = () => {
@@ -95,15 +95,21 @@ export default function SunImage({
   };
 
   return (
-    <img
-      src={imageSrc}
-      alt={alt}
-      className={`${className} ${imageError ? 'opacity-70' : ''}`}
-      style={{ width: size, height: size }}
-      onError={handleImageError}
-      onLoad={handleImageLoad}
-      loading="lazy"
-    />
+    <AssetErrorBoundary
+      errorMessage="Star asset failed to load"
+      showDetails={import.meta.env.DEV}
+      fallback={<AssetFallback width={size} height={size} text="⭐" />}
+    >
+      <img
+        src={imageSrc}
+        alt={alt}
+        className={`${className} ${imageError ? 'opacity-70' : ''}`}
+        style={{ width: size, height: size }}
+        onError={handleImageError}
+        onLoad={handleImageLoad}
+        loading="lazy"
+      />
+    </AssetErrorBoundary>
   );
 }
 
@@ -112,14 +118,14 @@ export default function SunImage({
  */
 export const getSystemTypeLabel = (systemType: string): string => {
   const labels: Record<string, string> = {
-    SMALL_BLUE: 'Kleiner Blauer Stern',      // (1001) - hot young stars
-    SMALL_YELLOW: 'Kleiner Gelber Stern',    // (1021) - like our Sun
+    SMALL_BLUE: 'Blauer Zwerg',               // (1057) - small blue dwarf star
+    SMALL_YELLOW: 'Gelber Zwerg',             // (1058) - yellow dwarf like our Sun
     MEDIUM_BLUE: 'Mittlerer Blauer Stern',   // (1041) - bright main sequence
-    BLUE_GIANT: 'Blauer Riese',              // (1053) - massive luminous stars
-    RED_DWARF: 'Roter Zwerg',                // (1061) - long-lived small stars
+    BLUE_GIANT: 'Orange Riese',              // (1004) - orange giant star
+    RED_DWARF: 'Roter Riese',                // (1052) - red giant star
     NEUTRON_STAR: 'Neutronenstern',          // (1070) - ultra-dense stellar remnant
-    BLACK_HOLE: 'Schwarzes Loch',            // (1072) - gravitational anomaly
-    BINARY_SYSTEM: 'Doppelsternsystem',      // (1074) - twin star system
+    BLACK_HOLE: 'Schwarzes Loch',            // (1062) - gravitational anomaly
+    BINARY_SYSTEM: 'Gelber Überriese',       // (1054) - yellow supergiant system
   };
 
   return labels[systemType] || systemType;

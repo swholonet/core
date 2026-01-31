@@ -9,12 +9,15 @@ import {
   ConstructionCosts,
   ResearchValidationResult,
   CreateBlueprintInput,
+  ModuleCategory,
 } from '../../types/blueprint';
 import { blueprintApi } from '../../lib/blueprintApi';
 import HullSelector from './HullSelector';
 import ModuleSlot from './ModuleSlot';
 import StatsDisplay from './StatsDisplay';
 import CostDisplay from './CostDisplay';
+import ModuleComparison from './ModuleComparison';
+import PerformanceRating from './PerformanceRating';
 
 interface BlueprintEditorProps {
   onSave?: (blueprint: any) => void;
@@ -56,6 +59,11 @@ export default function BlueprintEditor({
   const [stats, setStats] = useState<BlueprintStats | null>(null);
   const [costs, setCosts] = useState<ConstructionCosts | null>(null);
   const [validation, setValidation] = useState<ResearchValidationResult | null>(null);
+
+  // Module Comparison State
+  const [showComparison, setShowComparison] = useState(false);
+  const [comparisonCategory, setComparisonCategory] = useState<ModuleCategory | null>(null);
+  const [comparisonSlot, setComparisonSlot] = useState<number | null>(null);
 
   // Load initial data
   useEffect(() => {
@@ -148,6 +156,22 @@ export default function BlueprintEditor({
       newModules.set(slotPosition, { ...mod, level });
       setModules(newModules);
     }
+  };
+
+  // Handle module comparison
+  const handleShowComparison = (slotPosition: number, category: ModuleCategory) => {
+    setComparisonSlot(slotPosition);
+    setComparisonCategory(category);
+    setShowComparison(true);
+  };
+
+  const handleComparisonSelect = (moduleType: ModuleType, level: number) => {
+    if (comparisonSlot) {
+      handleModuleSelect(comparisonSlot, moduleType.id, level);
+    }
+    setShowComparison(false);
+    setComparisonSlot(null);
+    setComparisonCategory(null);
   };
 
   // Handle save
@@ -259,6 +283,7 @@ export default function BlueprintEditor({
                   }
                   onModuleRemove={() => handleModuleRemove(slot)}
                   onLevelChange={(level) => handleLevelChange(slot, level)}
+                  onShowComparison={handleShowComparison}
                 />
               ))}
             </div>
@@ -267,6 +292,13 @@ export default function BlueprintEditor({
           {/* Stats & Costs Panel */}
           <div className="space-y-4">
             <StatsDisplay stats={stats} isCalculating={calculating} />
+            {selectedClass && (
+              <PerformanceRating
+                stats={stats}
+                shipClass={selectedClass}
+                isCalculating={calculating}
+              />
+            )}
             <CostDisplay costs={costs} planetResources={planetResources} />
 
             {/* Validation Warnings */}
@@ -333,6 +365,26 @@ export default function BlueprintEditor({
             Verschiedene Klassen bieten unterschiedliche Modul-Slots und Boni
           </p>
         </div>
+      )}
+
+      {/* Module Comparison Modal */}
+      {showComparison && comparisonCategory && (
+        <ModuleComparison
+          category={comparisonCategory}
+          availableModules={availableModules}
+          currentModule={
+            comparisonSlot && modules.has(comparisonSlot)
+              ? availableModules.find((m) => m.id === modules.get(comparisonSlot)!.moduleTypeId)
+              : undefined
+          }
+          currentLevel={comparisonSlot && modules.has(comparisonSlot) ? modules.get(comparisonSlot)!.level : 1}
+          onClose={() => {
+            setShowComparison(false);
+            setComparisonSlot(null);
+            setComparisonCategory(null);
+          }}
+          onSelectModule={handleComparisonSelect}
+        />
       )}
     </div>
   );

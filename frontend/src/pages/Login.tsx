@@ -1,7 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useGameStore } from '../stores/gameStore';
-import { Shield, Users } from 'lucide-react';
+import { Shield, Users, KeyRound } from 'lucide-react';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -149,17 +149,34 @@ export default function Login() {
             <div className="h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent my-6" />
 
             {/* Navigation Links */}
-            <div className="text-center">
-              <p className="text-cyan-500/70 text-sm font-mono mb-3">
-                Kein Zugang vorhanden?
-              </p>
-              <Link
-                to="/register"
-                className="text-cyan-400 hover:text-cyan-300 font-mono tracking-wider flex items-center justify-center gap-2 transition-colors group"
-              >
-                <Users className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                Neuen Account erstellen
-              </Link>
+            <div className="text-center space-y-4">
+              <div>
+                <p className="text-cyan-500/70 text-sm font-mono mb-3">
+                  Kein Zugang vorhanden?
+                </p>
+                <Link
+                  to="/register"
+                  className="text-cyan-400 hover:text-cyan-300 font-mono tracking-wider flex items-center justify-center gap-2 transition-colors group"
+                >
+                  <Users className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  Neuen Account erstellen
+                </Link>
+              </div>
+
+              <div className="h-px bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent" />
+
+              <div>
+                <p className="text-amber-500/70 text-sm font-mono mb-3">
+                  Sicherheitscode vergessen?
+                </p>
+                <Link
+                  to="/forgot-password"
+                  className="text-amber-400 hover:text-amber-300 font-mono tracking-wider flex items-center justify-center gap-2 transition-colors group"
+                >
+                  <KeyRound className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  Code zurücksetzen
+                </Link>
+              </div>
             </div>
 
             {/* Terminal Status */}

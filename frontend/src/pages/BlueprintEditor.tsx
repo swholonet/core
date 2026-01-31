@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Plus, Rocket, Trash2, Edit } from 'lucide-react';
+import { ArrowLeft, Plus, Rocket, Trash2, Edit, Copy } from 'lucide-react';
 import { BlueprintEditor } from '../components/shipyard';
 import { blueprintApi } from '../lib/blueprintApi';
 import {
@@ -50,6 +50,24 @@ export default function BlueprintEditorPage() {
 
   const handleEdit = (blueprint: Blueprint) => {
     setEditingBlueprint(blueprint);
+    setShowEditor(true);
+  };
+
+  const handleCopy = (blueprint: Blueprint) => {
+    // Create a copy with modified name - pass as partial for editing
+    const copiedBlueprint = {
+      ...blueprint,
+      name: `${blueprint.name} (Kopie)`,
+      // Remove timestamps and IDs - the editor will treat this as new blueprint
+    } as any; // Cast to any since we're modifying the structure for editing
+
+    // Clear the ID to indicate this is a new blueprint
+    delete copiedBlueprint.id;
+    delete copiedBlueprint.playerId;
+    delete copiedBlueprint.createdAt;
+    delete copiedBlueprint.updatedAt;
+
+    setEditingBlueprint(copiedBlueprint);
     setShowEditor(true);
   };
 
@@ -161,6 +179,13 @@ export default function BlueprintEditorPage() {
                     <Edit size={16} />
                   </button>
                   <button
+                    onClick={() => handleCopy(bp)}
+                    className="p-2 text-gray-400 hover:text-green-400 transition-colors"
+                    title="Kopieren"
+                  >
+                    <Copy size={16} />
+                  </button>
+                  <button
                     onClick={() => handleDelete(bp.id)}
                     className="p-2 text-gray-400 hover:text-red-400 transition-colors"
                     title="Loeschen"
@@ -177,18 +202,20 @@ export default function BlueprintEditorPage() {
                   <p className="text-white font-mono">{bp.stats.hullPoints}</p>
                 </div>
                 <div className="bg-black/20 rounded p-2">
-                  <span className="text-gray-500">Schilde</span>
-                  <p className="text-purple-400 font-mono">
-                    {bp.stats.shieldStrength}
+                  <span className="text-gray-500">Kampfstaerke</span>
+                  <p className="text-red-400 font-mono">
+                    {bp.stats.combatRating === 'SEHR_HOCH' ? 'Sehr Hoch' :
+                     bp.stats.combatRating === 'HOCH' ? 'Hoch' :
+                     bp.stats.combatRating === 'MITTEL' ? 'Mittel' : 'Niedrig'}
                   </p>
-                </div>
-                <div className="bg-black/20 rounded p-2">
-                  <span className="text-gray-500">Schaden</span>
-                  <p className="text-red-400 font-mono">{bp.stats.damage}</p>
                 </div>
                 <div className="bg-black/20 rounded p-2">
                   <span className="text-gray-500">Speed</span>
                   <p className="text-cyan-400 font-mono">{bp.stats.speed}</p>
+                </div>
+                <div className="bg-black/20 rounded p-2">
+                  <span className="text-gray-500">Sensoren</span>
+                  <p className="text-yellow-400 font-mono">{bp.stats.sensorRange}</p>
                 </div>
               </div>
 
